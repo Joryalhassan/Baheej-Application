@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "656395346341",
+    "project_id": "baheejdatabase",
+    "storage_bucket": "baheejdatabase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:656395346341:android:096db054614e7ab297884c",
+        "android_client_info": {
+          "package_name": "com.example.baheej"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "656395346341-bmiip5v8vd6cgi392tag7bvsoggk6f3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3m6RyQe2HYapnOYKYj7ROmkoCGDCe9Sk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "656395346341-bmiip5v8vd6cgi392tag7bvsoggk6f3u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "656395346341-g8b1l4tvp2li3hsnifj7hh6glbshstob.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.baheej"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:656395346341:android:b525a71f6ba1d16f97884c",
+        "android_client_info": {
+          "package_name": "com.example.my_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "656395346341-bmiip5v8vd6cgi392tag7bvsoggk6f3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3m6RyQe2HYapnOYKYj7ROmkoCGDCe9Sk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "656395346341-bmiip5v8vd6cgi392tag7bvsoggk6f3u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "656395346341-g8b1l4tvp2li3hsnifj7hh6glbshstob.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.baheej"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
