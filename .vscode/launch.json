@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "baheej",
+            "name": "baheej", 
             "cwd": "baheej",
             "request": "launch",
             "type": "dart"
