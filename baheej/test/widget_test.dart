@@ -7,13 +7,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:baheej/screens/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:baheej/screens/home-page.dart';
+import 'package:baheej/screens/login_register_page.dart';
 
 import 'package:baheej/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
@@ -28,3 +32,25 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 }
+
+// class WidgetTree extends StatefulWidget {
+//   WidgetTree({Key? key}) : super(key: key);
+//   @override
+//   State<WidgetTree> createState() => _WidgetTreeState();
+// }
+
+// class _WidgetTreeState extends State<WidgetTree> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder(
+//       stream: Auth().authStateChanges,
+//       builder: (context, snapshot) {
+//         if (snapshot.hasData) {
+//           return HomePage();
+//         } else {
+//           return const LoginPage();
+//         }
+//       },
+//     );
+//   }
+// }
