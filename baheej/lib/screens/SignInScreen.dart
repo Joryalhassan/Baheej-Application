@@ -5,7 +5,6 @@ import 'package:baheej/screens/rest_password.dart';
 import 'package:baheej/screens/signup.dart';
 import 'package:baheej/utlis/utilas.dart';
 import 'package:flutter/material.dart';
-import 'package:baheej/screens/RegistrationPage.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
@@ -75,43 +74,19 @@ class _SignInScreenState extends State<SignInScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Don't have an account?",
+        const Text("Don't have account?",
             style: TextStyle(color: Colors.white70)),
         GestureDetector(
-          onTap: _navigateToRegistrationPage, // Call the navigation function
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SignUpScreen()));
+          },
           child: const Text(
             " Sign Up",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         )
       ],
-    );
-  }
-
-  // Row signUpOption() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     children: [
-  //       const Text("Don't have account?",
-  //           style: TextStyle(color: Colors.white70)),
-  //       GestureDetector(
-  //         onTap: () {
-  //           Navigator.push(context,
-  //               MaterialPageRoute(builder: (context) => SignUpScreen()));
-  //         },
-  //         child: const Text(
-  //           " Sign Up",
-  //           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  //         ),
-  //       )
-  //     ],
-  //   );
-  // }
-
-  void _navigateToRegistrationPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => RegistrationPage()),
     );
   }
 
