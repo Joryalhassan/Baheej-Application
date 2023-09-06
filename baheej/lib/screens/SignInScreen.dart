@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/reusable_widget/reusable_widget.dart';
-import 'package:baheej/screens/home-page.dart';
-import 'package:baheej/screens/rest_password.dart';
-import 'package:baheej/screens/signup.dart';
+//import 'package:baheej/reusable_widget/reusable_widget.dart';
+import 'package:baheej/screens/Homepage.dart';
+//import 'package:baheej/screens/rest_password.dart';
+//import 'package:baheej/screens/signup.dart';
 import 'package:baheej/utlis/utilas.dart';
 import 'package:flutter/material.dart';
-import 'package:baheej/screens/RegistrationPage.dart';
+import 'package:baheej/screens/Csignup.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
