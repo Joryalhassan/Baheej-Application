@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:baheej/screens/Service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ServiceFormScreen extends StatefulWidget {
   @override
@@ -9,38 +12,58 @@ class ServiceFormScreen extends StatefulWidget {
 class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
   String? serviceName;
-  TimeOfDay selectedTime = TimeOfDay.now();
+  int? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
   int? selectedCapacity;
   int? selectedAge;
-  DateTime selectedDate = DateTime.now();
+  DateTime? selectedStartDate;
+  DateTime? selectedEndDate;
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-
-    if (pickedTime != null && pickedTime != selectedTime) {
-      setState(() {
-        selectedTime = pickedTime;
-      });
+  // Custom validator functions
+  String? validateString(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
     }
+    return null;
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101), // You can adjust the range of selectable dates
+  String? validateInt(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+    final intValue = int.tryParse(value);
+    if (intValue == null) {
+      return 'Please enter a valid integer';
+    }
+    return null;
+  }
+
+  void sendDataToFirebase() async {
+    final url = Uri.https(
+        'baheejdatabase-default-rtdb.firebaseio.com', 'centers-service.json');
+
+    final response = await http.post(
+      url,
+      body: json.encode({
+        'serviceName': serviceName,
+        'servicePrice': selectedPrice,
+        'serviceCapacity': selectedCapacity,
+        'serviceAge': selectedAge,
+        'serviceTime': selectedTimeSlot,
+        'serviceDesc': selectedDescription,
+        'startDate': selectedStartDate?.toIso8601String(),
+        'endDate': selectedEndDate?.toIso8601String(),
+      }),
     );
 
-    if (pickedDate != null && pickedDate != selectedDate) {
-      setState(() {
-        selectedDate = pickedDate;
-      });
+    if (response.statusCode == 200) {
+      print('Service added to Firebase Realtime Database');
+      // Optionally, you can navigate back to the previous screen or show a success message.
+    } else {
+      print(
+          'Error adding service to Firebase Realtime Database: ${response.reasonPhrase}');
+      // Handle the error, show an error message, etc.
     }
   }
 
@@ -60,12 +83,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
             children: <Widget>[
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a service name';
-                  }
-                  return null;
-                },
+                validator: validateString,
                 onChanged: (value) {
                   setState(() {
                     serviceName = value;
@@ -74,12 +92,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Price'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a service price';
-                  }
-                  return null;
-                },
+                validator: validateInt,
                 onChanged: (value) {
                   setState(() {
                     selectedPrice = double.tryParse(value);
@@ -88,12 +101,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Age Range'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a service age range';
-                  }
-                  return null;
-                },
+                validator: validateInt,
                 onChanged: (value) {
                   setState(() {
                     selectedAge = int.tryParse(value);
@@ -102,12 +110,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Capacity'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a service capacity';
-                  }
-                  return null;
-                },
+                validator: validateInt,
                 onChanged: (value) {
                   setState(() {
                     selectedCapacity = int.tryParse(value);
@@ -116,12 +119,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Description'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a service description';
-                  }
-                  return null;
-                },
+                validator: validateString,
                 onChanged: (value) {
                   setState(() {
                     selectedDescription = value;
@@ -132,16 +130,17 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Time: ${selectedTime.format(context)}'),
-                  ElevatedButton(
-                    onPressed: () => _selectTime(context),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 98, 144,
-                          224), // Change the background color of the "Select Date" button
-                      onPrimary: Colors
-                          .white, // Change the text color of the "Select Date" button
+                  Text(
+                    'Start Date: ${selectedStartDate?.toLocal().toString().split(' ')[0] ?? 'Not Selected'}',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                  InkWell(
+                    onTap: () => _selectDate(context, true),
+                    child: Icon(
+                      Icons.calendar_today,
+                      color: Color.fromARGB(255, 98, 144, 224),
+                      size: 30.0,
                     ),
-                    child: Text('Select Time'),
                   ),
                 ],
               ),
@@ -149,16 +148,49 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Date: ${selectedTime.format(context)}'),
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 98, 144,
-                          224), // Change the background color of the "Select Date" button
-                      onPrimary: Colors
-                          .white, // Change the text color of the "Select Date" button
+                  Text(
+                    'End Date: ${selectedEndDate?.toLocal().toString().split(' ')[0] ?? 'Not Selected'}',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                  InkWell(
+                    onTap: () => _selectDate(context, false),
+                    child: Icon(
+                      Icons.calendar_today,
+                      color: Color.fromARGB(255, 98, 144, 224),
+                      size: 30.0,
                     ),
-                    child: Text('Select Date'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 40.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedTimeSlot = 0; // 8-11 AM
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary:
+                          selectedTimeSlot == 0 ? Colors.green : Colors.grey,
+                      onPrimary: Colors.white,
+                    ),
+                    child: Text('8-11 AM'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedTimeSlot = 1; // 2-5 PM
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary:
+                          selectedTimeSlot == 1 ? Colors.green : Colors.grey,
+                      onPrimary: Colors.white,
+                    ),
+                    child: Text('2-5 PM'),
                   ),
                 ],
               ),
@@ -166,26 +198,15 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    final newService = Service(
-                      name: serviceName!,
-                      time: selectedTime,
-                      Date: selectedDate,
-                      price: selectedPrice ?? 0.0,
-                      age: selectedAge ?? 0,
-                      description: selectedDescription ?? '',
-                      capacity: selectedCapacity ?? 0,
-                    );
-                    Navigator.pop(context, newService);
+                    // If the form is valid, the data will be sent to Firebase.
+                    sendDataToFirebase();
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors
-                      .green, // Change the background color of the "Done" button
-                  onPrimary: Colors
-                      .white, // Change the text color of the "Done" button
+                  primary: Colors.green,
+                  onPrimary: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20.0), // Adjust the radius to change the roundness
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
                   minimumSize: Size(120, 50),
                 ),
@@ -199,5 +220,26 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: isStartDate
+          ? selectedStartDate ?? DateTime.now()
+          : selectedEndDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        if (isStartDate) {
+          selectedStartDate = pickedDate;
+        } else {
+          selectedEndDate = pickedDate;
+        }
+      });
+    }
   }
 }
