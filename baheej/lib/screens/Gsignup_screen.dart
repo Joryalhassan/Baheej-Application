@@ -177,31 +177,44 @@ class _SignUpScreenState extends State<GSignUpScreen> {
 
 
            const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    controller: _passwordTextController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Enter Password",
-                      icon: Icon(Icons.lock_outlined),
+                      height: 20,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
-                      }
-                        // Check for at least one uppercase letter and one lowercase letter
-                        if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])').hasMatch(value)) {
-                          return 'Password must include at least one uppercase letter and one lowercase letter';
+                    TextFormField(
+                      controller: _passwordTextController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: "Enter Password",
+                        icon: Icon(Icons.lock_outlined),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a password';
                         }
 
-                        // Check for at least one digit and a minimum length of 6 characters
-                        if (value.length < 6 || !RegExp(r'(?=.*\d)').hasMatch(value)) {
-                          return 'Password must be at least 6 characters long and contain at least one digit';
+                        // Check for at least one uppercase letter
+                        if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
+                          return 'Password must include at least one uppercase letter';
                         }
-                      return null;
-                    },
-                  ),
+
+                        // Check for at least one lowercase letter
+                        if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
+                          return 'Password must include at least one lowercase letter';
+                        }
+
+                        // Check for at least one digit
+                        if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+                          return 'Password must contain at least one digit';
+                        }
+
+                        // Check for a minimum length of 6 characters
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters long';
+                        }
+
+                        return null;
+                      },
+                    ),
+
                
 
 
