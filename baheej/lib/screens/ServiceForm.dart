@@ -34,7 +34,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         RegExp(r'^[A-Za-z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-]+$');
 
     if (!serviceNamePattern.hasMatch(value)) {
-      return 'Service name must start with a letter and contain only letters, numbers, and special characters (excluding spaces)';
+      return 'service-name format wrong';
     }
 
     return null;
@@ -74,6 +74,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     // should change the value !
     if (doubleValue > 1000) {
       return 'Maximum price limit exceeded (1000)';
+    }
+    if (doubleValue < 0) {
+      return 'there is no negative price!!';
     }
 
     return null;
