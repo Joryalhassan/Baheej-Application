@@ -64,6 +64,10 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your first name';
                       }
+                      // Use a regular expression to check if the value contains only letters
+                      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                        return 'First name can only contain letters';
+                      }
                       return null;
                     },
                   ),
@@ -83,9 +87,14 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your last name';
                       }
+                      // Use a regular expression to check if the value contains only letters
+                      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                        return 'Last name can only contain letters';
+                      }
                       return null;
                     },
                   ),
+
            
 
           const SizedBox(
@@ -181,9 +190,15 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a password';
                       }
-                      if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#\$%^&*()_+|~-]).{8,}$').hasMatch(value)) {
-                        return 'Password must include at least one uppercase letter, one lowercase letter, one digit, and one special character';
-                      }
+                        // Check for at least one uppercase letter and one lowercase letter
+                        if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])').hasMatch(value)) {
+                          return 'Password must include at least one uppercase letter and one lowercase letter';
+                        }
+
+                        // Check for at least one digit and a minimum length of 6 characters
+                        if (value.length < 6 || !RegExp(r'(?=.*\d)').hasMatch(value)) {
+                          return 'Password must be at least 6 characters long and contain at least one digit';
+                        }
                       return null;
                     },
                   ),
