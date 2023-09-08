@@ -12,6 +12,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Service> services = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,15 +36,38 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Text("Logout"),
             ),
-            SizedBox(height: 20), // Add some space between buttons
+            SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                // Navigate to the form screen and wait for the result
+                final newService = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ServiceFormScreen()),
                 );
+
+                // Check if a new service was returned
+                if (newService != null) {
+                  setState(() {
+                    // Add the new service to the list
+                    services.add(newService);
+                  });
+                }
               },
               child: Text("Add Service"),
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: services.map((service) {
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: ListTile(
+                    title: Text(service.name),
+                    subtitle: Text(
+                      'Start Date: ${service.startDate.toLocal().toString().split(' ')[0]} - End Date: ${service.endDate.toLocal().toString().split(' ')[0]}',
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),
