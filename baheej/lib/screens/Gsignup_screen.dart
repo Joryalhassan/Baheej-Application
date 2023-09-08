@@ -4,14 +4,14 @@ import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'package:baheej/screens/home-page.dart';
 import 'package:baheej/utlis/utilas.dart';
 
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+class GSignUpScreen extends StatefulWidget {
+  const GSignUpScreen({Key? key}) : super(key: key);
 
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends State<GSignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController _passwordTextController = TextEditingController();
   TextEditingController _emailTextController = TextEditingController();
