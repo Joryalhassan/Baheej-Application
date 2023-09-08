@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
-import 'package:baheej/screens/home-page.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:baheej/utlis/utilas.dart';
-import 'package:baheej/screens/home-page.dart';
+import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -68,7 +68,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       .then((value) {
                     print("Created New Account");
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()));
+                        MaterialPageRoute(builder: (context) => HomeScreenCenter()));// add Gaurdian, this change only to eliminate red errors
                   }).onError((error, stackTrace) {
                     print("Error ${error.toString()}");
                   });

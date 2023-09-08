@@ -2,14 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreenCenter extends StatefulWidget {
+  const HomeScreenCenter({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _HomeScreenCenterState createState() => _HomeScreenCenterState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenCenterState extends State<HomeScreenCenter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
             FirebaseAuth.instance.signOut().then((value) {
               print("Signed Out");
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SignInScreen()));
+                  MaterialPageRoute(builder: (context) => SignInScreen())); 
             });
           },
         ),

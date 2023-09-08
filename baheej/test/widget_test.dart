@@ -9,8 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:baheej/screens/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/screens/home-page.dart';
-import 'package:baheej/screens/login_register_page.dart';
+import 'package:baheej/screens/HomeScreenCenter.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
+//import 'package:baheej/screens/login_register_page.dart';
 
 import 'package:baheej/main.dart';
 

@@ -3,7 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
+
 
 //jory
 Future<void> main() async {
@@ -40,7 +42,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const SignInScreen(),
+      home:  const SignInScreen(),
     );
   }
 }
