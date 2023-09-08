@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,11 +19,24 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
 
+  // Variables to track the state of date and time fields
+  bool dateSelected = false;
+  bool timeSlotSelected = false;
+
   // Custom validator functions
-  String? validateString(String? value) {
+  String? validateServiceName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'This field is required';
+      return 'Service name is required';
     }
+
+    // Use a regular expression to check if the service name contains only letters, numbers, and special characters (excluding spaces).
+    final RegExp serviceNamePattern =
+        RegExp(r'^[A-Za-z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-]+$');
+
+    if (!serviceNamePattern.hasMatch(value)) {
+      return 'Service name must start with a letter and contain only letters, numbers, and special characters (excluding spaces)';
+    }
+
     return null;
   }
 
@@ -39,7 +51,146 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
+  String? validateDescription(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+    if (value.contains(new RegExp(r'[0-9]'))) {
+      return 'Description cannot contain numbers';
+    }
+    return null;
+  }
+
+  String? validatePrice(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+
+    final double? doubleValue = double.tryParse(value);
+
+    if (doubleValue == null) {
+      return 'Please enter a valid number';
+    }
+    // should change the value !
+    if (doubleValue > 1000) {
+      return 'Maximum price limit exceeded (1000)';
+    }
+
+    return null;
+  }
+
+  String? validateCapacity(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+
+    final double? doubleValue = double.tryParse(value);
+
+    if (doubleValue == null) {
+      return 'Please enter a valid number';
+    }
+    // should change the value !
+    if (doubleValue > 30) {
+      return 'maximum capacity limit exceeded:30';
+    }
+    if (doubleValue < 10) {
+      return 'minimum capacity limit exceeded:10';
+    }
+
+    return null;
+  }
+
+  String? validateAge(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+
+    final double? doubleValue = double.tryParse(value);
+
+    if (doubleValue == null) {
+      return 'Please enter a valid number';
+    }
+    // should change the value !
+    if (doubleValue > 17) {
+      return 'maximum age is : 17';
+    }
+    if (doubleValue < 4) {
+      return 'minimum age is : 4';
+    }
+
+    return null;
+  }
+
   void sendDataToFirebase() async {
+    // Check the state of the date and time fields
+    if (!dateSelected) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Warning'),
+            content: Text('You must select the service date!'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    if (!timeSlotSelected) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Warning'),
+            content: Text('You must select the service time!'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    // Check if start and end dates are selected
+    if (selectedStartDate == null || selectedEndDate == null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Warning'),
+            content: Text('You must select both start and end dates!'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      return; // Do not send data if there are errors in other fields
+    }
+
     final url = Uri.https(
         'baheejdatabase-default-rtdb.firebaseio.com', 'centers-service.json');
 
@@ -52,8 +203,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceAge': selectedAge,
         'serviceTime': selectedTimeSlot,
         'serviceDesc': selectedDescription,
-        'startDate': selectedStartDate?.toIso8601String(),
-        'endDate': selectedEndDate?.toIso8601String(),
+        'startDate': selectedStartDate!.toIso8601String(),
+        'endDate': selectedEndDate!.toIso8601String(),
       }),
     );
 
@@ -83,7 +234,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
             children: <Widget>[
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Name'),
-                validator: validateString,
+                validator: validateServiceName,
                 onChanged: (value) {
                   setState(() {
                     serviceName = value;
@@ -92,7 +243,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Price'),
-                validator: validateInt,
+                validator: validatePrice,
                 onChanged: (value) {
                   setState(() {
                     selectedPrice = double.tryParse(value);
@@ -101,7 +252,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Age Range'),
-                validator: validateInt,
+                validator: validateAge,
                 onChanged: (value) {
                   setState(() {
                     selectedAge = int.tryParse(value);
@@ -110,7 +261,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Capacity'),
-                validator: validateInt,
+                validator: validateCapacity,
                 onChanged: (value) {
                   setState(() {
                     selectedCapacity = int.tryParse(value);
@@ -119,7 +270,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Service Description'),
-                validator: validateString,
+                validator: validateDescription,
                 onChanged: (value) {
                   setState(() {
                     selectedDescription = value;
@@ -170,6 +321,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     onPressed: () {
                       setState(() {
                         selectedTimeSlot = 0; // 8-11 AM
+                        timeSlotSelected = true;
                       });
                     },
                     style: ElevatedButton.styleFrom(
@@ -183,6 +335,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     onPressed: () {
                       setState(() {
                         selectedTimeSlot = 1; // 2-5 PM
+                        timeSlotSelected = true;
                       });
                     },
                     style: ElevatedButton.styleFrom(
@@ -197,8 +350,51 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               SizedBox(height: 40.0),
               ElevatedButton(
                 onPressed: () {
+                  // Check the state of the date and time fields
+                  if (!dateSelected) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Warning'),
+                          content: Text('You must select the service date'),
+                          actions: [
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    return;
+                  }
+
+                  if (!timeSlotSelected) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Warning'),
+                          content: Text('You must select the service time'),
+                          actions: [
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    return;
+                  }
+
                   if (_formKey.currentState!.validate()) {
-                    // If the form is valid, the data will be sent to Firebase.
+                    // If the form is valid, send the data to Firebase.
                     sendDataToFirebase();
                   }
                 },
@@ -239,6 +435,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         } else {
           selectedEndDate = pickedDate;
         }
+
+        // Update the date field state
+        dateSelected = true;
       });
     }
   }
