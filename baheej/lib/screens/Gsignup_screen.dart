@@ -1,26 +1,43 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:baheej/reusable_widget/reusable_widget.dart';
-import 'package:baheej/screens/home-page.dart';
-import 'package:baheej/utlis/utilas.dart';
 
-class GSignUpScreen extends StatefulWidget {
-  const GSignUpScreen({Key? key}) : super(key: key);
-
-  @override
-  _SignUpScreenState createState() => _SignUpScreenState();
-}
-
-class _SignUpScreenState extends State<GSignUpScreen> {
-  final _formKey = GlobalKey<FormState>();
-  TextEditingController _passwordTextController = TextEditingController();
-  TextEditingController _emailTextController = TextEditingController();
-  TextEditingController _FnameTextController = TextEditingController();
-  TextEditingController _LnameTextController = TextEditingController();
-  TextEditingController _PhoneNumTextController = TextEditingController();
-  String? selectedGender;
-
-  @override
+ import 'package:firebase_auth/firebase_auth.dart'; 
+ import 'package:flutter/material.dart'; 
+ import 'package:http/http.dart' as http; 
+ import 'package:baheej/screens/Home-Page.dart'; 
+ import 'package:baheej/utlis/utilas.dart'; 
+ import 'package:baheej/reusable_widget/reusable_widget.dart';
+ import 'dart:convert'; 
+  
+  class GSignUpScreen extends StatefulWidget { 
+    const GSignUpScreen({Key? key}) : 
+    super(key: key); 
+    
+    @override _GSignUpScreenState createState() => _GSignUpScreenState();
+     } 
+     
+class _GSignUpScreenState extends State {
+   GlobalKey< FormState > _formKey = GlobalKey(); 
+   TextEditingController _passwordTextController = TextEditingController();
+   TextEditingController _emailTextController = TextEditingController(); 
+   TextEditingController _FnameTextController = TextEditingController(); 
+   TextEditingController _LnameTextController = TextEditingController(); 
+   TextEditingController _PhoneNumTextController = TextEditingController();
+   String? selectedGender; 
+   String type = "guardian";
+   
+   void sendDataToFirebase() async { final url = Uri.https('baheejdatabase-default-rtdb.firebaseio.com',
+    'Gurdian-users.json'); // Replace with your Firebase Realtime Database URL 
+   
+   final response = await http.post( url, 
+   body: json.encode({ 'firstName': _FnameTextController.text, 'lastName': _LnameTextController.text, 'email': _emailTextController.text, 
+   'phoneNum': _PhoneNumTextController.text, 'gender': selectedGender,  'type': type }), ); 
+   
+   if (response.statusCode == 200) { print('User data added to Firebase Realtime Database'); // Optionally, you can navigate to the next screen or show a success message.
+    } else { print( 'Error adding user data to Firebase Realtime Database: ${response.reasonPhrase}'); // Handle the error, show an error message, etc. 
+      } 
+    } 
+    
+    
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -49,9 +66,10 @@ class _SignUpScreenState extends State<GSignUpScreen> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                
 
-         const SizedBox(
+
+
+    const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
@@ -71,10 +89,10 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                       return null;
                     },
                   ),
-
-
-
-         const SizedBox(
+            
+           
+           
+       const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
@@ -95,9 +113,8 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                     },
                   ),
 
-           
-
-          const SizedBox(
+            
+       const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
@@ -118,9 +135,11 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                     },
                   ),
                
-
-            const SizedBox(
-                    height: 20,
+            
+            
+            
+    const SizedBox(
+         height: 20,
                   ),
                   TextFormField(
                     controller: _PhoneNumTextController,
@@ -139,10 +158,10 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                       return null;
                     },
                   ),
-            
-
-             const SizedBox(
-                    height: 20,
+                
+                
+   const SizedBox(
+             height: 20,
                   ),
                   DropdownButtonFormField<String>(
                     value: selectedGender,
@@ -172,11 +191,8 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                   ),
                 
 
-
-
-
-
-           const SizedBox(
+                   
+      const SizedBox(
                       height: 20,
                     ),
                     TextFormField(
@@ -215,37 +231,38 @@ class _SignUpScreenState extends State<GSignUpScreen> {
                       },
                     ),
 
-               
-
-
-           const SizedBox(
-                    height: 20,
-                  ),
-                  firebaseUIButton(context, "Sign Up", () {
+                
+                
+                
+                const SizedBox(
+                   height: 20, ), 
+                   firebaseUIButton(context, "Sign Up", () { 
                     if (_formKey.currentState!.validate()) {
-                      FirebaseAuth.instance
-                          .createUserWithEmailAndPassword(
-                              email: _emailTextController.text,
-                              password: _passwordTextController.text)
-                          .then((value) {
-                        print("Created New Account");
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HomeScreen(),
-                          ),
-                        );
-                      }).onError((error, stackTrace) {
+                      FirebaseAuth.instance .createUserWithEmailAndPassword( 
+                        email: _emailTextController.text,
+                         password: _passwordTextController.text) .then((value) { 
+                          print("Created New Account"); 
+                          sendDataToFirebase(); 
+                          // Send user data to Firebase 
+                          Navigator.push( context, MaterialPageRoute( builder: (context) => HomeScreen(), 
+                          ), 
+                          ); 
+                      }).onError((error, stackTrace) { 
                         print("Error ${error.toString()}");
-                      });
-                    }
-                  }),
-                ],
+                           });
+                          }
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+          );
+        }
+      }
+
+
+
+
+    
