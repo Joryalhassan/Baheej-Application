@@ -1,17 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
+//<<<<<<< HEAD:baheej/lib/screens/home-page.dart
 import 'package:baheej/screens/Service.dart';
-import 'package:baheej/screens/ServiceForm.dart';
+import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/Service.dart';
+//=======
+import 'package:baheej/screens/WelcomePage.dart';
+//>>>>>>> origin/main:baheej/lib/screens/HomeScreenGaurdian.dart
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreenGaurdian extends StatefulWidget {
+  const HomeScreenGaurdian({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _HomeScreenGaurdianState createState() => _HomeScreenGaurdianState();
 }
 
+<<<<<<< HEAD:baheej/lib/screens/home-page.dart
 class _HomeScreenState extends State<HomeScreen> {
   List<Service> services = [];
   @override
@@ -32,6 +36,23 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
+////=======
+class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          child: Text("Logout"),
+          onPressed: () {
+            FirebaseAuth.instance.signOut().then((value) {
+              print("Signed Out");
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => WelcomePage())); 
+            });
+          },
+        ),
+//>>>>>>> origin/main:baheej/lib/screens/HomeScreenGaurdian.dart
       ),
       body: ListView.builder(
         itemCount: services.length,
