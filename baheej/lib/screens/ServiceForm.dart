@@ -1,3 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/Service.dart';
+import 'package:baheej/screens/ServiceForm.dart';
+
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -225,8 +231,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Service'),
-        backgroundColor: Color.fromARGB(255, 98, 144, 224),
+        title: Text(
+          'Add Service',
+          style: TextStyle(
+            color: Color.fromARGB(255, 255, 255, 255), // Change the color here
+          ),
+        ),
+        backgroundColor: Color.fromARGB(255, 57, 196, 234),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -292,7 +303,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     onTap: () => _selectDate(context, true),
                     child: Icon(
                       Icons.calendar_today,
-                      color: Color.fromARGB(255, 98, 144, 224),
+                      color: Color.fromARGB(255, 57, 196, 234),
                       size: 30.0,
                     ),
                   ),
@@ -310,7 +321,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     onTap: () => _selectDate(context, false),
                     child: Icon(
                       Icons.calendar_today,
-                      color: Color.fromARGB(255, 98, 144, 224),
+                      color: Color.fromARGB(255, 57, 196, 234),
                       size: 30.0,
                     ),
                   ),
@@ -328,8 +339,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      primary:
-                          selectedTimeSlot == 0 ? Colors.green : Colors.grey,
+                      primary: selectedTimeSlot == 0
+                          ? Color.fromARGB(255, 32, 118, 180)
+                          : Color.fromARGB(255, 57, 196, 234),
                       onPrimary: Colors.white,
                     ),
                     child: Text('8-11 AM'),
@@ -342,8 +354,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      primary:
-                          selectedTimeSlot == 1 ? Colors.green : Colors.grey,
+                      primary: selectedTimeSlot == 1
+                          ? Color.fromARGB(255, 32, 118, 180)
+                          : Color.fromARGB(255, 57, 196, 234),
                       onPrimary: Colors.white,
                     ),
                     child: Text('2-5 PM'),
@@ -402,8 +415,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.green,
-                  onPrimary: Colors.white,
+                  primary: Color.fromARGB(255, 32, 118, 180),
+                  onPrimary: Color.fromARGB(255, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0),
                   ),
