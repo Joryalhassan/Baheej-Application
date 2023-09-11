@@ -80,11 +80,11 @@ class _GSignUpScreenState extends State {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your first name';
+                        return 'First Name is required';
                       }
                       // Use a regular expression to check if the value contains only letters
                       if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                        return 'First name can only contain letters';
+                        return 'First Name can only contain letters';
                       }
                       return null;
                     },
@@ -103,11 +103,11 @@ class _GSignUpScreenState extends State {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your last name';
+                        return 'Last Name is required';
                       }
                       // Use a regular expression to check if the value contains only letters
                       if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                        return 'Last name can only contain letters';
+                        return 'Last Name can only contain letters';
                       }
                       return null;
                     },
@@ -125,11 +125,11 @@ class _GSignUpScreenState extends State {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email address';
+                        return 'Email is required';
                       }
                       final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
                       if (!emailRegex.hasMatch(value)) {
-                        return 'Please enter a valid email address';
+                        return 'Invalid Email format';
                       }
                       return null;
                     },
@@ -149,11 +149,11 @@ class _GSignUpScreenState extends State {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your phone number';
+                        return 'Phone Number is required';
                       }
                       final phoneRegex = RegExp(r'^[0-9]{10}$');
                       if (!phoneRegex.hasMatch(value)) {
-                        return 'Please enter a valid 10-digit phone number';
+                        return 'Invalid phone number';
                       }
                       return null;
                     },
@@ -184,7 +184,7 @@ class _GSignUpScreenState extends State {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please select your gender';
+                        return 'Gender is required';
                       }
                       return null;
                     },
@@ -204,7 +204,7 @@ class _GSignUpScreenState extends State {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
+                          return 'Password is required';
                         }
 
                         // Check for at least one uppercase letter
