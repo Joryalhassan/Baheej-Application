@@ -170,7 +170,7 @@ class _GSignUpScreenState extends State {
                         selectedGender = value;
                       });
                     },
-                    items: ["Male", "Female", "Other"]
+                    items: ["Male", "Female" ]
                         .map<DropdownMenuItem<String>>(
                           (String value) => DropdownMenuItem<String>(
                             value: value,
