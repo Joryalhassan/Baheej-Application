@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:baheej/screens/WelcomePage.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -20,7 +20,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             FirebaseAuth.instance.signOut().then((value) {
               print("Signed Out");
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SignInScreen())); 
+                  MaterialPageRoute(builder: (context) => WelcomePage())); 
             });
           },
         ),

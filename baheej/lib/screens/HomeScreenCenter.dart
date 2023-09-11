@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:baheej/screens/Service.dart';
+import 'package:baheej/screens/ServiceFormScreen.dart';
+import 'package:baheej/screens/WelcomePage.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   const HomeScreenCenter({Key? key}) : super(key: key);
@@ -10,68 +12,66 @@ class HomeScreenCenter extends StatefulWidget {
 }
 
 class _HomeScreenCenterState extends State<HomeScreenCenter> {
+  List<Service> services = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Home Page'),
+      ),
       body: Center(
-        child: ElevatedButton(
-          child: Text("Logout"),
-          onPressed: () {
-            FirebaseAuth.instance.signOut().then((value) {
-              print("Signed Out");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SignInScreen())); 
-            });
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut().then((value) {
+                  print("Signed Out");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => WelcomePage()),
+                  );
+                });
+              },
+              child: Text("Logout"),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                // Navigate to the form screen and wait for the result
+                final newService = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ServiceFormScreen()),
+                );
+
+                // Check if a new service was returned
+                if (newService != null) {
+                  setState(() {
+                    // Add the new service to the list
+                    services.add(newService);
+                  });
+                }
+              },
+              child: Text("Add Service"),
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: services.map((service) {
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: ListTile(
+                    title: Text(service.name),
+                    subtitle: Text(
+                      'Start Date: ${service.startDate.toLocal().toString().split(' ')[0]} - End Date: ${service.endDate.toLocal().toString().split(' ')[0]}',
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:baheej/screens/auth.dart';
-
-// class HomePage extends StatelessWidget {
-//   final User? user = Auth().currentUser; // Declare the type explicitly
-
-//   HomePage({Key? key}) : super(key: key);
-
-//   Future<void> signout() async {
-//     await Auth().signout();
-//   }
-
-//   Widget _title() {
-//     return const Text("firebase Auth");
-//   }
-
-//   Widget _ueserUid() {
-//     return Text(user?.email ?? 'User email');
-//   }
-
-//   Widget _signOutButton() {
-//     return ElevatedButton(onPressed: signout, child: const Text('signout'));
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: _title(),
-//       ),
-//       body: Container(
-//         height: double.infinity,
-//         width: double.infinity,
-//         padding: const EdgeInsets.all(20),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.center,
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: <Widget>[],
-//         ),
-//       ),
-//     );
-//   }
-// }

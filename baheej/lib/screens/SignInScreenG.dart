@@ -1,20 +1,19 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
-import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
-//import 'package:baheej/screens/reset_password.dart';
-import 'package:baheej/screens/signup.dart';
+import 'package:baheej/screens/ResetPassword.dart';
+import 'package:baheej/screens/GSignUpScreen.dart';
 import 'package:baheej/utlis/utilas.dart'; // تأكد من استيراد المكتبة الصحيحة
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({Key? key}) : super(key: key);
+class SignInScreenG extends StatefulWidget {
+  const SignInScreenG({Key? key}) : super(key: key);
 
   @override
-  _SignInScreenState createState() => _SignInScreenState();
+  _SignInScreenGState createState() => _SignInScreenGState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignInScreenGState extends State<SignInScreenG> {
   TextEditingController _passwordTextController = TextEditingController();
   TextEditingController _emailTextController = TextEditingController();
 
@@ -24,6 +23,15 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+   extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          "Sign Up",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -128,7 +136,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HomeScreenCenter(),//check if it center or gaurdian
+                          builder: (context) => HomeScreenGaurdian(),//check if it center or gaurdian
                         ),
                       );
                     }).catchError((error) {
@@ -140,7 +148,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     });
                   }
                 }),
-                signUpOption()
+                signUpOption(),
+                forgetPassword()
               ],
             ),
           ),
@@ -160,7 +169,7 @@ class _SignInScreenState extends State<SignInScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SignUpScreen(),
+                builder: (context) => GSignUpScreen(),
               ),
             );
           },
@@ -172,28 +181,30 @@ class _SignInScreenState extends State<SignInScreen> {
       ],
     );
   }
+
+
+
+ Row forgetPassword() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const Text("Forget Password?", style: TextStyle(color: Colors.white70)),
+      const SizedBox(width: 8), // Add some horizontal spacing
+      GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResetPassword(),
+            ),
+          );
+        },
+        child: const Text(
+          "Reset Your Password",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      )
+    ],
+  );
 }
-
-
-  // Widget forgetPassword(BuildContext context) {
-  //   return Container(
-  //     width: MediaQuery.of(context).size.width,
-  //     height: 35,
-  //     alignment: Alignment.bottomRight,
-  //     child: TextButton(
-  //       child: const Text(
-  //         "Forgot Password?",
-  //         style: TextStyle(color: Colors.white70),
-  //         textAlign: TextAlign.right,
-  //       ),
-  //       onPressed: () {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => ResetPassword(),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
+}
