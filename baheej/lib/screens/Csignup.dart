@@ -40,7 +40,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       return 'Email is required';
     }
     if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(value)) {
-      return 'Invalid email format';
+      return 'Invalid Email format';
     }
     return null;
   }
@@ -49,7 +49,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Phone Number is required';
     } else if (!RegExp(r'^05\d{8}$').hasMatch(value)) {
-      return 'Phone Number must start with "05" and contain 10 digits';
+      return 'Invalid Phone Number';
     }
     return null;
   }
@@ -78,14 +78,31 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
-    } else if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
-    } else if (!RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])')
-        .hasMatch(value)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, and numbers';
-    }
-    return null;
+    } // Check for at least one uppercase letter
+if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
+return 'Password must include at least one uppercase letter';
+}
+
+// Check for at least one lowercase letter
+if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
+return 'Password must include at least one lowercase letter';
+}
+
+// Check for at least one digit
+if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+return 'Password must contain at least one digit';
+}
+
+// Check for a minimum length of 6 characters
+if (value.length < 6) {
+return 'Password must be at least 6 characters long';
+}
   }
+   
+
+
+
+
 
   void sendDataToFirebase() async {
     final url = Uri.https(
