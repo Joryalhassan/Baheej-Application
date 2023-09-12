@@ -68,7 +68,6 @@ class _GSignUpScreenState extends State {
                 children: <Widget>[
 
 
-
     const SizedBox(
                     height: 20,
                   ),
@@ -261,7 +260,6 @@ class _GSignUpScreenState extends State {
           );
         }
       }
-
 
 
 
