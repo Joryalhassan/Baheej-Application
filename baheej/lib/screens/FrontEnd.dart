@@ -3,9 +3,6 @@
 
 
 
-
-
-
 // big button for (Done, Sign up ,...),(blue)
 class CustomBigButton extends StatelessWidget {
   final String text;
