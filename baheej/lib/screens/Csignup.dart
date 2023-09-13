@@ -78,31 +78,28 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
-    } // Check for at least one uppercase letter
-if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
-return 'Password must include at least one uppercase letter';
-}
+    }
+    // Check for at least one uppercase letter
+    if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
+      return 'Password must include at least one uppercase letter';
+    }
 
-// Check for at least one lowercase letter
-if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
-return 'Password must include at least one lowercase letter';
-}
+    // Check for at least one lowercase letter
+    if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
+      return 'Password must include at least one lowercase letter';
+    }
 
-// Check for at least one digit
-if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
-return 'Password must contain at least one digit';
-}
+    // Check for at least one digit
+    if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+      return 'Password must contain at least one digit';
+    }
 
-// Check for a minimum length of 6 characters
-if (value.length < 6) {
-return 'Password must be at least 6 characters long';
-}
+    // Check for a minimum length of 6 characters
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
   }
-   
-
-
-
-
 
   void sendDataToFirebase() async {
     final url = Uri.https(
@@ -150,17 +147,7 @@ return 'Password must be at least 6 characters long';
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFCB2B93),
-              Color(0xFF9546C4),
-              Color(0xFF5E61F4),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.white, // Set the background color to white
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
@@ -168,81 +155,48 @@ return 'Password must be at least 6 characters long';
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Center Name",
                     controller: _userNameTextController,
-                    decoration: InputDecoration(
-                      labelText: "Enter Center Name",
-                      icon: Icon(Icons.person_outline),
-                    ),
-                    validator: _validateName, // Validate Center Name
+                    validator: _validateName,
+                    icon: Icons.person_outline,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Email Id",
                     controller: _emailTextController,
-                    decoration: InputDecoration(
-                      labelText: "Enter Email Id",
-                      icon: Icon(Icons.email),
-                    ),
-                    validator: _validateEmail, // Validate Email
+                    validator: _validateEmail,
+                    icon: Icons.email,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Phone Number",
                     controller: _PhoneNumTextController,
-                    decoration: InputDecoration(
-                      labelText: "Enter Phone Number",
-                      icon: Icon(Icons.phone),
-                    ),
-                    validator: _validatePhoneNumber, // Validate Phone Number
+                    validator: _validatePhoneNumber,
+                    icon: Icons.phone,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Address",
                     controller: _AddressTextController,
-                    decoration: InputDecoration(
-                      labelText: "Enter Address",
-                      icon: Icon(Icons.home),
-                    ),
-                    validator: _validateAddress, // Validate Address
+                    validator: _validateAddress,
+                    icon: Icons.home,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Commercial Register",
                     controller: _ComRegTextController,
-                    decoration: InputDecoration(
-                      labelText: "Enter Commercial Register",
-                      icon: Icon(Icons.format_list_numbered),
-                    ),
-                    validator:
-                        _validateCommercialRegister, // Validate Commercial Register
+                    validator: _validateCommercialRegister,
+                    icon: Icons.format_list_numbered,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Description",
                     controller: _DescriptionTextController,
-                    decoration: InputDecoration(
-                      labelText: "Enter Description",
-                      icon: Icon(Icons.description),
-                    ),
-                    validator: _validateDescription, // Validate Description
+                    validator: _validateDescription,
+                    icon: Icons.description,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                  buildStyledTextField(
+                    label: "Enter Password",
                     controller: _passwordTextController,
+                    validator: _validatePassword,
+                    icon: Icons.lock_outlined,
                     obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Enter Password",
-                      icon: Icon(Icons.lock_outlined),
-                    ),
-                    validator: _validatePassword, // Validate Password
                   ),
                   const SizedBox(
                     height: 20,
@@ -273,6 +227,46 @@ return 'Password must be at least 6 characters long';
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildStyledTextField({
+    required String label,
+    required TextEditingController controller,
+    required String? Function(String?) validator,
+    required IconData icon,
+    bool obscureText = false,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              color: Colors.grey[300], // Set the background color to grey
+            ),
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: '',
+                icon: Icon(icon),
+                border: InputBorder.none,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              ),
+              validator: validator,
+              obscureText: obscureText,
+            ),
+          ),
+        ],
       ),
     );
   }
