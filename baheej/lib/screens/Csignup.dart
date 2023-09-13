@@ -5,6 +5,7 @@ import 'package:baheej/screens/Home-Page.dart';
 import 'package:baheej/utlis/utilas.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'dart:convert';
+import 'package:baheej/screens/FrontEnd.dart';
 
 class CsignUpScreen extends StatefulWidget {
   const CsignUpScreen({Key? key}) : super(key: key);
@@ -203,8 +204,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () {
+                      // Button action
                       if (_formKey.currentState!.validate()) {
-                        // Form is valid, proceed with registration
                         FirebaseAuth.instance
                             .createUserWithEmailAndPassword(
                           email: _emailTextController.text,
@@ -212,15 +213,31 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         )
                             .then((value) {
                           print("Created New Account");
-                          sendDataToFirebase(); // Send center data to Firebase
-                          // Optionally, navigate to the home screen or show a success message.
+                          sendDataToFirebase();
+                          // Send user data to Firebase
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomeScreen(),
+                            ),
+                          );
                         }).onError((error, stackTrace) {
                           print("Error ${error.toString()}");
-                          // Handle the error, show an error message, etc.
                         });
                       }
                     },
-                    child: Text("Sign Up"),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 111, 176, 234),
+                      onPrimary: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      minimumSize: Size(120, 50),
+                    ),
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
                   ),
                 ],
               ),
