@@ -1,23 +1,23 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:baheej/screens/home-page.dart';
-import 'package:baheej/screens/SignInScreenC.dart';
-import 'package:baheej/screens/SignInScreenG.dart';
+//import 'package:baheej/screens/SignInScreenC.dart';
+import 'package:baheej/screens/SignInScreen.dart';
+
 class WelcomePage extends StatelessWidget {
   const WelcomePage({Key? key}) : super(key: key);
 
-  void _loginAsCenter(BuildContext context) {
-    // Implement Center Login logic here
-    // You can navigate to the Center Login screen or perform other actions.
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-           SignInScreenC(), // Replace with the actual Center Login screen.
-      ),
-    );
-  }
+  // void _loginAsCenter(BuildContext context) {
+  //   // Implement Center Login logic here
+  //   // You can navigate to the Center Login screen or perform other actions.
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) =>
+  //           SignInScreenC(), // Replace with the actual Center Login screen.
+  //     ),
+  //   );
+  // }
 
   void _loginAsGuardian(BuildContext context) {
     // Implement Guardian Login logic here
@@ -64,7 +64,7 @@ class WelcomePage extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    _loginAsCenter(context);
+                    //_loginAsCenter(context);
                   },
                   child: Text('Center '),
                 ),

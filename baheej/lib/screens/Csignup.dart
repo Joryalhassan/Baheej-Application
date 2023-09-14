@@ -1,10 +1,10 @@
-// ignore: file_names
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:baheej/utlis/utilas.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 
 class CsignUpScreen extends StatefulWidget {
@@ -24,6 +24,82 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
   String type = "center";
+
+  UserCredential? resultaccount;
+  Future<void> signspup() async {
+    try {
+      if (resultaccount == null) {
+        resultaccount =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailTextController.text,
+          password: _passwordTextController.text,
+        );
+      }
+
+      await FirebaseFirestore.instance
+          .collection('center')
+          .doc(resultaccount!.user!.uid)
+          .set({
+        'username': _userNameTextController.text.trim(),
+        //'lname': _LnameTextController.text.trim(),
+        'addres': _AddressTextController.text.trim(),
+        'email': _emailTextController.text.trim(),
+        'comReg': _ComRegTextController.text.trim(),
+        'type': 'center',
+        'phonenumber': _PhoneNumTextController.text.trim(),
+        'Desc': _DescriptionTextController.text.trim()
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreenCenter()),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("The password provided is too weak."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
+        );
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("You already have an account."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
+        );
+        print('The account already exists for that email.');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   // Validation functions
   String? _validateName(String? value) {
@@ -80,34 +156,29 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     } // Check for at least one uppercase letter
-if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
-return 'Password must include at least one uppercase letter';
-}
+    if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
+      return 'Password must include at least one uppercase letter';
+    }
 
 // Check for at least one lowercase letter
-if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
-return 'Password must include at least one lowercase letter';
-}
+    if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
+      return 'Password must include at least one lowercase letter';
+    }
 
 // Check for at least one digit
-if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
-return 'Password must contain at least one digit';
-}
+    if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+      return 'Password must contain at least one digit';
+    }
 
 // Check for a minimum length of 6 characters
-if (value.length < 6) {
-return 'Password must be at least 6 characters long';
-}
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
   }
-   
-
-
-
-
 
   void sendDataToFirebase() async {
-    final url = Uri.https(
-        'baheejdatabase-default-rtdb.firebaseio.com', 'Center-users.json');
+    final url =
+        Uri.https('baheejdatabase-default-rtdb.firebaseio.com', 'Users.json');
 
     try {
       final response = await http.post(
@@ -248,23 +319,10 @@ return 'Password must be at least 6 characters long';
                   const SizedBox(
                     height: 20,
                   ),
-                  ElevatedButton(
+                  TextButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Form is valid, proceed with registration
-                        FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                          email: _emailTextController.text,
-                          password: _passwordTextController.text,
-                        )
-                            .then((value) {
-                          print("Created New Account");
-                          sendDataToFirebase(); // Send center data to Firebase
-                          // Optionally, navigate to the home screen or show a success message.
-                        }).onError((error, stackTrace) {
-                          print("Error ${error.toString()}");
-                          // Handle the error, show an error message, etc.
-                        });
+                        signspup();
                       }
                     },
                     child: Text("Sign Up"),

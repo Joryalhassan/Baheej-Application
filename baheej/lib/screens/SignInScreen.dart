@@ -1,10 +1,12 @@
- import 'package:flutter/material.dart';
+import 'package:baheej/screens/HomeScreenCenter.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:baheej/screens/ResetPassword.dart';
 import 'package:baheej/screens/GSignUpScreen.dart';
-import 'package:baheej/utlis/utilas.dart'; // تأكد من استيراد المكتبة الصحيحة
+import 'package:baheej/utlis/utilas.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignInScreenG extends StatefulWidget {
   const SignInScreenG({Key? key}) : super(key: key);
@@ -23,7 +25,7 @@ class _SignInScreenGState extends State<SignInScreenG> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-   extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -60,7 +62,6 @@ class _SignInScreenGState extends State<SignInScreenG> {
                 const SizedBox(
                   height: 30,
                 ),
-                // Email Input Field
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -69,8 +70,7 @@ class _SignInScreenGState extends State<SignInScreenG> {
                       controller: _emailTextController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person_outline),
-                        errorText:
-                            emailErrorText, // Display the email error message
+                        errorText: emailErrorText,
                       ),
                     ),
                   ],
@@ -78,7 +78,6 @@ class _SignInScreenGState extends State<SignInScreenG> {
                 const SizedBox(
                   height: 20,
                 ),
-                // Password Input Field
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -89,8 +88,7 @@ class _SignInScreenGState extends State<SignInScreenG> {
                       obscureText: true,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock_outline),
-                        errorText:
-                            passwordErrorText, // Display the password error message
+                        errorText: passwordErrorText,
                       ),
                     ),
                   ],
@@ -98,13 +96,11 @@ class _SignInScreenGState extends State<SignInScreenG> {
                 const SizedBox(
                   height: 5,
                 ),
-                // Sign-In Button
-                firebaseUIButton(context, "Sign In", () {
+                firebaseUIButton(context, "Sign In", () async {
                   final email = _emailTextController.text.trim();
                   final password = _passwordTextController.text.trim();
 
                   setState(() {
-                    // Reset error messages
                     emailErrorText = null;
                     passwordErrorText = null;
                   });
@@ -126,30 +122,53 @@ class _SignInScreenGState extends State<SignInScreenG> {
                   }
 
                   if (emailErrorText == null && passwordErrorText == null) {
-                    // Both fields are non-empty, and email format is valid
-                    FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
-                      email: email,
-                      password: password,
-                    )
-                        .then((value) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomeScreenGaurdian(),//check if it center or gaurdian
-                        ),
+                    try {
+                      final UserCredential userCredential = await FirebaseAuth
+                          .instance
+                          .signInWithEmailAndPassword(
+                        email: email,
+                        password: password,
                       );
-                    }).catchError((error) {
-                      print("Error: $error");
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Invalid username or password'),
-                        backgroundColor: Color.fromARGB(255, 245, 19, 3),
-                      ));
-                    });
+                      final user = userCredential.user;
+                      print(user!.uid);
+
+                      // Check if the user exists in the service provider collection
+                      final centerDoc = await FirebaseFirestore.instance
+                          .collection('center')
+                          .doc(user!.uid)
+                          .get();
+
+                      // Check if the user exists in the customer collection
+                      final usersDoc = await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .get();
+
+                      if (centerDoc.exists) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreenCenter(),
+                          ),
+                        );
+                      } else if (usersDoc.exists) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreenGaurdian(),
+                          ),
+                        );
+                      } else {
+                        // Handle unknown user type or user not found
+                      }
+                    } catch (e) {
+                      // Handle sign-in errors
+                      print(e.toString());
+                    }
                   }
                 }),
                 signUpOption(),
-                forgetPassword()
+                forgetPassword(),
               ],
             ),
           ),
@@ -182,29 +201,27 @@ class _SignInScreenGState extends State<SignInScreenG> {
     );
   }
 
-
-
- Row forgetPassword() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      const Text("Forget Password?", style: TextStyle(color: Colors.white70)),
-      const SizedBox(width: 8), // Add some horizontal spacing
-      GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResetPassword(),
-            ),
-          );
-        },
-        child: const Text(
-          "Reset Your Password",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      )
-    ],
-  );
-}
+  Row forgetPassword() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Forget Password?", style: TextStyle(color: Colors.white70)),
+        const SizedBox(width: 8), // Add some horizontal spacing
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ResetPassword(),
+              ),
+            );
+          },
+          child: const Text(
+            "Reset Your Password",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
 }

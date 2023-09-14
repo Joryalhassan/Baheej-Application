@@ -1,6 +1,7 @@
-import 'dart:convert';
+import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -19,13 +20,12 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   int? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
-  int capacityValue = 0; // Initial capacity value
-  String? ageRange; // New Age Range field
+  int capacityValue = 0;
+  String? ageRange;
 
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
 
-  // Variables to track the state of date and time fields
   bool dateSelected = false;
   bool timeSlotSelected = false;
 
@@ -35,8 +35,6 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'Service name is required';
     }
 
-    // Use a regular expression to check if the service name contains only letters, numbers, and special characters (excluding spaces),
-    // and ensure that at least one character is present.
     final RegExp serviceNamePattern =
         RegExp(r'^(?=.*[A-Za-z])[A-Za-z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-]+$');
 
@@ -53,16 +51,16 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     }
     final intValue = int.tryParse(value);
     if (intValue == null) {
-      return ' fill a number';
+      return 'fill a number';
     }
     if (intValue < 0) {
       return 'positive';
     }
     if (intValue == 0) {
-      return 'more that 0';
+      return 'more than 0';
     }
     if (intValue > 30) {
-      return "max 30";
+      return 'max 30';
     }
     return null;
   }
@@ -72,10 +70,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'This field is required';
     }
 
-    // Check if the input contains a combination of numbers and special characters
     if (RegExp(r'[0-9]').hasMatch(value) &&
         RegExp(r'[!@#\$%^&*()_+{}\[\]:;<>,.?~\\/\-]').hasMatch(value)) {
-      return 'Description cannot combination of numbers&special characters';
+      return 'Description cannot contain a combination of numbers and special characters';
     }
 
     return null;
@@ -91,7 +88,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     if (doubleValue == null) {
       return 'Please enter a valid number';
     }
-    // should change the value !
+
     if (doubleValue > 10000) {
       return 'Maximum price limit exceeded (10000)';
     }
@@ -125,12 +122,10 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   }
 
   void sendDataToFirebase() async {
-    // Check if other form fields are valid
     if (!_formKey.currentState!.validate()) {
-      return; // Do not proceed if there are errors in other fields
+      return;
     }
 
-// Check the state of the date and time fields
     if (!dateSelected) {
       showDialog(
         context: context,
@@ -173,7 +168,6 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return;
     }
 
-// Check if the end date is before the start date
     int? endDate = selectedEndDate?.millisecondsSinceEpoch;
     int? startDate = selectedStartDate?.millisecondsSinceEpoch;
 
@@ -198,15 +192,11 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return;
     }
 
-// Send the data to Firebase.
-    sendDataToFirebase();
+    CollectionReference serviceCollection =
+        FirebaseFirestore.instance.collection('center-service');
 
-    final url = Uri.https(
-        'baheejdatabase-default-rtdb.firebaseio.com', 'centers-service.json');
-
-    final response = await http.post(
-      url,
-      body: json.encode({
+    try {
+      await serviceCollection.add({
         'serviceName': serviceName,
         'servicePrice': selectedPrice,
         'serviceCapacity': capacityValue,
@@ -214,24 +204,41 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
-        'ageRange': ageRange, // Added Age Range field to Firebase data
-      }),
+        'ageRange': ageRange,
+      });
+
+      // Data has been successfully added to Firestore.
+      print('Service added to Firestore');
+      _showSnackBar('Service added successfully!');
+
+      // Navigate to the HomeCenterScreen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => HomeScreenCenter(),
+        ),
+      );
+
+      // Optionally, you can navigate back to the previous screen or show a success message.
+      // ...
+    } catch (e) {
+      print('Error adding service to Firestore: $e');
+    }
+  }
+
+  void _showSnackBar(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green,
+      duration:
+          Duration(seconds: 3), // Duration for which the SnackBar is displayed
     );
 
-    if (response.statusCode == 200) {
-      print('Service added to Firebase Realtime Database');
-      // Optionally, you can navigate back to the previous screen or show a success message.
-    } else {
-      print(
-          'Error adding service to Firebase Realtime Database: ${response.reasonPhrase}');
-      // Handle the error, show an error message, etc.
-    }
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Widget buildTextField(String label, String? Function(String?)? validator) {
     return Container(
-      margin:
-          EdgeInsets.only(bottom: 8), // Reduce the space between input fields
+      margin: EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -239,7 +246,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
             label,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4), // Reduce space between label and text field
+          SizedBox(height: 4),
           TextFormField(
             keyboardType: label == 'Service Capacity'
                 ? TextInputType.number
@@ -248,17 +255,16 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               hintText: '',
               filled: true,
               fillColor: Colors.grey[300],
-              contentPadding: EdgeInsets.symmetric(
-                  vertical: 8, horizontal: 12), // Adjust padding
+              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0), // Make it more oval
+                borderRadius: BorderRadius.circular(12.0),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0), // Oval shape
+                borderRadius: BorderRadius.circular(12.0),
                 borderSide: BorderSide(color: Colors.transparent),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0), // Oval shape
+                borderRadius: BorderRadius.circular(12.0),
                 borderSide: BorderSide(color: Colors.transparent),
               ),
             ),
@@ -275,7 +281,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 } else if (label == 'Service Description') {
                   selectedDescription = value;
                 } else if (label == 'Age Range') {
-                  ageRange = value; // Store Age Range value
+                  ageRange = value;
                 }
               });
             },
@@ -292,8 +298,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     void Function() onDecrement,
   ) {
     return Container(
-      margin:
-          EdgeInsets.only(bottom: 8), // Reduce the space between input fields
+      margin: EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -301,7 +306,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
             label,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4), // Reduce space between label and text field
+          SizedBox(height: 4),
           Row(
             children: [
               IconButton(
@@ -309,7 +314,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 onPressed: onDecrement,
               ),
               Container(
-                width: 100, // Set a fixed width here
+                width: 100,
                 child: TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -318,25 +323,21 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     contentPadding: EdgeInsets.symmetric(
                       vertical: 8,
                       horizontal: 12,
-                    ), // Adjust padding
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(12.0), // Make it more oval
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0), // Oval shape
+                      borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide(color: Colors.transparent),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0), // Oval shape
+                      borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide(color: Colors.transparent),
                     ),
                   ),
                   validator: validateCapacity,
-                  onChanged: (newValue) {
-                    // You can add validation or additional logic here if needed.
-                    // For this example, we'll leave it as is.
-                  },
+                  onChanged: (newValue) {},
                   controller: TextEditingController(
                       text: value == 0 ? '' : value.toString()),
                 ),
@@ -358,8 +359,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     bool isStartDate,
   ) {
     return Container(
-      margin:
-          EdgeInsets.only(bottom: 8), // Reduce the space between input fields
+      margin: EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -367,7 +367,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
             label,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4), // Reduce space between label and text field
+          SizedBox(height: 4),
           InkWell(
             onTap: () => _selectDate(context, isStartDate),
             child: Container(
@@ -409,14 +409,12 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Image.asset(
-            'assets/images/back3.png', // Replace with your background image asset path or network image URL
+            'assets/images/back3.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
           ),
-          // Content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
@@ -450,8 +448,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                   ),
                   buildTextField('Service Name', validateServiceName),
                   buildTextField('Service Price', validatePrice),
-                  buildTextField(
-                      'Age Range', validateAgeRange), // New Age Range field
+                  buildTextField('Age Range', validateAgeRange),
                   buildIncrementDecrementField(
                     'Service Capacity',
                     capacityValue,
@@ -469,16 +466,14 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     },
                   ),
                   buildTextField('Service Description', validateDescription),
-                  SizedBox(
-                      height:
-                          4.0), // Reduced space between date fields and options
+                  SizedBox(height: 4.0),
                   Row(
                     children: <Widget>[
                       Expanded(
                         child: buildDateField(
                             'Start Date', selectedStartDate, true),
                       ),
-                      SizedBox(width: 8), // Add some horizontal spacing
+                      SizedBox(width: 8),
                       Expanded(
                         child:
                             buildDateField('End Date', selectedEndDate, false),
@@ -486,14 +481,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     ],
                   ),
                   SizedBox(height: 4.0),
-                  // Reduced space between date fields and options
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            selectedTimeSlot = 0; // 8-11 AM
+                            selectedTimeSlot = 0;
                             timeSlotSelected = true;
                           });
                         },
@@ -505,15 +499,14 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          minimumSize: Size(
-                              100, 40), // Adjust the width and height as needed
+                          minimumSize: Size(100, 40),
                         ),
                         child: Text('8-11 AM'),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            selectedTimeSlot = 1; // 2-5 PM
+                            selectedTimeSlot = 1;
                             timeSlotSelected = true;
                           });
                         },
@@ -525,26 +518,23 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          minimumSize: Size(
-                              100, 40), // Adjust the width and height as needed
+                          minimumSize: Size(100, 40),
                         ),
                         child: Text('2-5 PM'),
                       ),
                     ],
                   ),
-                  SizedBox(
-                      height:
-                          4.0), // Reduced space between "Done" button and options
+                  SizedBox(height: 4.0),
                   ElevatedButton(
                     onPressed: () {
-                      // Check the state of the date and time fields
                       if (!dateSelected) {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text('Warning'),
-                              content: Text('You must select the service date'),
+                              content: Text(
+                                  'You must select both start and end dates!'),
                               actions: [
                                 TextButton(
                                   child: Text('OK'),
@@ -556,16 +546,14 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                             );
                           },
                         );
-                        return;
-                      }
-
-                      if (!timeSlotSelected) {
+                      } else if (!timeSlotSelected) {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text('Warning'),
-                              content: Text('You must select the service time'),
+                              content:
+                                  Text('You must select the service time!'),
                               actions: [
                                 TextButton(
                                   child: Text('OK'),
@@ -577,27 +565,19 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                             );
                           },
                         );
-                        return;
-                      }
-
-                      if (_formKey.currentState!.validate()) {
-                        // If the form is valid, send the data to Firebase.
+                      } else {
                         sendDataToFirebase();
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 250, 163, 230),
+                      primary: Color.fromARGB(255, 59, 138, 207),
                       onPrimary: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
-                      minimumSize: Size(
-                          120, 40), // Adjust the width and height as needed
+                      minimumSize: Size(100, 40),
                     ),
-                    child: Text(
-                      'Done',
-                      style: TextStyle(fontSize: 18.0),
-                    ),
+                    child: Text('Submit'),
                   ),
                 ],
               ),
@@ -609,29 +589,23 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime? pickedDate = await showDatePicker(
+    final DateTime picked = (await showDatePicker(
       context: context,
       initialDate: isStartDate
           ? selectedStartDate ?? DateTime.now()
           : selectedEndDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
-    );
-
-    if (pickedDate != null) {
+    ))!;
+    if (picked != null &&
+        picked != (isStartDate ? selectedStartDate : selectedEndDate)) {
       setState(() {
         if (isStartDate) {
-          selectedStartDate = pickedDate;
+          selectedStartDate = picked;
         } else {
-          selectedEndDate = pickedDate;
+          selectedEndDate = picked;
         }
-
-        // Check if both start and end dates are selected
-        if (selectedStartDate != null && selectedEndDate != null) {
-          dateSelected = true;
-        } else {
-          dateSelected = false;
-        }
+        dateSelected = selectedStartDate != null && selectedEndDate != null;
       });
     }
   }
