@@ -269,99 +269,46 @@ Widget build(BuildContext context) {
 }
 
 
-//Widget buildStyledTextField({
- // required String label,
- // required TextEditingController controller,
- // required String? Function(String?) validator,
-  //required IconData icon,
- // bool obscureText = false,
-//}) {
-  //return Container(
-   // margin: EdgeInsets.only(bottom: 16),
-   // child: Column(
-   //   crossAxisAlignment: CrossAxisAlignment.start,
-     // children: [
-      //  Text(
-         // label,
-       //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      //  ),
-       // SizedBox(height: 8),
-       // Container(
-       //   decoration: BoxDecoration(
-          //  borderRadius: BorderRadius.circular(16.0),
-           // color: Colors.grey[300], // Set the background color to grey
-         // ),
-      //    child: TextFormField(
-           // controller: controller,
-          //  decoration: InputDecoration(
-           //   labelText: '',
-           //   icon: Icon(icon),
-           //   border: InputBorder.none,
-            //  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            //),
-           // validator: validator,
-           // obscureText: obscureText,
-         // ),
-       // ),
-     // ],
-  //  ),
- // );
-//}
-
 Widget buildStyledTextField({
   required String label,
   required TextEditingController controller,
   required String? Function(String?) validator,
   required IconData icon,
-  bool obscureText = false,
+ bool obscureText = false,
 }) {
   return Container(
     margin: EdgeInsets.only(bottom: 16),
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+     crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 8),
-        Stack(
-          alignment: Alignment.bottomLeft,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color: Colors.grey[300], // Set the background color to grey
-              ),
-              child: TextFormField(
-                controller: controller,
-                decoration: InputDecoration(
-                  labelText: '',
-                  icon: Icon(icon),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                ),
-                validator: validator,
-                obscureText: obscureText,
-              ),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+       SizedBox(height: 8),
+        Container(
+         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.0),
+            color: Colors.grey[300], // Set the background color to grey
+         ),
+        child: TextFormField(
+           controller: controller,
+         decoration: InputDecoration(
+              labelText: '',
+             icon: Icon(icon),
+            border: InputBorder.none,
+             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             ),
-            if (validator(controller.text) != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 4),
-                child: Text(
-                  validator(controller.text)!,
-                  style: TextStyle(
-                    color: Colors.red, // Set the color for error messages
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-          ],
+           validator: validator,
+           obscureText: obscureText,
+         ),
         ),
       ],
     ),
-  );
+ );
 }
+
+
 
 
 
