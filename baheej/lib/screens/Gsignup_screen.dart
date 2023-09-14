@@ -308,8 +308,6 @@ Widget build(BuildContext context) {
  // );
 //}
 
-
-
 Widget buildStyledTextField({
   required String label,
   required TextEditingController controller,
@@ -327,15 +325,15 @@ Widget buildStyledTextField({
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0),
-            color: Colors.grey[300], // Set the background color to grey
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
+        Stack(
+          alignment: Alignment.bottomLeft,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
+                color: Colors.grey[300], // Set the background color to grey
+              ),
+              child: TextFormField(
                 controller: controller,
                 decoration: InputDecoration(
                   labelText: '',
@@ -346,24 +344,27 @@ Widget buildStyledTextField({
                 validator: validator,
                 obscureText: obscureText,
               ),
-              if (validator(controller.text) != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    validator(controller.text)!,
-                    style: TextStyle(
-                      color: Colors.red, // Set the color for error messages
-                      fontSize: 12,
-                    ),
+            ),
+            if (validator(controller.text) != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 16, top: 4),
+                child: Text(
+                  validator(controller.text)!,
+                  style: TextStyle(
+                    color: Colors.red, // Set the color for error messages
+                    fontSize: 12,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ],
     ),
   );
 }
+
+
+
 
 
 Widget buildStyledDropdownButtonFormField({
