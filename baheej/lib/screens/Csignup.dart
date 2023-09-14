@@ -406,7 +406,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                   const SizedBox(
                     height: 20,
                   ),
-                  //here
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
@@ -423,8 +422,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     },
                     child: Text('Sign Up'),
                   )
-
-                  //here
                 ],
               ),
             ),
