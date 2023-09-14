@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:baheej/screens/Home-Page.dart';
+import 'package:baheej/screens/Home-page.dart';
 import 'package:baheej/utlis/utilas.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
-import 'package:baheej/screens/FrontEnd.dart';
 
 class CsignUpScreen extends StatefulWidget {
   const CsignUpScreen({Key? key}) : super(key: key);
@@ -24,6 +24,81 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
   String type = "center";
+
+  UserCredential? resultaccount;
+  Future<void> signUp() async {
+    try {
+      if (resultaccount == null) {
+        resultaccount =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailTextController.text,
+          password: _passwordTextController.text,
+        );
+      }
+
+      await FirebaseFirestore.instance
+          .collection('center')
+          .doc(resultaccount!.user!.uid)
+          .set({
+        'username': _userNameTextController.text.trim(),
+        'addres': _AddressTextController.text.trim(),
+        'email': _emailTextController.text.trim(),
+        'comReg': _ComRegTextController.text.trim(),
+        'type': 'center',
+        'phonenumber': _PhoneNumTextController.text.trim(),
+        'Desc': _DescriptionTextController.text.trim()
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("The password provided is too weak."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
+        );
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("You already have an account."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
+        );
+        print('The account already exists for that email.');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   // Validation functions
   String? _validateName(String? value) {
@@ -99,38 +174,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value.length < 6) {
       return 'Password must be at least 6 characters long';
     }
+
     return null;
-  }
-
-  void sendDataToFirebase() async {
-    final url = Uri.https(
-        'baheejdatabase-default-rtdb.firebaseio.com', 'Center-users.json');
-
-    try {
-      final response = await http.post(
-        url,
-        body: json.encode({
-          'centerName': _userNameTextController.text,
-          'email': _emailTextController.text,
-          'phoneNum': _PhoneNumTextController.text,
-          'address': _AddressTextController.text,
-          'commercialRegister': _ComRegTextController.text,
-          'description': _DescriptionTextController.text,
-          'type': type
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        print('Center data added to Firebase Realtime Database');
-        // Optionally, you can navigate to the next screen or show a success message.
-      } else {
-        print(
-            'Error adding center data to Firebase Realtime Database: ${response.reasonPhrase}');
-        // Handle the error, show an error message, etc.
-      }
-    } catch (e) {
-      print('Error sending data to Firebase: $e');
-    }
   }
 
   @override
@@ -146,9 +191,10 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         ),
       ),
       body: Container(
+        // Set a white background color
+        color: Colors.white,
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        color: Colors.white, // Set the background color to white
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
@@ -156,134 +202,234 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  buildStyledTextField(
-                    label: "Enter Center Name",
-                    controller: _userNameTextController,
+                  TextFormField(
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Center Name",
+                      icon: Icon(Icons.person_outline),
+                    ),
                     validator: _validateName,
-                    icon: Icons.person_outline,
-                  ),
-                  buildStyledTextField(
-                    label: "Enter Email Id",
-                    controller: _emailTextController,
-                    validator: _validateEmail,
-                    icon: Icons.email,
-                  ),
-                  buildStyledTextField(
-                    label: "Enter Phone Number",
-                    controller: _PhoneNumTextController,
-                    validator: _validatePhoneNumber,
-                    icon: Icons.phone,
-                  ),
-                  buildStyledTextField(
-                    label: "Enter Address",
-                    controller: _AddressTextController,
-                    validator: _validateAddress,
-                    icon: Icons.home,
-                  ),
-                  buildStyledTextField(
-                    label: "Enter Commercial Register",
-                    controller: _ComRegTextController,
-                    validator: _validateCommercialRegister,
-                    icon: Icons.format_list_numbered,
-                  ),
-                  buildStyledTextField(
-                    label: "Enter Description",
-                    controller: _DescriptionTextController,
-                    validator: _validateDescription,
-                    icon: Icons.description,
-                  ),
-                  buildStyledTextField(
-                    label: "Enter Password",
-                    controller: _passwordTextController,
-                    validator: _validatePassword,
-                    icon: Icons.lock_outlined,
-                    obscureText: true,
+                    controller: _userNameTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
+                  TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Email Id",
+                      icon: Icon(Icons.email),
+                    ),
+                    validator: _validateEmail,
+                    controller: _emailTextController,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Phone Number",
+                      icon: Icon(Icons.phone),
+                    ),
+                    validator: _validatePhoneNumber,
+                    controller: _PhoneNumTextController,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Address",
+                      icon: Icon(Icons.home),
+                    ),
+                    validator: _validateAddress,
+                    controller: _AddressTextController,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Commercial Register",
+                      icon: Icon(Icons.format_list_numbered),
+                    ),
+                    validator: _validateCommercialRegister,
+                    controller: _ComRegTextController,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Description",
+                      icon: Icon(Icons.description),
+                    ),
+                    validator: _validateDescription,
+                    controller: _DescriptionTextController,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    keyboardType: TextInputType.text,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      labelText: "Enter Password",
+                      icon: Icon(Icons.lock_outlined),
+                    ),
+                    validator: _validatePassword,
+                    controller: _passwordTextController,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  //here
                   ElevatedButton(
-                    onPressed: () {
-                      // Button action
-                      if (_formKey.currentState!.validate()) {
-                        FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                          email: _emailTextController.text,
-                          password: _passwordTextController.text,
-                        )
-                            .then((value) {
-                          print("Created New Account");
-                          sendDataToFirebase();
-                          // Send user data to Firebase
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeScreen(),
-                            ),
-                          );
-                        }).onError((error, stackTrace) {
-                          print("Error ${error.toString()}");
-                        });
-                      }
-                    },
                     style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 111, 176, 234),
+                      primary: Color.fromARGB(255, 59, 138, 207),
                       onPrimary: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
-                      minimumSize: Size(120, 50),
+                      minimumSize: Size(100, 40),
                     ),
-                    child: Text(
-                      'Sign Up',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                  ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        signUp();
+                      }
+                    },
+                    child: Text('Sign Up'),
+                  )
+
+                  //here
                 ],
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget buildStyledTextField({
-    required String label,
-    required TextEditingController controller,
-    required String? Function(String?) validator,
-    required IconData icon,
-    bool obscureText = false,
-  }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              color: Colors.grey[300], // Set the background color to grey
-            ),
-            child: TextFormField(
-              controller: controller,
-              decoration: InputDecoration(
-                labelText: '',
-                icon: Icon(icon),
-                border: InputBorder.none,
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              ),
-              validator: validator,
-              obscureText: obscureText,
-            ),
-          ),
-        ],
       ),
     );
   }
