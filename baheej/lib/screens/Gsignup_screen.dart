@@ -279,37 +279,45 @@ Widget buildStyledTextField({
   TextInputType? keyboardType,
 }) {
   return Container(
-    margin: EdgeInsets.only(bottom: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    width: 100,
+    child: TextFormField(
+      keyboardType: keyboardType,
+      controller: controller,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey[300],
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 16,
         ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0),
-            color: Colors.grey[300], // Set the background color to grey
-          ),
-          child: TextFormField(
-            keyboardType: keyboardType,
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: '',
-              icon: Icon(icon),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // Adjust the horizontal padding here
-            ),
-            validator: validator,
-            obscureText: obscureText,
-          ),
+        labelText: label,
+        labelStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
         ),
-      ],
+        icon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        errorStyle: TextStyle(
+          color: Colors.red, // Set the color for error messages
+          fontSize: 12,
+        ),
+      ),
+      validator: validator,
+      obscureText: obscureText,
     ),
   );
 }
+
 
 
 Widget buildStyledDropdownButtonFormField({
