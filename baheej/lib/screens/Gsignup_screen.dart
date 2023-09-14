@@ -276,7 +276,7 @@ class _GSignUpScreenState extends State {
           fillColor: Colors.grey[300],
           contentPadding: EdgeInsets.symmetric(
             vertical: 10,
-            horizontal: 26,
+            horizontal: 16,
           ),
           labelText: label,
           labelStyle: TextStyle(
