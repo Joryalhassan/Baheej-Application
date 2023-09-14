@@ -269,54 +269,46 @@ Widget build(BuildContext context) {
 }
 
 
-
 Widget buildStyledTextField({
   required String label,
   required TextEditingController controller,
   required String? Function(String?) validator,
   required IconData icon,
-  bool obscureText = false,
-  TextInputType? keyboardType,
+ bool obscureText = false,
 }) {
   return Container(
-    width: 100,
-    child: TextFormField(
-      keyboardType: keyboardType,
-      controller: controller,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.grey[300],
-        contentPadding: EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 16,
-        ),
-        labelText: label,
-        labelStyle: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-        icon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        errorStyle: TextStyle(
-          color: Colors.red, // Set the color for error messages
-          fontSize: 12,
-        ),
+    margin: EdgeInsets.only(bottom: 16),
+    child: Column(
+     crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
-      validator: validator,
-      obscureText: obscureText,
+       SizedBox(height: 8),
+        Container(
+         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.0),
+            color: Colors.grey[300], // Set the background color to grey
+         ),
+        child: TextFormField(
+           controller: controller,
+         decoration: InputDecoration(
+              labelText: '',
+             icon: Icon(icon),
+            border: InputBorder.none,
+             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            ),
+           validator: validator,
+           obscureText: obscureText,
+         ),
+        ),
+      ],
     ),
-  );
+ );
 }
+
+
 
 
 
