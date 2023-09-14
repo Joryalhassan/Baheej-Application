@@ -64,8 +64,6 @@ Widget build(BuildContext context) {
         key: _formKey,
         child: Column(
           children: <Widget>[
-           
-           
             const SizedBox(
               height: 20,
             ),
@@ -84,9 +82,6 @@ Widget build(BuildContext context) {
                   },
                   icon: Icons.person_outline,
                 ),
-              
-              
-              
                 const SizedBox(
                   height: 20,
                 ),
@@ -105,10 +100,6 @@ Widget build(BuildContext context) {
                   },
                   icon: Icons.person_outline,
                 ),
-              
-              
-              
-              
                 const SizedBox(
                   height: 20,
                 ),
@@ -129,10 +120,6 @@ Widget build(BuildContext context) {
                   },
                   icon: Icons.email,
                 ),
-            
-            
-            
-            
                 const SizedBox(
                   height: 20,
                 ),
@@ -151,10 +138,6 @@ Widget build(BuildContext context) {
                   },
                   icon: Icons.phone,
                 ),
-            
-            
-            
-            
                 const SizedBox(
                   height: 20,
                 ),
@@ -175,9 +158,6 @@ Widget build(BuildContext context) {
                   },
                   icon: Icons.person,
                 ),
-              
-              
-              
                 const SizedBox(
                   height: 20,
                 ),
@@ -268,49 +248,44 @@ Widget build(BuildContext context) {
   );
 }
 
-
 Widget buildStyledTextField({
   required String label,
   required TextEditingController controller,
   required String? Function(String?) validator,
   required IconData icon,
- bool obscureText = false,
+  bool obscureText = false,
 }) {
   return Container(
     margin: EdgeInsets.only(bottom: 16),
     child: Column(
-     crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-       SizedBox(height: 8),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
         Container(
-         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0),
             color: Colors.grey[300], // Set the background color to grey
-         ),
-        child: TextFormField(
-           controller: controller,
-         decoration: InputDecoration(
+          ),
+          child: TextFormField(
+            controller: controller,
+            decoration: InputDecoration(
               labelText: '',
-             icon: Icon(icon),
-            border: InputBorder.none,
-             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              icon: Icon(icon),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             ),
-           validator: validator,
-           obscureText: obscureText,
-         ),
+            validator: validator,
+            obscureText: obscureText,
+          ),
         ),
       ],
     ),
- );
+  );
 }
-
-
-
-
 
 Widget buildStyledDropdownButtonFormField({
   required String label,
@@ -361,12 +336,6 @@ Widget buildStyledDropdownButtonFormField({
 }
 
 
-
     
 }
     
-    
-    
-    
-    
-  
