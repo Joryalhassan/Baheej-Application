@@ -4,18 +4,26 @@
 
 
 // big button for (Done, Sign up ,...),(blue)
-class CustomButton extends StatelessWidget {
+class CustomBigButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const CustomButton({
+  CustomBigButton({
     required this.text,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Color.fromARGB(255, 59, 138, 207),
+        onPrimary: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        minimumSize: Size(100, 40),
+      ),
       onPressed: onPressed,
       child: Text(text),
     );

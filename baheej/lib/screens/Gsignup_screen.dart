@@ -377,6 +377,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                     },
                     child: Text('Sign Up'),
                   ),
+
+                  
                 ],
               ),
             ),
