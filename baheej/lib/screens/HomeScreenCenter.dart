@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
-import 'package:baheej/screens/WelcomePage.dart';
+import 'package:baheej/screens/SignInScreen.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   const HomeScreenCenter({Key? key}) : super(key: key);
@@ -30,7 +30,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   print("Signed Out");
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => WelcomePage()),
+                    MaterialPageRoute(builder: (context) => SignInScreen()),
                   );
                 });
               },

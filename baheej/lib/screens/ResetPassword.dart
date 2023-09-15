@@ -1,7 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/reusable_widget/reusable_widget.dart';
-//import 'package:baheej/screens/HomeScreenGaurdian.dart';
-import 'package:baheej/utlis/utilas.dart';
 import 'package:flutter/material.dart';
 
 class ResetPassword extends StatefulWidget {
@@ -27,49 +24,65 @@ class _ResetPasswordState extends State<ResetPassword> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              hexStringToColor("CB2B93"),
-              hexStringToColor("9546C4"),
-              hexStringToColor("5E61F4"),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: Stack(
+        children: [
+          // Background Image
+          Image.asset(
+            'assets/images/back3.png', // Replace with your image path
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-            child: Column(
-              children: <Widget>[
-                const SizedBox(
-                  height: 20,
+          Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Reset Password",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    buildStyledTextField(
+                      controller: _emailTextController,
+                      labelText: "Enter Email",
+                      icon: Icons.email,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter an email address";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    CustomBigButton(
+                      text: "Reset Password",
+                      onPressed: () {
+                        _validateAndResetPassword(context);
+                      },
+                    ),
+                  ],
                 ),
-                TextField(
-                  controller: _emailTextController,
-                  decoration: InputDecoration(
-                    labelText: "Enter Email Id",
-                    icon: Icon(Icons.person_outline),
-                    errorText: _infoText.isNotEmpty ? _infoText : null,
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _validateAndResetPassword(context);
-                  },
-                  child: Text("Reset Password"),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -100,5 +113,91 @@ class _ResetPasswordState extends State<ResetPassword> {
         _infoText = "Error occurred. Please try again later.";
       });
     }
+  }
+}
+
+Widget buildStyledTextField({
+  required TextEditingController controller,
+  required String labelText,
+  required IconData icon,
+  required String? Function(String?) validator,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        labelText,
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.grey[300]!,
+              ),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.grey[300]!,
+              ),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+          ),
+        ),
+      ),
+      if (validator != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            validator("") ?? "",
+            style: TextStyle(
+              color: Colors.red, // Red error text color
+              fontSize: 12,
+            ),
+          ),
+        ),
+    ],
+  );
+}
+
+class CustomBigButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  CustomBigButton({
+    required this.text,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Color.fromARGB(255, 59, 138, 207),
+        onPrimary: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        minimumSize: Size(200.0, 50.0),
+      ),
+      onPressed: onPressed,
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 20.0),
+      ),
+    );
   }
 }

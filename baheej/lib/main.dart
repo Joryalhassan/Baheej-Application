@@ -1,11 +1,7 @@
 import 'package:baheej/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:baheej/screens/GSignUpScreen.dart';
-import 'package:baheej/screens/SignInScreenC.dart';
-import 'package:baheej/screens/WelcomePage.dart';
+import 'package:baheej/screens/SignInScreen.dart';
 
 //jory
 Future<void> main() async {
@@ -42,7 +38,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home:  const WelcomePage(),
+      home: const SignInScreen(),
     );
   }
 }
