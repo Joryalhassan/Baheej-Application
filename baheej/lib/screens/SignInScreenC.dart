@@ -1,3 +1,4 @@
+import 'package:baheej/screens/GSignUpScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
@@ -23,7 +24,7 @@ class _SignInScreenCState extends State<SignInScreenC> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-   extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -136,7 +137,8 @@ class _SignInScreenCState extends State<SignInScreenC> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HomeScreenCenter(),//check if it center or gaurdian
+                          builder: (context) =>
+                              HomeScreenCenter(), //check if it center or gaurdian
                         ),
                       );
                     }).catchError((error) {
@@ -169,7 +171,7 @@ class _SignInScreenCState extends State<SignInScreenC> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CsignUpScreen(),
+                builder: (context) => GSignUpScreen(),
               ),
             );
           },
@@ -182,29 +184,27 @@ class _SignInScreenCState extends State<SignInScreenC> {
     );
   }
 
-
-
- Row forgetPassword() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      const Text("Forget Password?", style: TextStyle(color: Colors.white70)),
-      const SizedBox(width: 8), // Add some horizontal spacing
-      GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResetPassword(),
-            ),
-          );
-        },
-        child: const Text(
-          "Reset Your Password",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      )
-    ],
-  );
-}
+  Row forgetPassword() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Forget Password?", style: TextStyle(color: Colors.white70)),
+        const SizedBox(width: 8), // Add some horizontal spacing
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ResetPassword(),
+              ),
+            );
+          },
+          child: const Text(
+            "Reset Your Password",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
 }

@@ -1,10 +1,11 @@
-// ignore: file_names
+import 'package:baheej/screens/SignInScreenC.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:baheej/screens/HomeScreenCenter.dart';
+//import 'package:baheej/screens/Home-page.dart';
 import 'package:baheej/utlis/utilas.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 
 class CsignUpScreen extends StatefulWidget {
@@ -24,6 +25,81 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
   String type = "center";
+
+  UserCredential? resultaccount;
+  Future<void> signUp() async {
+    try {
+      if (resultaccount == null) {
+        resultaccount =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailTextController.text,
+          password: _passwordTextController.text,
+        );
+      }
+
+      await FirebaseFirestore.instance
+          .collection('center')
+          .doc(resultaccount!.user!.uid)
+          .set({
+        'username': _userNameTextController.text.trim(),
+        'addres': _AddressTextController.text.trim(),
+        'email': _emailTextController.text.trim(),
+        'comReg': _ComRegTextController.text.trim(),
+        'type': 'center',
+        'phonenumber': _PhoneNumTextController.text.trim(),
+        'Desc': _DescriptionTextController.text.trim()
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreenC()),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("The password provided is too weak."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
+        );
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("You already have an account."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
+        );
+        print('The account already exists for that email.');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   // Validation functions
   String? _validateName(String? value) {
@@ -79,61 +155,28 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
-    } // Check for at least one uppercase letter
-if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
-return 'Password must include at least one uppercase letter';
-}
-
-// Check for at least one lowercase letter
-if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
-return 'Password must include at least one lowercase letter';
-}
-
-// Check for at least one digit
-if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
-return 'Password must contain at least one digit';
-}
-
-// Check for a minimum length of 6 characters
-if (value.length < 6) {
-return 'Password must be at least 6 characters long';
-}
-  }
-   
-
-
-
-
-
-  void sendDataToFirebase() async {
-    final url = Uri.https(
-        'baheejdatabase-default-rtdb.firebaseio.com', 'Center-users.json');
-
-    try {
-      final response = await http.post(
-        url,
-        body: json.encode({
-          'centerName': _userNameTextController.text,
-          'email': _emailTextController.text,
-          'phoneNum': _PhoneNumTextController.text,
-          'address': _AddressTextController.text,
-          'commercialRegister': _ComRegTextController.text,
-          'description': _DescriptionTextController.text,
-          'type': type
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        print('Center data added to Firebase Realtime Database');
-        // Optionally, you can navigate to the next screen or show a success message.
-      } else {
-        print(
-            'Error adding center data to Firebase Realtime Database: ${response.reasonPhrase}');
-        // Handle the error, show an error message, etc.
-      }
-    } catch (e) {
-      print('Error sending data to Firebase: $e');
     }
+    // Check for at least one uppercase letter
+    if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
+      return 'Password must include at least one uppercase letter';
+    }
+
+    // Check for at least one lowercase letter
+    if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
+      return 'Password must include at least one lowercase letter';
+    }
+
+    // Check for at least one digit
+    if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+      return 'Password must contain at least one digit';
+    }
+
+    // Check for a minimum length of 6 characters
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+
+    return null;
   }
 
   @override
@@ -149,19 +192,10 @@ return 'Password must be at least 6 characters long';
         ),
       ),
       body: Container(
+        // Set a white background color
+        color: Colors.white,
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFCB2B93),
-              Color(0xFF9546C4),
-              Color(0xFF5E61F4),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
@@ -170,105 +204,225 @@ return 'Password must be at least 6 characters long';
               child: Column(
                 children: <Widget>[
                   TextFormField(
-                    controller: _userNameTextController,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Center Name",
                       icon: Icon(Icons.person_outline),
                     ),
-                    validator: _validateName, // Validate Center Name
+                    validator: _validateName,
+                    controller: _userNameTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    controller: _emailTextController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Email Id",
                       icon: Icon(Icons.email),
                     ),
-                    validator: _validateEmail, // Validate Email
+                    validator: _validateEmail,
+                    controller: _emailTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    controller: _PhoneNumTextController,
+                    keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Phone Number",
                       icon: Icon(Icons.phone),
                     ),
-                    validator: _validatePhoneNumber, // Validate Phone Number
+                    validator: _validatePhoneNumber,
+                    controller: _PhoneNumTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    controller: _AddressTextController,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Address",
                       icon: Icon(Icons.home),
                     ),
-                    validator: _validateAddress, // Validate Address
+                    validator: _validateAddress,
+                    controller: _AddressTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    controller: _ComRegTextController,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Commercial Register",
                       icon: Icon(Icons.format_list_numbered),
                     ),
-                    validator:
-                        _validateCommercialRegister, // Validate Commercial Register
+                    validator: _validateCommercialRegister,
+                    controller: _ComRegTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    controller: _DescriptionTextController,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Description",
                       icon: Icon(Icons.description),
                     ),
-                    validator: _validateDescription, // Validate Description
+                    validator: _validateDescription,
+                    controller: _DescriptionTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    controller: _passwordTextController,
+                    keyboardType: TextInputType.text,
                     obscureText: true,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
                       labelText: "Enter Password",
                       icon: Icon(Icons.lock_outlined),
                     ),
-                    validator: _validatePassword, // Validate Password
+                    validator: _validatePassword,
+                    controller: _passwordTextController,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 59, 138, 207),
+                      onPrimary: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      minimumSize: Size(100, 40),
+                    ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Form is valid, proceed with registration
-                        FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                          email: _emailTextController.text,
-                          password: _passwordTextController.text,
-                        )
-                            .then((value) {
-                          print("Created New Account");
-                          sendDataToFirebase(); // Send center data to Firebase
-                          // Optionally, navigate to the home screen or show a success message.
-                        }).onError((error, stackTrace) {
-                          print("Error ${error.toString()}");
-                          // Handle the error, show an error message, etc.
-                        });
+                        signUp();
                       }
                     },
-                    child: Text("Sign Up"),
-                  ),
+                    child: Text('Sign Up'),
+                  )
                 ],
               ),
             ),
