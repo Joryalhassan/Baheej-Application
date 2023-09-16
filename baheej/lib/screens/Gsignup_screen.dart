@@ -73,14 +73,14 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            content: const Text("You already have an account."),
+            content: const Text("Email already exists"),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(ctx).pop();
                 },
                 child: Container(
-                  color: Colors.green,
+                  color: Colors.red,
                   padding: const EdgeInsets.all(14),
                   child: const Text("OK"),
                 ),
@@ -95,7 +95,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
     }
   }
 
-  
+
 
   @override
   Widget build(BuildContext context) {
