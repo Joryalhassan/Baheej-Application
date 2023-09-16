@@ -194,13 +194,13 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
     // Check if there is at least one alphabetic character in the description
     if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
-      return 'Description must contain at least one alphabetic character';
+      return 'Description must contain at least one \n alphabetic character';
     }
 
     // Check if the description contains only letters, numbers, spaces, and special characters
     if (!RegExp(r'^[a-zA-Z0-9\s!@#\$%^&*()_+{}\[\]:;<>,.?~\\/-]+$')
         .hasMatch(value)) {
-      return 'Description should contain only letters, numbers, spaces, or special characters';
+      return 'Description should contain only letters, \n numbers, spaces, or special characters';
     }
 
     if (value.length < 10 || value.length > 100) {
