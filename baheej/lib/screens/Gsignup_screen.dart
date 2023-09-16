@@ -150,7 +150,7 @@ print('The account already exists for that email.');
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Enter First Name",
+                        "First Name",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -204,7 +204,7 @@ print('The account already exists for that email.');
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Enter Last Name",
+                        "Last Name",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -260,7 +260,7 @@ print('The account already exists for that email.');
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Enter Email Id",
+                        "Email Id",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -314,7 +314,7 @@ print('The account already exists for that email.');
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Enter Phone Number",
+                        "Phone Number",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -429,7 +429,7 @@ print('The account already exists for that email.');
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Enter Password",
+                        "Password",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -484,25 +484,29 @@ print('The account already exists for that email.');
                   
                   
                   
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      minimumSize: Size(120, 48),
+              const SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Color.fromARGB(255, 59, 138, 207),
+                    onPrimary: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(33.0), // Increase the border radius
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        signspup();
-                      }
-                    },
-                    child: Text('Sign Up'),
+                    minimumSize: Size(150, 54), // Increase the button size
                   ),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      signspup();
+                    }
+                  },
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(fontSize: 18), // Increase the font size
+                  ),
+                ),
+
 
                   
                 ],
