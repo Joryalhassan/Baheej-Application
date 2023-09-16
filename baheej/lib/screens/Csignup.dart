@@ -78,7 +78,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            content: const Text("You already have an account."),
+            content: const Text("Email already exists"),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -373,6 +373,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     validator: _validateDescription,
                     controller: _DescriptionTextController,
                   ),
+                 
+                 
                   const SizedBox(
                     height: 20,
                   ),
@@ -397,12 +399,19 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderRadius: BorderRadius.circular(12.0),
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
+                     
+                     
                       labelText: "Enter Password",
                       icon: Icon(Icons.lock_outlined),
                     ),
                     validator: _validatePassword,
                     controller: _passwordTextController,
                   ),
+                  
+                  
+                  
+
+
                   const SizedBox(
                     height: 20,
                   ),
