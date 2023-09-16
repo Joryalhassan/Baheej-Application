@@ -13,20 +13,18 @@ class _ResetPasswordState extends State<ResetPassword> {
   String _infoText = "";
 
   @override
-  @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    extendBodyBehindAppBar: true,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      title: const Text(
-        "Reset Password",
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          "Reset Password",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
-    ),
-    body: SingleChildScrollView( // Wrap your content in SingleChildScrollView
-      child: Stack(
+      body: Stack(
         children: [
           // Background Image
           Image.asset(
@@ -43,73 +41,65 @@ Widget build(BuildContext context) {
                 borderRadius: BorderRadius.circular(12.0),
               ),
               padding: const EdgeInsets.all(16),
-              child: Column(
-                children: <Widget>[
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                   "",
-                   style: TextStyle(
-                     fontSize: 24,
-                     fontWeight: FontWeight.bold,
-                   ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  buildStyledTextField(
-                    controller: _emailTextController,
-                    labelText: "Enter Email",
-                    icon: Icons.email,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter an email address";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  CustomBigButton(
-                    text: "Reset Password",
-                    onPressed: () {
-                      _validateAndResetPassword(context);
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    _infoText, // Display the info text here
-                    style: TextStyle(
-                      color: Colors.red, // You can style it as needed
-                      fontSize: 16,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    const SizedBox(
+                      height: 20,
                     ),
-                  ),
-                ],
+                    Text(
+                      "Reset Password",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    buildStyledTextField(
+                      controller: _emailTextController,
+                      labelText: "Enter Email",
+                      icon: Icons.email,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter an email address";
+                        }
+                        return null;
+                      },
+                      showError: _infoText.isNotEmpty,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    CustomBigButton(
+                      text: "Reset Password",
+                      onPressed: () {
+                        _validateAndResetPassword(context);
+                      },
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      _infoText,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ],
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   void _validateAndResetPassword(BuildContext context) async {
     final email = _emailTextController.text;
-    final emailPattern = r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
-    final regExp = RegExp(emailPattern);
-
-    if (!regExp.hasMatch(email)) {
-    setState(() {
-      _infoText = "Invalid email format. Please enter a valid email.";
-    });
-    return;
-  }
 
     try {
       // Check if the user with the entered email exists
@@ -137,11 +127,13 @@ Widget build(BuildContext context) {
   }
 }
 
+// Define buildStyledTextField function here
 Widget buildStyledTextField({
   required TextEditingController controller,
   required String labelText,
   required IconData icon,
   required String? Function(String?) validator,
+  bool showError = false,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,13 +171,13 @@ Widget buildStyledTextField({
           ),
         ),
       ),
-      if (validator(" ") != null && validator(" ")!.isNotEmpty)
+      if (showError && validator(controller.text) != null && validator(controller.text)!.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            validator("") ?? "",
+            validator(controller.text) ?? "",
             style: TextStyle(
-              color: Colors.red, // Red error text color
+              color: Colors.red,
               fontSize: 12,
             ),
           ),
@@ -193,7 +185,6 @@ Widget buildStyledTextField({
     ],
   );
 }
-
 
 class CustomBigButton extends StatelessWidget {
   final String text;
