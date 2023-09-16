@@ -78,16 +78,32 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            content: const Text("You already have an account."),
+            content: const Text("Email already exists"),
             actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                },
+              Center(
                 child: Container(
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(14),
-                  child: const Text("OK"),
+                  width: 90, // Adjust the width as needed
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.red),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              20), // Adjust the radius as needed
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: const Text(
+                        "OK",
+                        style: TextStyle(fontSize: 14, color: Colors.black),
+                      ), // Adjust the font size as needed
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -105,9 +121,15 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Center Name is required';
     }
-    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+
+    if (value.length < 4 || value.length > 25) {
+      return 'Center Name should be between 4 and 25 characters';
+    }
+
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
       return 'Center Name should only contain letters';
     }
+
     return null;
   }
 
@@ -134,6 +156,21 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Address is required';
     }
+
+    // Check if there is at least one alphabetic character in the address
+    if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+      return 'Address must contain at least one alphabetic character';
+    }
+
+    // Check if the address contains only letters, numbers, or spaces
+    if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value)) {
+      return 'Address should contain only letters, numbers, or spaces';
+    }
+
+    if (value.length < 5 || value.length > 35) {
+      return 'Address should be between 5 and 35 characters';
+    }
+
     return null;
   }
 
@@ -141,6 +178,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Commercial Register is required';
     }
+
+    // Check if the value consists of exactly 10 numbers
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+      return 'Commercial Register should contain exactly 10 numbers';
+    }
+
     return null;
   }
 
@@ -148,6 +191,22 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Description is required';
     }
+
+    // Check if there is at least one alphabetic character in the description
+    if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+      return 'Description must contain at least one alphabetic character';
+    }
+
+    // Check if the description contains only letters, numbers, spaces, and special characters
+    if (!RegExp(r'^[a-zA-Z0-9\s!@#\$%^&*()_+{}\[\]:;<>,.?~\\/-]+$')
+        .hasMatch(value)) {
+      return 'Description should contain only letters, numbers, spaces, or special characters';
+    }
+
+    if (value.length < 10 || value.length > 100) {
+      return 'Description should be between 10 and 100 characters';
+    }
+
     return null;
   }
 
@@ -171,8 +230,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
 
     // Check for a minimum length of 6 characters
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
+    if (value.length < 8 || value.length > 20) {
+      return 'Password must be between 8 and 20 characters long';
     }
 
     return null;
@@ -223,7 +282,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Center Name",
-                      icon: Icon(Icons.person_outline),
+                      prefixIcon: Icon(Icons.person_outline),
                     ),
                     validator: _validateName,
                     controller: _userNameTextController,
@@ -252,7 +311,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Email Id",
-                      icon: Icon(Icons.email),
+                      prefixIcon: Icon(Icons.email),
                     ),
                     validator: _validateEmail,
                     controller: _emailTextController,
@@ -281,7 +340,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Phone Number",
-                      icon: Icon(Icons.phone),
+                      prefixIcon: Icon(Icons.phone),
                     ),
                     validator: _validatePhoneNumber,
                     controller: _PhoneNumTextController,
@@ -310,7 +369,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Address",
-                      icon: Icon(Icons.home),
+                      prefixIcon: Icon(Icons.home),
                     ),
                     validator: _validateAddress,
                     controller: _AddressTextController,
@@ -339,7 +398,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Commercial Register",
-                      icon: Icon(Icons.format_list_numbered),
+                      prefixIcon: Icon(Icons.format_list_numbered),
                     ),
                     validator: _validateCommercialRegister,
                     controller: _ComRegTextController,
@@ -368,7 +427,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Description",
-                      icon: Icon(Icons.description),
+                      prefixIcon: Icon(Icons.description),
                     ),
                     validator: _validateDescription,
                     controller: _DescriptionTextController,
@@ -398,7 +457,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       labelText: "Enter Password",
-                      icon: Icon(Icons.lock_outlined),
+                      prefixIcon: Icon(Icons.lock_outlined),
                     ),
                     validator: _validatePassword,
                     controller: _passwordTextController,
@@ -413,7 +472,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
-                      minimumSize: Size(100, 40),
+                      minimumSize: Size(120, 48),
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
