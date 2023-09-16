@@ -123,7 +123,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
 
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name should be between 4 and 25 characters';
+      return 'Center Name must be between 4 and 25 letters';
     }
 
     if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
@@ -159,16 +159,16 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
     // Check if there is at least one alphabetic character in the address
     if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
-      return 'Address must contain at least one \n alphabetic character';
+      return 'Address must contain at least one alphabetic\n character';
     }
 
     // Check if the address contains only letters, numbers, or spaces
     if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value)) {
-      return 'Address should contain only \n letters, numbers, or spaces';
+      return 'Address must contain only letters, numbers,\n or spaces';
     }
 
     if (value.length < 5 || value.length > 35) {
-      return 'Address should be between 5 and 35 characters';
+      return 'Address must be between 5 and 35 characters';
     }
 
     return null;
@@ -181,7 +181,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
     // Check if the value consists of exactly 10 numbers
     if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-      return 'Commercial Register should contain exactly 10 numbers';
+      return 'Commercial Register must contain exactly 10 numbers';
     }
 
     return null;
@@ -194,17 +194,17 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
     // Check if there is at least one alphabetic character in the description
     if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
-      return 'Description must contain at least one \n alphabetic character';
+      return 'Description must contain at least one alphabetic\n character';
     }
 
     // Check if the description contains only letters, numbers, spaces, and special characters
     if (!RegExp(r'^[a-zA-Z0-9\s!@#\$%^&*()_+{}\[\]:;<>,.?~\\/-]+$')
         .hasMatch(value)) {
-      return 'Description should contain only \nletters, numbers, spaces, or special characters';
+      return 'Description shoumustld contain only letters, numbers,\n spaces, or special characters';
     }
 
     if (value.length < 10 || value.length > 100) {
-      return 'Description should be between 10 and 100 characters';
+      return 'Description must be between 10 and 100 characters';
     }
 
     return null;
