@@ -119,7 +119,7 @@ print('The account already exists for that email.');
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign Up",
+          "Sign Up As Guardian",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
