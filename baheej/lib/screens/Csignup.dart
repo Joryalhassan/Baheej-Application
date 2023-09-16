@@ -176,12 +176,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
   String? _validateCommercialRegister(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Commercial Register is required';
+      return 'Commercial Register Number is required';
     }
 
     // Check if the value consists of exactly 10 numbers
     if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-      return 'Commercial Register must contain exactly 10 numbers';
+      return 'Commercial Register Number must contain exactly 10 numbers';
     }
 
     return null;
@@ -271,7 +271,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter First Name",
+                          "First Name",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -313,7 +313,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter Email Id",
+                          "Email Id",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -355,7 +355,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter Phone Number",
+                          "Phone Number",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -397,7 +397,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter Address",
+                          "Address",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -439,7 +439,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter Commercial Register",
+                          "Commercial Register Number",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -481,7 +481,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter Description",
+                          "Description",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -523,7 +523,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Enter Password",
+                          "Password",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -555,22 +555,33 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     ],
                   ),
 
+
+                const SizedBox(
+                  height: 20,
+                ),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      minimumSize: Size(120, 48),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color.fromARGB(255, 59, 138, 207),
+                    onPrimary: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(33.0), // Increase the border radius
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        signUp();
-                      }
-                    },
-                    child: Text('Sign Up'),
-                  )
+                    minimumSize: Size(150, 54), // Increase the button size
+                  ),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      signUp();
+                    }
+                  },
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(fontSize: 18), // Increase the font size
+                  ),
+                ),
+
+
+
+
                 ],
               ),
             ),
