@@ -347,7 +347,7 @@ print('The account already exists for that email.');
                         }
                         final phoneRegex = RegExp(r'^05[0-9]{8}$');
                         if (!phoneRegex.hasMatch(value)) {
-                          return 'Invalid phone number';
+                          return 'Invalid Phone Number';
                         }
                         return null;
                       },
