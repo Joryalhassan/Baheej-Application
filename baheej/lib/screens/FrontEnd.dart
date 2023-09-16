@@ -20,16 +20,16 @@ class CustomBigButton extends StatelessWidget {
         primary: Color.fromARGB(255, 59, 138, 207),
         onPrimary: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
+          borderRadius: BorderRadius.circular(33.0),
         ),
-        minimumSize: Size(120, 48),
+        minimumSize: Size(150, 54),
       ),
       onPressed: onPressed,
-      child: Text(text),
+      child: Text(text ,  style: TextStyle(fontSize: 18), ),
     );
   }
 }
-
+             
 
 
 ///////////////////////////////////////////////////////////
