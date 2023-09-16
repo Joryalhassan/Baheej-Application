@@ -68,7 +68,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
           ),
         );
         print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
+      } 
+      else if (e.code == 'email-already-in-use') {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -93,6 +94,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
       print(e.toString());
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +122,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  const SizedBox(
+                
+                
+                 const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
@@ -149,12 +154,18 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'First Name is required';
                       }
+                       if (value.length < 2 || value.length > 12) {
+                        return 'First Name must be between 2 and 12 letters';
+                      }
                       if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
                         return 'First Name can only contain letters';
                       }
                       return null;
                     },
                   ),
+                
+                
+                
                   const SizedBox(
                     height: 20,
                   ),
@@ -185,12 +196,19 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Last Name is required';
                       }
+                      if (value.length < 2 || value.length > 12) {
+                        return 'Last Name must be between 2 and 12 letters';
+                      }
                       if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
                         return 'Last Name can only contain letters';
                       }
                       return null;
                     },
                   ),
+               
+               
+               
+               
                   const SizedBox(
                     height: 20,
                   ),
@@ -229,6 +247,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       return null;
                     },
                   ),
+                 
+                 
+                 
                   const SizedBox(
                     height: 20,
                   ),
@@ -259,13 +280,16 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Phone Number is required';
                       }
-                      final phoneRegex = RegExp(r'^[0-9]{10}$');
+                      final phoneRegex = RegExp(r'^05[0-9]{8}$');
                       if (!phoneRegex.hasMatch(value)) {
                         return 'Invalid phone number';
                       }
                       return null;
                     },
                   ),
+                  
+                  
+                  
                   const SizedBox(
                     height: 20,
                   ),
@@ -312,6 +336,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       return null;
                     },
                   ),
+                
+                
+                
                   const SizedBox(
                     height: 20,
                   ),
@@ -352,12 +379,17 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
                         return 'Password must contain at least one digit';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters long';
+                       if (value.length < 8 || value.length > 20) {
+                        return 'Password must be between 8 and 20 characters long';
                       }
                       return null;
                     },
                   ),
+                  
+                  
+                  
+                  
+                  
                   const SizedBox(
                     height: 20,
                   ),
@@ -368,7 +400,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
-                      minimumSize: Size(100, 40),
+                      minimumSize: Size(120, 48),
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {

@@ -22,7 +22,7 @@ class CustomBigButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
-        minimumSize: Size(100, 40),
+        minimumSize: Size(120, 48),
       ),
       onPressed: onPressed,
       child: Text(text),
