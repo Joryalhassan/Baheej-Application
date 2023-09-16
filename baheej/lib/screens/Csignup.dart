@@ -159,12 +159,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
     // Check if there is at least one alphabetic character in the address
     if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
-      return 'Address must contain at least one alphabetic character';
+      return 'Address must contain at least one \n alphabetic character';
     }
 
     // Check if the address contains only letters, numbers, or spaces
     if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value)) {
-      return 'Address should contain only letters, numbers, or spaces';
+      return 'Address should contain only \n letters, numbers, or spaces';
     }
 
     if (value.length < 5 || value.length > 35) {
@@ -200,7 +200,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     // Check if the description contains only letters, numbers, spaces, and special characters
     if (!RegExp(r'^[a-zA-Z0-9\s!@#\$%^&*()_+{}\[\]:;<>,.?~\\/-]+$')
         .hasMatch(value)) {
-      return 'Description should contain only letters, \n numbers, spaces, or special characters';
+      return 'Description should contain only \nletters, numbers, spaces, or special characters';
     }
 
     if (value.length < 10 || value.length > 100) {
@@ -245,7 +245,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign Up",
+          "Sign Up As Center",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
@@ -261,210 +261,300 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  TextFormField(
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
+                  //1
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter First Name",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
+                      TextFormField(
+                        controller: _userNameTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person_outline),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateName,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Center Name",
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                    validator: _validateName,
-                    controller: _userNameTextController,
+                    ],
                   ),
-                  const SizedBox(
-                    height: 20,
+
+                  //2
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter Email Id",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _emailTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateEmail,
+                      ),
+                    ],
                   ),
-                  TextFormField(
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
+
+                  //3
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter Phone Number",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
+                      TextFormField(
+                        controller: _PhoneNumTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.phone),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validatePhoneNumber,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Email Id",
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                    validator: _validateEmail,
-                    controller: _emailTextController,
+                    ],
                   ),
-                  const SizedBox(
-                    height: 20,
+
+                  //4
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter Address",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _AddressTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.home),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateAddress,
+                      ),
+                    ],
                   ),
-                  TextFormField(
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
+
+                  //5
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter Commercial Register",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
+                      TextFormField(
+                        controller: _ComRegTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.format_list_numbered),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateCommercialRegister,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Phone Number",
-                      prefixIcon: Icon(Icons.phone),
-                    ),
-                    validator: _validatePhoneNumber,
-                    controller: _PhoneNumTextController,
+                    ],
                   ),
-                  const SizedBox(
-                    height: 20,
+
+                  //6
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter Description",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _DescriptionTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.description),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateDescription,
+                      ),
+                    ],
                   ),
-                  TextFormField(
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
+
+                  //7
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Enter Password",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
+                      TextFormField(
+                        controller: _passwordTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outlined),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validatePassword,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Address",
-                      prefixIcon: Icon(Icons.home),
-                    ),
-                    validator: _validateAddress,
-                    controller: _AddressTextController,
+                    ],
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Commercial Register",
-                      prefixIcon: Icon(Icons.format_list_numbered),
-                    ),
-                    validator: _validateCommercialRegister,
-                    controller: _ComRegTextController,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Description",
-                      prefixIcon: Icon(Icons.description),
-                    ),
-                    validator: _validateDescription,
-                    controller: _DescriptionTextController,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    keyboardType: TextInputType.text,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[300],
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      labelText: "Enter Password",
-                      prefixIcon: Icon(Icons.lock_outlined),
-                    ),
-                    validator: _validatePassword,
-                    controller: _passwordTextController,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
