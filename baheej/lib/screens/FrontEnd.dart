@@ -4,32 +4,25 @@ import 'package:flutter/material.dart';
 class CustomBigButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  final double width;
-  final double height;
 
-  const CustomBigButton({
+  CustomBigButton({
     required this.text,
     required this.onPressed,
-    this.width = 120.0,
-    this.height = 50.0,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        primary: Color.fromARGB(255, 111, 176, 234),
+        primary: Color.fromARGB(255, 59, 138, 207),
         onPrimary: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
-        minimumSize: Size(width, height),
+        minimumSize: Size(120, 48),
       ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 20.0),
-      ),
+      onPressed: onPressed,
+      child: Text(text),
     );
   }
 }
@@ -84,44 +77,56 @@ class CustomSmallButton extends StatelessWidget {
 ///////////////////////////////////////////////////////////
 
 // for text input field
-Widget buildStyledTextField({
-  required String label,
-  required TextEditingController controller,
-  required String? Function(String?) validator,
-  required IconData icon,
-  bool obscureText = false,
-}) {
-  return Container(
-    margin: EdgeInsets.only(bottom: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0),
-            color: Colors.grey[300],
+class buildStyledTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String labelText;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final String? Function(String?)? validator;
+  final IconData? icon;
+
+  const buildStyledTextField({
+    required this.controller,
+    required this.labelText,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    this.validator,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 100,
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey[300],
+          contentPadding: EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 12,
           ),
-          child: TextFormField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: '',
-              icon: Icon(icon),
-              border: InputBorder.none,
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            ),
-            validator: validator,
-            obscureText: obscureText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
           ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(color: Colors.transparent),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(color: Colors.transparent),
+          ),
+          labelText: labelText,
+          icon: icon != null ? Icon(icon) : null,
         ),
-      ],
-    ),
-  );
+        validator: validator,
+      ),
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////
@@ -175,40 +180,3 @@ Widget buildStyledDropdownButtonFormField({
     ),
   );
 }
-
-// big button for Done, Sign up (blue)
-//ElevatedButton(
-// onPressed: () {
-// Button action
-//  },
-// style: ElevatedButton.styleFrom(
-//   primary: Color.fromARGB(255, 111, 176, 234),
-//   onPrimary: Colors.white,
-//   shape: RoundedRectangleBorder(
-//     borderRadius: BorderRadius.circular(30.0),
-//   ),
-//   minimumSize: Size(120, 50),
-// ),
-//  child: Text(
-//     'Done',
-//     style: TextStyle(fontSize: 20.0),
-//   ),
-// )
-
-///////////////////////////////////////////////////////////
-
-// small button
-// ElevatedButton(
-// onPressed: () {
-// Button action
-// },
-//  style: ElevatedButton.styleFrom(
-//   primary: Color.fromARGB(255, 241, 106, 210),
-//   onPrimary: Color.fromARGB(255, 241, 106, 210),
-//   shape: RoundedRectangleBorder(
-//     borderRadius: BorderRadius.circular(30.0),
-//   ),
-//   minimumSize: Size(100, 50),
-// ),
-// child: Text('8-11 AM'),
-// )

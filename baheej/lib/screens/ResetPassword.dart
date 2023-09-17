@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ResetPassword extends StatefulWidget {
@@ -65,8 +66,12 @@ class _ResetPasswordState extends State<ResetPassword> {
                         if (value == null || value.isEmpty) {
                           return "Please enter an email address";
                         }
+                        if (!isValidEmail(value)) {
+                          return "Invalid email format";
+                        }
                         return null;
                       },
+                      showError: _infoText.isNotEmpty,
                     ),
                     const SizedBox(
                       height: 20,
@@ -76,6 +81,16 @@ class _ResetPasswordState extends State<ResetPassword> {
                       onPressed: () {
                         _validateAndResetPassword(context);
                       },
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      _infoText,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
@@ -87,15 +102,30 @@ class _ResetPasswordState extends State<ResetPassword> {
     );
   }
 
+  // Function to validate email format using regular expression
+  bool isValidEmail(String email) {
+    final RegExp regex = RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$');
+    return regex.hasMatch(email);
+  }
+
   void _validateAndResetPassword(BuildContext context) async {
     final email = _emailTextController.text;
 
     try {
-      // Check if the user with the entered email exists
-      final signInMethods =
-          await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+      // if (!isValidEmail(email)) {
+      //   setState(() {
+      //     _infoText = "Invalid email format";
+      //   });
+      //   return;
+      // }
 
-      if (signInMethods.isEmpty) {
+      // Query Firestore to check if the entered email exists in your database
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('center')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
         setState(() {
           _infoText = "Email not found. Please enter a valid email.";
         });
@@ -116,11 +146,13 @@ class _ResetPasswordState extends State<ResetPassword> {
   }
 }
 
+// Define buildStyledTextField function here
 Widget buildStyledTextField({
   required TextEditingController controller,
   required String labelText,
   required IconData icon,
   required String? Function(String?) validator,
+  bool showError = false,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,13 +190,15 @@ Widget buildStyledTextField({
           ),
         ),
       ),
-      if (validator != null)
+      if (showError &&
+          validator(controller.text) != null &&
+          validator(controller.text)!.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            validator("") ?? "",
+            validator(controller.text) ?? "",
             style: TextStyle(
-              color: Colors.red, // Red error text color
+              color: Colors.red,
               fontSize: 12,
             ),
           ),

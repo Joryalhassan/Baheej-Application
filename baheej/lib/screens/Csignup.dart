@@ -22,7 +22,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String type = "center";
 
   UserCredential? resultaccount;
-
   Future<void> signUp() async {
     try {
       if (resultaccount == null) {
@@ -75,16 +74,32 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            content: const Text("You already have an account."),
+            content: const Text("Email already exists"),
             actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                },
+              Center(
                 child: Container(
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(14),
-                  child: const Text("OK"),
+                  width: 90, // Adjust the width as needed
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.red),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              20), // Adjust the radius as needed
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: const Text(
+                        "OK",
+                        style: TextStyle(fontSize: 14, color: Colors.black),
+                      ), // Adjust the font size as needed
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -95,6 +110,20 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     } catch (e) {
       print(e.toString());
     }
+    _showSnackBar('create account successfully!');
+  }
+
+  void _showSnackBar(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+
+      backgroundColor: Colors.green,
+
+      duration:
+          Duration(seconds: 3), // Duration for which the SnackBar is displayed
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   // Validation functions
@@ -102,9 +131,15 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Center Name is required';
     }
-    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+
+    if (value.length < 4 || value.length > 25) {
+      return 'Center Name must be between 4 and 25 letters';
+    }
+
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
       return 'Center Name should only contain letters';
     }
+
     return null;
   }
 
@@ -131,13 +166,34 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Address is required';
     }
+
+    // Check if there is at least one alphabetic character in the address
+    if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+      return 'Address must contain at least one alphabetic\n character';
+    }
+
+    // Check if the address contains only letters, numbers, or spaces
+    if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value)) {
+      return 'Address must contain only letters, numbers,\n or spaces';
+    }
+
+    if (value.length < 5 || value.length > 35) {
+      return 'Address must be between 5 and 35 characters';
+    }
+
     return null;
   }
 
   String? _validateCommercialRegister(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Commercial Register is required';
+      return 'Commercial Register Number is required';
     }
+
+    // Check if the value consists of exactly 10 numbers
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+      return 'Commercial Register Number must contain exactly 10 numbers';
+    }
+
     return null;
   }
 
@@ -145,6 +201,22 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Description is required';
     }
+
+    // Check if there is at least one alphabetic character in the description
+    if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+      return 'Description must contain at least one alphabetic\n character';
+    }
+
+    // Check if the description contains only letters, numbers, spaces, and special characters
+    if (!RegExp(r'^[a-zA-Z0-9\s!@#\$%^&*()_+{}\[\]:;<>,.?~\\/-]+$')
+        .hasMatch(value)) {
+      return 'Description shoumustld contain only letters, numbers,\n spaces, or special characters';
+    }
+
+    if (value.length < 10 || value.length > 100) {
+      return 'Description must be between 10 and 100 characters';
+    }
+
     return null;
   }
 
@@ -168,8 +240,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
 
     // Check for a minimum length of 6 characters
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
+    if (value.length < 8 || value.length > 20) {
+      return 'Password must be between 8 and 20 characters long';
     }
 
     return null;
@@ -183,19 +255,21 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign Up",
+          "Sign Up As Center",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
       body: Stack(
         children: [
-          // Background Image
+          // Background image
           Image.asset(
-            'assets/images/back3.png', // Replace with your image path
+            'assets/images/back3.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
+            //color: Colors.white,
           ),
+
           SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
@@ -203,207 +277,300 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
+                    //1
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "First Name",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
+                        TextFormField(
+                          controller: _userNameTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.person_outline),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validateName,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Center Name",
-                        icon: Icon(Icons.person_outline),
-                      ),
-                      validator: _validateName,
-                      controller: _userNameTextController,
+                      ],
                     ),
-                    const SizedBox(
-                      height: 20,
+
+                    //2
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Email Id",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        TextFormField(
+                          controller: _emailTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.email),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validateEmail,
+                        ),
+                      ],
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
+
+                    //3
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Phone Number",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
+                        TextFormField(
+                          controller: _PhoneNumTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.phone),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validatePhoneNumber,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Email Id",
-                        icon: Icon(Icons.email),
-                      ),
-                      validator: _validateEmail,
-                      controller: _emailTextController,
+                      ],
                     ),
-                    const SizedBox(
-                      height: 20,
+
+                    //4
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Address",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        TextFormField(
+                          controller: _AddressTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.home),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validateAddress,
+                        ),
+                      ],
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
+
+                    //5
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Commercial Register Number",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
+                        TextFormField(
+                          controller: _ComRegTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.format_list_numbered),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validateCommercialRegister,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Phone Number",
-                        icon: Icon(Icons.phone),
-                      ),
-                      validator: _validatePhoneNumber,
-                      controller: _PhoneNumTextController,
+                      ],
                     ),
-                    const SizedBox(
-                      height: 20,
+
+                    //6
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Description",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        TextFormField(
+                          controller: _DescriptionTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.description),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validateDescription,
+                        ),
+                      ],
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
+
+                    //7
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Password",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
+                        TextFormField(
+                          controller: _passwordTextController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.lock_outlined),
+                            filled: true,
+                            fillColor: Colors.grey[300],
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          validator: _validatePassword,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Address",
-                        icon: Icon(Icons.home),
-                      ),
-                      validator: _validateAddress,
-                      controller: _AddressTextController,
+                      ],
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Commercial Register",
-                        icon: Icon(Icons.format_list_numbered),
-                      ),
-                      validator: _validateCommercialRegister,
-                      controller: _ComRegTextController,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Description",
-                        icon: Icon(Icons.description),
-                      ),
-                      validator: _validateDescription,
-                      controller: _DescriptionTextController,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        labelText: "Enter Password",
-                        icon: Icon(Icons.lock_outlined),
-                      ),
-                      validator: _validatePassword,
-                      controller: _passwordTextController,
-                    ),
+
                     const SizedBox(
                       height: 20,
                     ),
@@ -412,17 +579,22 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         primary: Color.fromARGB(255, 59, 138, 207),
                         onPrimary: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
+                          borderRadius: BorderRadius.circular(
+                              33.0), // Increase the border radius
                         ),
-                        minimumSize: Size(100, 40),
+                        minimumSize: Size(150, 54), // Increase the button size
                       ),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           signUp();
                         }
                       },
-                      child: Text('Sign Up'),
-                    )
+                      child: Text(
+                        'Sign Up',
+                        style:
+                            TextStyle(fontSize: 18), // Increase the font size
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -1,6 +1,4 @@
-import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
@@ -16,30 +14,44 @@ class ServiceFormScreen extends StatefulWidget {
 
 class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
+
   String? serviceName;
+
   int? selectedTimeSlot;
+
   double? selectedPrice;
+
   String? selectedDescription;
+
   int capacityValue = 0;
+
   String? ageRange;
 
   DateTime? selectedStartDate;
+
   DateTime? selectedEndDate;
 
   bool dateSelected = false;
+
   bool timeSlotSelected = false;
 
-  // Custom validator functions
   String? validateServiceName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Service name is required';
     }
 
-    final RegExp serviceNamePattern =
-        RegExp(r'^(?=.*[A-Za-z])[A-Za-z0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-]+$');
+    if (value.length < 5 || value.length > 20) {
+      return 'Service name should be between 5 and 20 characters';
+    }
+
+    if (value.trim() != value) {
+      return 'Service name should not start or end with spaces';
+    }
+
+    final RegExp serviceNamePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
 
     if (!serviceNamePattern.hasMatch(value)) {
-      return 'Service name format is wrong';
+      return 'Service name should only contain letters, numbers, and spaces';
     }
 
     return null;
@@ -49,19 +61,25 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     if (value == null || value.isEmpty) {
       return 'field required';
     }
+
     final intValue = int.tryParse(value);
+
     if (intValue == null) {
-      return 'fill a number';
+      return 'Fill a number';
     }
+
     if (intValue < 0) {
-      return 'positive';
+      return 'Positive';
     }
+
     if (intValue == 0) {
-      return 'more than 0';
+      return 'More than 0';
     }
-    if (intValue > 30) {
-      return 'max 30';
+
+    if (intValue > 1000) {
+      return 'Max 1000';
     }
+
     return null;
   }
 
@@ -70,9 +88,20 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'This field is required';
     }
 
-    if (RegExp(r'[0-9]').hasMatch(value) &&
-        RegExp(r'[!@#\$%^&*()_+{}\[\]:;<>,.?~\\/\-]').hasMatch(value)) {
-      return 'Description cannot contain a combination of numbers and special characters';
+    if (value.trim().isEmpty) {
+      return 'Description should not be only spaces';
+    }
+
+    if (value.length < 5) {
+      return 'Description should be at least 5 characters long';
+    }
+
+    if (value.length > 225) {
+      return 'Description should not exceed 225 characters';
+    }
+
+    if (!RegExp(r'[a-zA-Z!@#\$%^&*()_+{}\[\]:;<>,.?~\\/\-]').hasMatch(value)) {
+      return 'Description should contain at least one non-numeric character';
     }
 
     return null;
@@ -92,6 +121,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     if (doubleValue > 10000) {
       return 'Maximum price limit exceeded (10000)';
     }
+
     if (doubleValue < 0) {
       return 'There is no negative price!!';
     }
@@ -105,13 +135,15 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     }
 
     final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
+
     final match = ageRangePattern.firstMatch(value);
 
     if (match == null) {
-      return 'Invalid age range format. Please enter a valid numeric range like "8-10".';
+      return 'Please enter a valid numeric range like "8-10".';
     }
 
     final minAge = int.tryParse(match.group(1) ?? '');
+
     final maxAge = int.tryParse(match.group(2) ?? '');
 
     if (minAge == null || maxAge == null || minAge < 4 || maxAge > 17) {
@@ -144,6 +176,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           );
         },
       );
+
       return;
     }
 
@@ -165,10 +198,12 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           );
         },
       );
+
       return;
     }
 
     int? endDate = selectedEndDate?.millisecondsSinceEpoch;
+
     int? startDate = selectedStartDate?.millisecondsSinceEpoch;
 
     if (endDate != null && startDate != null && endDate < startDate) {
@@ -189,6 +224,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           );
         },
       );
+
       return;
     }
 
@@ -208,17 +244,25 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       });
 
       // Data has been successfully added to Firestore.
+
       print('Service added to Firestore');
+
       _showSnackBar('Service added successfully!');
 
       // Navigate to the HomeCenterScreen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => HomeScreenCenter(),
-        ),
-      );
+
+      // Navigator.of(context).pushReplacement(
+
+      //  MaterialPageRoute(                               remove this comment5555555555
+
+      //   builder: (context) => HomeScreenCenter(),
+
+      // ),
+
+      //);
 
       // Optionally, you can navigate back to the previous screen or show a success message.
+
       // ...
     } catch (e) {
       print('Error adding service to Firestore: $e');
@@ -228,7 +272,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   void _showSnackBar(String message) {
     final snackBar = SnackBar(
       content: Text(message),
+
       backgroundColor: Colors.green,
+
       duration:
           Duration(seconds: 3), // Duration for which the SnackBar is displayed
     );
@@ -407,179 +453,216 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: null, // Remove the app bar
+
       body: Stack(
         children: [
           Image.asset(
-            'assets/images/back3.png',
+            'assets/images/backasf.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          margin: EdgeInsets.only(top: 37),
-                          child: Column(
-                            children: [
-                              Text(
-                                'Add Service',
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color.fromARGB(255, 255, 255, 255)),
-                              ),
-                            ],
+          SingleChildScrollView(
+            child: Container(
+              margin: EdgeInsets.only(top: (40)), // Adjust for app bar height
+
+              padding: EdgeInsets.all(16.0),
+
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    // Add back arrow icon and Service text in a Row
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios,
+
+                            color: Colors.white, // Set the arrow color to white
                           ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 35,
-                      ),
-                    ],
-                  ),
-                  buildTextField('Service Name', validateServiceName),
-                  buildTextField('Service Price', validatePrice),
-                  buildTextField('Age Range', validateAgeRange),
-                  buildIncrementDecrementField(
-                    'Service Capacity',
-                    capacityValue,
-                    () {
-                      setState(() {
-                        capacityValue += 10;
-                      });
-                    },
-                    () {
-                      setState(() {
-                        if (capacityValue >= 10) {
-                          capacityValue -= 10;
-                        }
-                      });
-                    },
-                  ),
-                  buildTextField('Service Description', validateDescription),
-                  SizedBox(height: 4.0),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: buildDateField(
-                            'Start Date', selectedStartDate, true),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child:
-                            buildDateField('End Date', selectedEndDate, false),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 4.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            selectedTimeSlot = 0;
-                            timeSlotSelected = true;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          primary: selectedTimeSlot == 0
-                              ? Color.fromARGB(255, 59, 138, 207)
-                              : const Color.fromARGB(255, 111, 176, 234),
-                          onPrimary: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          minimumSize: Size(100, 40),
-                        ),
-                        child: Text('8-11 AM'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            selectedTimeSlot = 1;
-                            timeSlotSelected = true;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          primary: selectedTimeSlot == 1
-                              ? Color.fromARGB(255, 59, 138, 207)
-                              : Color.fromARGB(255, 111, 176, 234),
-                          onPrimary: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          minimumSize: Size(100, 40),
-                        ),
-                        child: Text('2-5 PM'),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 4.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (!dateSelected) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Warning'),
-                              content: Text(
-                                  'You must select both start and end dates!'),
-                              actions: [
-                                TextButton(
-                                  child: Text('OK'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Add navigation logic here
                           },
-                        );
-                      } else if (!timeSlotSelected) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Warning'),
-                              content:
-                                  Text('You must select the service time!'),
-                              actions: [
-                                TextButton(
-                                  child: Text('OK'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      } else {
-                        sendDataToFirebase();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      minimumSize: Size(100, 40),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              right: 130.0), // Adjust the margin as needed
+
+                          child: Text(
+                            'Add Service',
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              color: Color.fromARGB(255, 255, 255, 255),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text('Submit'),
-                  ),
-                ],
+
+                    SizedBox(height: 20.0),
+
+                    buildTextField('Service Name', validateServiceName),
+
+                    buildTextField('Service Price', validatePrice),
+
+                    buildTextField('Age Range', validateAgeRange),
+
+                    buildIncrementDecrementField(
+                      'Service Capacity',
+                      capacityValue,
+                      () {
+                        setState(() {
+                          capacityValue += 10;
+                        });
+                      },
+                      () {
+                        setState(() {
+                          if (capacityValue >= 10) {
+                            capacityValue -= 10;
+                          }
+                        });
+                      },
+                    ),
+
+                    buildTextField('Service Description', validateDescription),
+
+                    SizedBox(height: 4.0),
+
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: buildDateField(
+                              'Start Date', selectedStartDate, true),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: buildDateField(
+                              'End Date', selectedEndDate, false),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 0),
+
+                    Text(
+                      'Service Period Time',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+
+                    SizedBox(height: 5.0),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedTimeSlot = 0;
+
+                              timeSlotSelected = true;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: selectedTimeSlot == 0
+                                ? Color.fromARGB(255, 59, 138, 207)
+                                : const Color.fromARGB(255, 111, 176, 234),
+                            onPrimary: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            minimumSize: Size(100, 40),
+                          ),
+                          child: Text('8-11 AM'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedTimeSlot = 1;
+
+                              timeSlotSelected = true;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: selectedTimeSlot == 1
+                                ? Color.fromARGB(255, 59, 138, 207)
+                                : Color.fromARGB(255, 111, 176, 234),
+                            onPrimary: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            minimumSize: Size(100, 40),
+                          ),
+                          child: Text('2-5 PM'),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 5.0),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        if (!dateSelected) {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Warning'),
+                                content: Text(
+                                    'You must select both start and end dates!'),
+                                actions: [
+                                  TextButton(
+                                    child: Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else if (!timeSlotSelected) {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Warning'),
+                                content:
+                                    Text('You must select the service time!'),
+                                actions: [
+                                  TextButton(
+                                    child: Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          sendDataToFirebase();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Color.fromARGB(255, 59, 138, 207),
+                        onPrimary: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        minimumSize: Size(100, 40),
+                      ),
+                      child: Text('Submit'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -597,6 +680,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     ))!;
+
     if (picked != null &&
         picked != (isStartDate ? selectedStartDate : selectedEndDate)) {
       setState(() {
@@ -605,6 +689,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         } else {
           selectedEndDate = picked;
         }
+
         dateSelected = selectedStartDate != null && selectedEndDate != null;
       });
     }

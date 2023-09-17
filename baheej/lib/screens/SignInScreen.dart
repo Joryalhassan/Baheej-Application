@@ -63,7 +63,7 @@ class _SignInScreenState extends State<SignInScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HomeScreenCenter(),
+                builder: (context) => HomeScreen(),
               ),
             );
           } else if (usersDoc.exists) {
@@ -81,8 +81,8 @@ class _SignInScreenState extends State<SignInScreen> {
         if (e.code == 'user-not-found' || e.code == 'wrong-password') {
           // Invalid email or password
           setState(() {
-            emailErrorText = 'Username or password is incorrect';
-            passwordErrorText = 'Username or password is incorrect';
+            emailErrorText = 'Email or password is incorrect';
+            passwordErrorText = 'Email or password is incorrect';
           });
         } else {
           print('Error: $e');
@@ -162,7 +162,7 @@ class _SignInScreenState extends State<SignInScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Enter Email",
+          "Enter Email ID",
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,

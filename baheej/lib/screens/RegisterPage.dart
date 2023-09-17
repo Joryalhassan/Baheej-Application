@@ -1,16 +1,24 @@
-import 'package:baheej/screens/GSignUpScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:baheej/screens/GSignUpScreen.dart';
 import 'package:baheej/screens/Csignup.dart';
-import 'package:baheej/screens/FrontEnd.dart';
 
 class RegisterPage extends StatelessWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  RegisterPage({Key? key}) : super(key: key);
+
+  final Color buttonColor = Color.fromARGB(255, 58, 138, 207); // Darker shade
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Register as:'),
+        title: Text(
+          'Register ',
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w700,
+            color: Color.fromARGB(255, 255, 255, 255),
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -19,7 +27,7 @@ class RegisterPage extends StatelessWidget {
         children: [
           // Background image
           Image.asset(
-            "assets/images/back3.png",
+            "assets/images/backLo.png",
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -31,8 +39,16 @@ class RegisterPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  CustomBigButton(
-                    text: 'Register as Center',
+                  Text(
+                    'Register as:',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  buildCustomButton(
+                    text: 'Center',
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -43,8 +59,8 @@ class RegisterPage extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: 20),
-                  CustomBigButton(
-                    text: 'Register as Guardian',
+                  buildCustomButton(
+                    text: 'Guardian',
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -59,6 +75,31 @@ class RegisterPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildCustomButton({
+    required String text,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        primary:
+            Color.fromARGB(255, 59, 138, 207), // Change to your desired color
+        onPrimary: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(30.0), // Adjust the shape as needed
+        ),
+        minimumSize: Size(200.0, 50.0), // Adjust the size as needed
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 20.0, // Change the font size as needed
+        ),
       ),
     );
   }
