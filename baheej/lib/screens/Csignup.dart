@@ -567,6 +567,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                             ),
                           ),
                           validator: _validatePassword,
+                          obscureText: true,
                         ),
                       ],
                     ),
