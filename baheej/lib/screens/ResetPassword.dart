@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/reusable_widget/reusable_widget.dart';
-//import 'package:baheej/screens/HomeScreenGaurdian.dart';
-import 'package:baheej/utlis/utilas.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ResetPassword extends StatefulWidget {
@@ -27,62 +25,107 @@ class _ResetPasswordState extends State<ResetPassword> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              hexStringToColor("CB2B93"),
-              hexStringToColor("9546C4"),
-              hexStringToColor("5E61F4"),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: Stack(
+        children: [
+          // Background Image
+          Image.asset(
+            'assets/images/back3.png', // Replace with your image path
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-            child: Column(
-              children: <Widget>[
-                const SizedBox(
-                  height: 20,
+          Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Reset Password",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    buildStyledTextField(
+                      controller: _emailTextController,
+                      labelText: "Enter Email",
+                      icon: Icons.email,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter an email address";
+                        }
+                        if (!isValidEmail(value)) {
+                          return "Invalid email format";
+                        }
+                        return null;
+                      },
+                      showError: _infoText.isNotEmpty,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    CustomBigButton(
+                      text: "Reset Password",
+                      onPressed: () {
+                        _validateAndResetPassword(context);
+                      },
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      _infoText,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-                TextField(
-                  controller: _emailTextController,
-                  decoration: InputDecoration(
-                    labelText: "Enter Email Id",
-                    icon: Icon(Icons.person_outline),
-                    errorText: _infoText.isNotEmpty ? _infoText : null,
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _validateAndResetPassword(context);
-                  },
-                  child: Text("Reset Password"),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  // Function to validate email format using regular expression
+  bool isValidEmail(String email) {
+    final RegExp regex = RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$');
+    return regex.hasMatch(email);
   }
 
   void _validateAndResetPassword(BuildContext context) async {
     final email = _emailTextController.text;
 
     try {
-      // Check if the user with the entered email exists
-      final signInMethods =
-          await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+      // if (!isValidEmail(email)) {
+      //   setState(() {
+      //     _infoText = "Invalid email format";
+      //   });
+      //   return;
+      // }
 
-      if (signInMethods.isEmpty) {
+      // Query Firestore to check if the entered email exists in your database
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('center')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
         setState(() {
           _infoText = "Email not found. Please enter a valid email.";
         });
@@ -100,5 +143,95 @@ class _ResetPasswordState extends State<ResetPassword> {
         _infoText = "Error occurred. Please try again later.";
       });
     }
+  }
+}
+
+// Define buildStyledTextField function here
+Widget buildStyledTextField({
+  required TextEditingController controller,
+  required String labelText,
+  required IconData icon,
+  required String? Function(String?) validator,
+  bool showError = false,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        labelText,
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.grey[300]!,
+              ),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.grey[300]!,
+              ),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+          ),
+        ),
+      ),
+      if (showError &&
+          validator(controller.text) != null &&
+          validator(controller.text)!.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            validator(controller.text) ?? "",
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 12,
+            ),
+          ),
+        ),
+    ],
+  );
+}
+
+class CustomBigButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  CustomBigButton({
+    required this.text,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Color.fromARGB(255, 59, 138, 207),
+        onPrimary: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        minimumSize: Size(200.0, 50.0),
+      ),
+      onPressed: onPressed,
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 20.0),
+      ),
+    );
   }
 }
