@@ -17,6 +17,8 @@ class CsignUpScreen extends StatefulWidget {
 class _CsignUpScreenState extends State<CsignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController _passwordTextController = TextEditingController();
+  TextEditingController _passwordConfirmTextController =
+      TextEditingController();
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _userNameTextController = TextEditingController();
   TextEditingController _PhoneNumTextController = TextEditingController();
@@ -24,11 +26,36 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
   String type = "center";
+  String? _selectedDistrict;
 
   UserCredential? resultaccount;
   Future<void> signUp() async {
     try {
       if (resultaccount == null) {
+        // Check if passwords match before creating the account
+        if (_passwordTextController.text !=
+            _passwordConfirmTextController.text) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              content: const Text("Passwords do not match."),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Container(
+                    color: Colors.green,
+                    padding: const EdgeInsets.all(14),
+                    child: const Text("OK"),
+                  ),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+
         resultaccount =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailTextController.text,
@@ -116,6 +143,42 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
   }
 
+  //district drop down menu
+  List<String> riyadhDistricts = [
+    'Ad Diriyah',
+    'Al Batha',
+    'Al Dhahraniyah',
+    'Al Malaz',
+    'Al Manar',
+    'Al Maizilah',
+    'Al Muruj',
+    'Al Olaya',
+    'Al Rawdah',
+    'Al Sulimaniyah',
+    'Al Wadi',
+    'Al Wizarat',
+    'Al Worood',
+    'An Nakheel',
+    'As Safarat',
+    'Diplomatic Quarter',
+    'King Abdullah Financial District',
+    'King Fahd District',
+    'King Faisal District',
+    'King Salman District',
+    'King Saud University',
+    'Kingdom Centre',
+    'Masjid an Nabawi',
+    'Medinah District',
+    'Murabba',
+    'Nemar',
+    'Olaya',
+    'Qurtubah',
+    'Sulaymaniyah',
+    'Takhasusi',
+    'Umm Al Hamam',
+    'Yasmeen',
+  ];
+
   // Validation functions
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
@@ -146,44 +209,38 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Phone Number is required';
-    } else if (!RegExp(r'^05\d{8}$').hasMatch(value)) {
+    } else if (value.length > 10) {
+      // Disable input when more than 10 digits are entered
+      _PhoneNumTextController.text = value.substring(0, 10);
+      _PhoneNumTextController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _PhoneNumTextController.text.length),
+      );
+    } else if (!RegExp(r'^05\d{0,8}$').hasMatch(value)) {
       return 'Invalid Phone Number';
     }
     return null;
   }
 
-  String? _validateAddress(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Address is required';
-    }
+  //String? _validateAddress(String? value) {
+  //if (_selectedDistrict == null || _selectedDistrict == 'Select a District') {
+  // return 'Please select a valid district from the dropdown menu';
+  //}
 
-    // Check if there is at least one alphabetic character in the address
-    if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
-      return 'Address must contain at least one alphabetic\n character';
-    }
-
-    // Check if the address contains only letters, numbers, or spaces
-    if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value)) {
-      return 'Address must contain only letters, numbers,\n or spaces';
-    }
-
-    if (value.length < 5 || value.length > 35) {
-      return 'Address must be between 5 and 35 characters';
-    }
-
-    return null;
-  }
+  // return null;
+  //}
 
   String? _validateCommercialRegister(String? value) {
     if (value == null || value.isEmpty) {
       return 'Commercial Register Number is required';
-    }
-
-    // Check if the value consists of exactly 10 numbers
-    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+    } else if (value.length > 10) {
+      // Disable input when more than 10 digits are entered
+      _ComRegTextController.text = value.substring(0, 10);
+      _ComRegTextController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _ComRegTextController.text.length),
+      );
+    } else if (!RegExp(r'^[0-9]{0,10}$').hasMatch(value)) {
       return 'Commercial Register Number must contain exactly 10 numbers';
     }
-
     return null;
   }
 
@@ -200,7 +257,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     // Check if the description contains only letters, numbers, spaces, and special characters
     if (!RegExp(r'^[a-zA-Z0-9\s!@#\$%^&*()_+{}\[\]:;<>,.?~\\/-]+$')
         .hasMatch(value)) {
-      return 'Description shoumustld contain only letters, numbers,\n spaces, or special characters';
+      return 'Description should contain only letters, numbers,\n spaces, or special characters';
     }
 
     if (value.length < 10 || value.length > 100) {
@@ -216,22 +273,34 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
     // Check for at least one uppercase letter
     if (!RegExp(r'^(?=.*[A-Z])').hasMatch(value)) {
-      return 'Password must include at least one uppercase letter';
+      return 'Password must include at least one uppercase letter,\none lowercase letter, one digit and between 8 and\n20 characters long';
     }
 
     // Check for at least one lowercase letter
     if (!RegExp(r'^(?=.*[a-z])').hasMatch(value)) {
-      return 'Password must include at least one lowercase letter';
+      return 'Password must include at least one uppercase letter,\none lowercase letter, one digit and between 8 and\n20 characters long';
     }
 
     // Check for at least one digit
     if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
-      return 'Password must contain at least one digit';
+      return 'Password must include at least one uppercase letter,\none lowercase letter, one digit and between 8 and\n20 characters long';
     }
 
     // Check for a minimum length of 6 characters
     if (value.length < 8 || value.length > 20) {
-      return 'Password must be between 8 and 20 characters long';
+      return 'Password must include at least one uppercase letter,\none lowercase letter, one digit and between 8 and\n20 characters long';
+    }
+
+    return null;
+  }
+
+  String? _validatePasswordConfirmation(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Confirm Password is required';
+    }
+
+    if (value != _passwordTextController.text) {
+      return 'Passwords do not match';
     }
 
     return null;
@@ -399,13 +468,32 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "Address",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      TextFormField(
-                        controller: _AddressTextController,
+                      DropdownButtonFormField<String>(
+                        value: _selectedDistrict ??
+                            '', // Set an initial value here
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: '', // Add an empty value as an option
+                            child: Text('Select a District'),
+                          ),
+                          ...riyadhDistricts.map((district) {
+                            return DropdownMenuItem<String>(
+                              value: district,
+                              child: Text(district),
+                            );
+                          }).toList(),
+                        ],
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedDistrict = newValue;
+                          });
+                        },
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.home),
                           filled: true,
                           fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
@@ -424,7 +512,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
-                        validator: _validateAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty || value == '') {
+                            return 'Please select a valid district from the dropdown menu';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -525,7 +618,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "Password",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       TextFormField(
@@ -551,37 +646,81 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           ),
                         ),
                         validator: _validatePassword,
+                        obscureText:
+                            true, // Set this property to make it a password field
                       ),
                     ],
                   ),
 
+                  //8
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Confirm Password",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _passwordConfirmTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outlined),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validatePasswordConfirmation,
+                        obscureText:
+                            true, // Set this property to make it a password field
+                      ),
+                    ],
+                  ),
 
-                const SizedBox(
-                  height: 20,
-                ),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Color.fromARGB(255, 59, 138, 207),
-                    onPrimary: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(33.0), // Increase the border radius
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 59, 138, 207),
+                      onPrimary: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            33.0), // Increase the border radius
+                      ),
+                      minimumSize: Size(150, 54), // Increase the button size
                     ),
-                    minimumSize: Size(150, 54), // Increase the button size
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        signUp();
+                      }
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(fontSize: 18), // Increase the font size
+                    ),
                   ),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      signUp();
-                    }
-                  },
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(fontSize: 18), // Increase the font size
-                  ),
-                ),
-
-
-
-
                 ],
               ),
             ),
