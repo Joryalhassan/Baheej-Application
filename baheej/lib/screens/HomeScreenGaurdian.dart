@@ -1,9 +1,6 @@
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
-
-//import 'package:baheej/screens/WelcomePage.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -22,10 +19,21 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       _currentIndex = index;
     });
 
-    if (index == 0) {
-      // Handle the Home button tap
+    //if (index == 0) {}
+  }
 
-      // You can navigate to the home screen or perform any other action here
+  // Function to handle user logout
+
+  void _handleLogout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      print("Signed Out");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreen()),
+      );
+    } catch (e) {
+      print("Error signing out: $e");
     }
   }
 
@@ -45,16 +53,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           IconButton(
             icon: Icon(Icons.logout), // Logout Icon
 
-            onPressed: () {
-              FirebaseAuth.instance.signOut().then((value) {
-                print("Signed Out");
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignInScreen()),
-                );
-              });
-            },
+            onPressed: _handleLogout, // Call the logout function
           ),
         ],
       ),

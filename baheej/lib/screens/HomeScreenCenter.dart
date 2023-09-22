@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:baheej/screens/SignInScreen.dart';
-
 import 'package:baheej/screens/Service.dart';
-
 import 'package:baheej/screens/ServiceFormScreen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentIndex = index;
     });
 
-    // Handle navigation when the "Add Service" icon is tapped.
+    // Handle navigation when the "Add Service" icon .
 
     if (index == 1) {
       Navigator.push(
@@ -43,6 +40,21 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
       });
+    }
+  }
+
+  // Function to handle user logout
+
+  void _handleLogout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      print("Signed Out");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreen()),
+      );
+    } catch (e) {
+      print("Error signing out: $e");
     }
   }
 
@@ -82,17 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     IconButton(
                       icon: Icon(Icons.logout), // Logout icon
 
-                      onPressed: () {
-                        FirebaseAuth.instance.signOut().then((value) {
-                          print("Signed Out");
+                      onPressed: _handleLogout, // Call the logout function
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SignInScreen()),
-                          );
-                        });
-                      },
+                      color: Colors.white,
                     ),
                   ],
                   floating: false,
