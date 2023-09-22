@@ -22,7 +22,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _userNameTextController = TextEditingController();
   TextEditingController _PhoneNumTextController = TextEditingController();
-  TextEditingController _AddressTextController = TextEditingController();
+  TextEditingController _DistrictTextController = TextEditingController();
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
   String type = "center";
@@ -68,7 +68,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           .doc(resultaccount!.user!.uid)
           .set({
         'username': _userNameTextController.text.trim(),
-        'addres': _AddressTextController.text.trim(),
+        'addres': _DistrictTextController.text.trim(),
         'email': _emailTextController.text.trim(),
         'comReg': _ComRegTextController.text.trim(),
         'type': 'center',
@@ -209,13 +209,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Phone Number is required';
-    } else if (value.length > 10) {
-      // Disable input when more than 10 digits are entered
-      _PhoneNumTextController.text = value.substring(0, 10);
-      _PhoneNumTextController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _PhoneNumTextController.text.length),
-      );
-    } else if (!RegExp(r'^05\d{0,8}$').hasMatch(value)) {
+    } else if (value.length != 10) {
+      return 'Phone Number must be exactly 10 digits';
+    } else if (!RegExp(r'^05\d{8}$').hasMatch(value)) {
       return 'Invalid Phone Number';
     }
     return null;
@@ -232,14 +228,10 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validateCommercialRegister(String? value) {
     if (value == null || value.isEmpty) {
       return 'Commercial Register Number is required';
-    } else if (value.length > 10) {
-      // Disable input when more than 10 digits are entered
-      _ComRegTextController.text = value.substring(0, 10);
-      _ComRegTextController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _ComRegTextController.text.length),
-      );
-    } else if (!RegExp(r'^[0-9]{0,10}$').hasMatch(value)) {
-      return 'Commercial Register Number must contain exactly 10 numbers';
+    } else if (value.length != 10) {
+      return 'Commercial Register Number must be\nexactly 10 digits';
+    } else if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+      return 'Invalid Commercial Register Number';
     }
     return null;
   }
@@ -260,8 +252,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       return 'Description should contain only letters, numbers,\n spaces, or special characters';
     }
 
-    if (value.length < 10 || value.length > 100) {
-      return 'Description must be between 10 and 100 characters';
+    if (value.length < 10 || value.length > 225) {
+      return 'Description must be between 10 and 225 characters';
     }
 
     return null;
@@ -342,7 +334,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "First Name",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       TextFormField(
@@ -352,7 +346,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           filled: true,
                           fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
-                            vertical: 8,
+                            vertical: 6,
                             horizontal: 12,
                           ),
                           border: OutlineInputBorder(
@@ -368,6 +362,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           ),
                         ),
                         validator: _validateName,
+                        maxLength: 25, // Add maxLength property here
                       ),
                     ],
                   ),
@@ -426,7 +421,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "Phone Number",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       TextFormField(
@@ -452,6 +449,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           ),
                         ),
                         validator: _validatePhoneNumber,
+                        maxLength: 10, // Maximum length set to 10
                       ),
                     ],
                   ),
@@ -466,7 +464,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Address",
+                          "District",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -514,7 +512,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty || value == '') {
-                            return 'Please select a valid district from the dropdown menu';
+                            return 'Please select a valid district';
                           }
                           return null;
                         },
@@ -560,6 +558,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           ),
                         ),
                         validator: _validateCommercialRegister,
+                        maxLength: 10, // Maximum length set to 10
                       ),
                     ],
                   ),
@@ -602,6 +601,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           ),
                         ),
                         validator: _validateDescription,
+                        maxLength: 225,
                       ),
                     ],
                   ),
@@ -646,6 +646,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           ),
                         ),
                         validator: _validatePassword,
+                        maxLength: 20,
                         obscureText:
                             true, // Set this property to make it a password field
                       ),
