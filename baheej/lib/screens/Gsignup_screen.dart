@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/home-page.dart';
+import 'package:flutter/services.dart';
 
 class GSignUpScreen extends StatefulWidget {
   const GSignUpScreen({Key? key}) : super(key: key);
@@ -17,6 +18,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
   final TextEditingController _FnameTextController = TextEditingController();
   final TextEditingController _LnameTextController = TextEditingController();
   final TextEditingController _PhoneNumTextController = TextEditingController();
+  final TextEditingController _confirmPasswordTextController = TextEditingController();
+
   String? selectedGender;
   String type = "guardian";
 
@@ -24,13 +27,35 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
 
   Future<void> signspup() async {
     try {
+
       if (resultaccount == null) {
-        resultaccount =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailTextController.text,
-          password: _passwordTextController.text,
+      // Check if passwords match before proceeding
+      if (_passwordTextController.text != _confirmPasswordTextController.text) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: const Text("Passwords do not match."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("OK"),
+                ),
+              ),
+            ],
+          ),
         );
+        return;
       }
+      resultaccount = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailTextController.text,
+        password: _passwordTextController.text,
+      );
+    }
 
       await FirebaseFirestore.instance
           .collection('users')
@@ -111,6 +136,9 @@ print('The account already exists for that email.');
   }
 
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,6 +184,7 @@ print('The account already exists for that email.');
                     ),
                     TextFormField(
                       controller: _FnameTextController,
+                      maxLength: 12, // Limit the input to 12 characters
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person_outline),
                         filled: true,
@@ -209,7 +238,8 @@ print('The account already exists for that email.');
                       ),
                     ),
                     TextFormField(
-                      controller: _LnameTextController,
+                      controller: _LnameTextController,     
+                      maxLength: 12, // Limit the input to 12 characters
                       decoration: InputDecoration(
                        // labelText: "Enter Last Name",
                         prefixIcon: Icon(Icons.person_outline),
@@ -250,6 +280,7 @@ print('The account already exists for that email.');
                
                
                
+
                
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,10 +333,13 @@ print('The account already exists for that email.');
                   ],
                 ),
 
-                                
+
+                     SizedBox(
+                      height: 20,
+                    ),            
                                 
                  
-              Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     SizedBox(
@@ -320,6 +354,11 @@ print('The account already exists for that email.');
                     ),
                     TextFormField(
                       controller: _PhoneNumTextController,
+                      maxLength: 10, // Limit the input to exactly 10 digits
+                      keyboardType: TextInputType.phone, // Show numeric keyboard
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                      ],
                       decoration: InputDecoration(
                         // labelText: "Enter Phone Number",
                         prefixIcon: Icon(Icons.phone),
@@ -345,6 +384,9 @@ print('The account already exists for that email.');
                         if (value == null || value.isEmpty) {
                           return 'Phone Number is required';
                         }
+                        if (value.length != 10) {
+                          return 'Phone Number must be exactly 10 digits';
+                        }
                         final phoneRegex = RegExp(r'^05[0-9]{8}$');
                         if (!phoneRegex.hasMatch(value)) {
                           return 'Invalid Phone Number';
@@ -355,9 +397,11 @@ print('The account already exists for that email.');
                   ],
                 ),
 
+
                   
-                  
-                  
+              
+
+
              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -418,8 +462,10 @@ print('The account already exists for that email.');
               ),
 
                 
-                
-                
+                 SizedBox(
+                      height: 20,
+                    ), 
+
               Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -436,6 +482,7 @@ print('The account already exists for that email.');
                     TextFormField(
                       controller: _passwordTextController,
                       obscureText: true,
+                      maxLength: 20, // Limit the input to 20 characters
                       decoration: InputDecoration(
                         // labelText: "Enter Password",
                         prefixIcon: Icon(Icons.lock_outlined),
@@ -479,8 +526,89 @@ print('The account already exists for that email.');
                   ],
                 ),
 
+        SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: "Password must include:\n",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "• at least one uppercase letter\n",
+                      ),
+                      TextSpan(
+                        text: "• at least one lowercase letter\n",
+                      ),
+                      TextSpan(
+                        text: "• at least one digit\n",
+                      ),
+                      TextSpan(
+                        text: "• between 8 and 20 characters long.",
+                      ),
+                    ],
+                  ),
+                ),
+              ),
                   
-                  
+              Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Confirm Password",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    TextFormField(
+                      controller: _confirmPasswordTextController,
+                      obscureText: true,
+                      maxLength: 20, // Limit the input to 20 characters
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.lock_outlined),
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Confirm Password is required';
+                        }
+                        if (value != _passwordTextController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+
                   
                   
                   
