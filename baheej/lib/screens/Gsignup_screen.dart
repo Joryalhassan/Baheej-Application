@@ -68,6 +68,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         'phonenumber': _PhoneNumTextController.text.trim(),
       });
 
+     // Show success dialog here
+       _showSuccessDialog();
+       
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -137,6 +140,25 @@ print('The account already exists for that email.');
 
 
 
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Service added successfully!'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
   @override
