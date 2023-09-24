@@ -332,7 +332,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "First Name",
+                          "Center Name",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -346,7 +346,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                           filled: true,
                           fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
-                            vertical: 6,
+                            vertical: 8,
                             horizontal: 12,
                           ),
                           border: OutlineInputBorder(
