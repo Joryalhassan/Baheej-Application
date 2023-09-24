@@ -1,6 +1,33 @@
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/ServiceDetailsPage.dart';
+import 'package:baheej/screens/Addkids.dart';
+
+class Service {
+  final String serviceName;
+  final String description;
+  final String centerName;
+  final int selectedTimeSlot;
+  final int capacityValue;
+  final double servicePrice;
+  final DateTime selectedStartDate;
+  final DateTime selectedEndDate;
+  final String ageRange;
+
+  Service({
+    required this.serviceName,
+    required this.description,
+    required this.centerName,
+    required this.selectedEndDate,
+    required this.selectedStartDate,
+    required this.ageRange,
+    required this.capacityValue,
+    required this.servicePrice,
+    required this.selectedTimeSlot,
+  });
+}
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -11,18 +38,47 @@ class HomeScreenGaurdian extends StatefulWidget {
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   int _currentIndex = 0;
+  Future<List<Service>>? _services;
 
-  // Function to handle the bottom navigation item selection.
-
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    //if (index == 0) {}
+  @override
+  void initState() {
+    super.initState();
+    _services = fetchDataFromFirebase();
   }
 
-  // Function to handle user logout
+  Future<List<Service>> fetchDataFromFirebase() async {
+    final firestore = FirebaseFirestore.instance;
+    final collection = firestore.collection('center-service');
+
+    final querySnapshot = await collection.get();
+
+    return querySnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      final serviceName = data['serviceName'] ?? 'Default Title';
+      final description = data['serviceDesc'] ?? 'Default Description';
+      final centerName = data['centerName'] ?? 'Default Center Name';
+      final selectedTimeSlot = data['selectedTimeSlot'] ?? 0;
+      final capacityValue = data['capacityValue'] ?? 0;
+      final servicePrice = data['servicePrice'] ?? 0.0;
+      final selectedStartDate =
+          (data['selectedStartDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final selectedEndDate =
+          (data['selectedEndDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final ageRange = data['ageRange'] ?? 'Default Age Range';
+
+      return Service(
+        serviceName: serviceName,
+        description: description,
+        centerName: centerName,
+        selectedTimeSlot: selectedTimeSlot,
+        capacityValue: capacityValue,
+        servicePrice: servicePrice,
+        selectedStartDate: selectedStartDate,
+        selectedEndDate: selectedEndDate,
+        ageRange: ageRange,
+      );
+    }).toList();
+  }
 
   void _handleLogout() async {
     try {
@@ -30,50 +86,101 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       print("Signed Out");
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
+        MaterialPageRoute(
+          builder: (context) => SignInScreen(),
+        ),
       );
     } catch (e) {
       print("Error signing out: $e");
     }
   }
 
+  void _navigateToServiceDetails(Service service) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ServiceDetailsPage(
+          serviceName: service.serviceName,
+          serviceDescription: service.description,
+          centerName: service.centerName,
+          selectedTimeSlot: service.selectedTimeSlot,
+          capacityValue: service.capacityValue,
+          servicePrice: service.servicePrice,
+          selectedStartDate: service.selectedStartDate,
+          selectedEndDate: service.selectedEndDate,
+          ageRange: service.ageRange,
+        ),
+      ),
+    );
+  }
+
+  void _handleAddKids() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddKidsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // Extend the body behind the app bar
-
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text("Home"),
-
-        backgroundColor: Colors.transparent, // Make the app bar transparent
-
-        elevation: 0, // Remove the app bar shadow
-
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout), // Logout Icon
-
-            onPressed: _handleLogout, // Call the logout function
+            icon: Icon(Icons.logout),
+            onPressed: _handleLogout,
           ),
         ],
       ),
-
       body: Stack(
         children: [
           // Background Image
-
           Positioned.fill(
             child: Image.asset(
               'assets/images/backG.png', // Replace with your image path
-
               fit: BoxFit.cover,
             ),
           ),
-
           // Your content goes here
+          FutureBuilder<List<Service>>(
+            future: _services,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.data == null || snapshot.data!.isEmpty) {
+                return Center(child: Text('No services available.'));
+              } else {
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final service = snapshot.data![index];
+                    return GestureDetector(
+                      onTap: () {
+                        _navigateToServiceDetails(service);
+                      },
+                      child: Card(
+                        margin: EdgeInsets.only(top: 20),
+                        child: ListTile(
+                          title: Text(service.serviceName),
+                          subtitle: Text(service.description),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }
+            },
+          ),
         ],
       ),
-
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         color: Color.fromARGB(255, 245, 198, 239),
@@ -85,19 +192,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.history), // Home Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.history),
+                  color: Colors.white,
                   onPressed: () {
-                    // Handle home button tap
+                    // Handle history button tap
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 5), // Add margin to the top
-
+                  padding: EdgeInsets.only(top: 5),
                   child: Text(
-                    'Booking Service',
+                    'History',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -110,16 +214,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      1, 50, 17, 1), // Add margin to the top
-
-                  child: Text(
-                    'Add Child',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                IconButton(
+                  icon: Icon(Icons.person_add),
+                  color: Colors.white,
+                  onPressed: _handleAddKids,
+                ),
+                Text(
+                  'Add Kids',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -129,10 +233,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.person), // Profile Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.person),
+                  color: Colors.white,
                   onPressed: () {
                     // Handle profile button tap
                   },
@@ -150,20 +252,15 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           ],
         ),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
           // Handle the floating action button tap (Home)
-
-          // You can navigate to the home screen or perform any other action here
         },
         child: Icon(
-          Icons.add_reaction_outlined, // Home Icon
-
-          color: Colors.white, // Set FAB icon color to white.
+          Icons.add_reaction_outlined,
+          color: Colors.white,
         ),
       ),
     );

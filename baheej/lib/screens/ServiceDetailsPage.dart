@@ -1,5 +1,7 @@
+import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baheej/screens/PayemntService.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final String serviceName;
@@ -29,8 +31,14 @@ class ServiceDetailsPage extends StatefulWidget {
 }
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
-  List<String> selectedKids = [];
   double total = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Calculate the total price based on the number of selected kids
+    total = widget.servicePrice;
+  }
 
   // Function to add service details to Firestore
   Future<void> addServiceToFirestore() async {
@@ -47,7 +55,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'ageRange': widget.ageRange,
         'servicePrice': widget.servicePrice,
         'selectedTimeSlot': widget.selectedTimeSlot,
-        'selectedKids': selectedKids,
         'totalPrice': total, // Store the calculated total price
       };
 
@@ -64,8 +71,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    total = widget.servicePrice * selectedKids.length.toDouble();
-
     return Scaffold(
       body: Container(
         color: Colors.transparent, // Make the background transparent
@@ -81,7 +86,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               ),
             ),
             SingleChildScrollView(
-              padding: EdgeInsets.all(120.0),
+              padding: EdgeInsets.all(150.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -107,7 +112,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Description:',
                     style: TextStyle(
@@ -124,7 +128,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Center name:',
                     style: TextStyle(
@@ -141,7 +144,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Service Price:',
                     style: TextStyle(
@@ -158,7 +160,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Service Start Date:',
                     style: TextStyle(
@@ -175,7 +176,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Service End Date:',
                     style: TextStyle(
@@ -192,7 +192,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Service Time Slot:',
                     style: TextStyle(
@@ -209,7 +208,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-
                   Text(
                     'Age Range:',
                     style: TextStyle(
@@ -225,74 +223,24 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       color: const Color.fromARGB(255, 7, 0, 2),
                     ),
                   ),
-
-                  SizedBox(height: 16),
-
-                  Text(
-                    'Select Kids:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-
-                  // StreamBuilder to display kids from Firestore
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('Kids')
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return CircularProgressIndicator();
-                      }
-                      final kids = snapshot.data!.docs;
-                      List<Widget> checkboxes = [];
-                      for (var kid in kids) {
-                        final kidData = kid.data() as Map<String, dynamic>;
-                        final kidName = kidData['name'] as String;
-                        checkboxes.add(
-                          ListTile(
-                            title: Text(kidName),
-                            trailing: Checkbox(
-                              value: selectedKids.contains(kid.id),
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  if (value != null && value) {
-                                    selectedKids.add(kid.id);
-                                  } else {
-                                    selectedKids.remove(kid.id);
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                        );
-                      }
-                      return Column(
-                        children: checkboxes,
-                      );
-                    },
-                  ),
-
-                  SizedBox(height: 20),
-
                   ElevatedButton(
                     onPressed: () {
-                      // Call the function to add service details to Firestore
+                      // Call the function to add service to Firestore
                       addServiceToFirestore();
+
+                      // Redirect to the PaymentService page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentService(
+                            serviceName: widget.serviceName,
+                            servicePrice: widget.servicePrice,
+                            selectedKids: [], // Initialize with an empty list
+                          ),
+                        ),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 23, 34, 191),
-                      minimumSize: Size(200, 60),
-                    ),
-                    child: Text(
-                      'Book',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
+                    child: Text('Book'),
                   ),
                 ],
               ),
