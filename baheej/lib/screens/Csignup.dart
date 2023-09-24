@@ -409,6 +409,14 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     ],
                   ),
 
+                
+                const SizedBox(
+                    height: 20,
+                  ),
+
+
+
+
                   //3
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,6 +528,14 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     ],
                   ),
 
+                  
+                  
+                  const SizedBox(
+                    height: 20,
+                  ),    
+                 
+                 
+                 
                   //5
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -652,6 +668,39 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                       ),
                     ],
                   ),
+
+              SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Password must include:\n",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "• at least one uppercase letter\n",
+                            ),
+                            TextSpan(
+                              text: "• at least one lowercase letter\n",
+                            ),
+                            TextSpan(
+                              text: "• at least one digit\n",
+                            ),
+                            TextSpan(
+                              text: "• between 8 and 20 characters long.",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                   //8
                   Column(
