@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -19,7 +20,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   String? serviceName;
   String? serviceCenter;
   String? centerName;
-  int? selectedTimeSlot;
+  String? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
   int capacityValue = 0;
@@ -27,7 +28,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   DateTime? selectedEndDate;
   bool dateSelected = false;
   bool timeSlotSelected = false;
-  String? ageRange;
+  int minAge = 4;
+  int maxAge = 17;
+  //String? ageRange;
 
   //validation
 
@@ -112,25 +115,51 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
   //age range
 
-  String? validateAgeRange(String? value) {
+  String? validateMinRange(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }
 
     final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
-
     final match = ageRangePattern.firstMatch(value);
 
-    if (match == null) {
-      return 'Please enter a valid numeric range like "8-10".';
+    // final minAge = int.tryParse(match.group(1) ?? '');
+    // final maxAge = int.tryParse(match.group(2) ?? '');
+
+    if (minAge == null) {
+      return 'fill min age.';
     }
 
-    final minAge = int.tryParse(match.group(1) ?? '');
+    if (minAge < 4) {
+      return 'min age = 4';
+    }
+    if (minAge > 17) {
+      return 'max age = 17';
+    }
 
-    final maxAge = int.tryParse(match.group(2) ?? '');
+    return null;
+  }
 
-    if (minAge == null || maxAge == null || minAge < 4 || maxAge > 17) {
-      return 'Age range must be between 4 and 17.';
+  String? validateMaxRange(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+
+    final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
+    final match = ageRangePattern.firstMatch(value);
+
+    // final minAge = int.tryParse(match.group(1) ?? '');
+    // final maxAge = int.tryParse(match.group(2) ?? '');
+
+    if (maxAge == null) {
+      return 'fill max age.';
+    }
+
+    if (maxAge < 4) {
+      return 'min age = 4';
+    }
+    if (maxAge > 17) {
+      return 'min age = 4';
     }
 
     return null;
@@ -173,7 +202,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
-        'ageRange': ageRange,
+        // 'ageRange': ageRange,
+        'minAge': minAge,
+        'maxAge': maxAge
       });
 
       // Data has been successfully added to Firestore.
@@ -274,12 +305,174 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                   capacityValue = int.tryParse(value) ?? 0;
                 } else if (label == 'Service Description') {
                   selectedDescription = value;
-                } else if (label == 'Age Range') {
-                  ageRange = value;
+                } else if (label == 'Min Age') {
+                  minAge = int.tryParse(value) ?? 0;
+                } else if (label == 'Max Age') {
+                  maxAge = int.tryParse(value) ?? 0;
                 }
               });
             },
             maxLength: maxLength,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildIncrementDecrementMinAgeField(
+    String label,
+    int value,
+    void Function() onIncrement,
+    void Function() onDecrement,
+  ) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    if (minAge > 4) {
+                      minAge -= 1;
+                      onDecrement();
+                    }
+                  });
+                },
+              ),
+              Container(
+                width: 100,
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  validator: validateMaxRange,
+                  onChanged: (newValue) {},
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                  ],
+                  controller: TextEditingController(
+                    text: minAge.toString(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    if (minAge < 17) {
+                      minAge += 1;
+                      onIncrement();
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildIncrementDecrementMaxAgeField(
+    String label,
+    int value,
+    void Function() onIncrement,
+    void Function() onDecrement,
+  ) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    if (maxAge > 4) {
+                      maxAge -= 1;
+                      onDecrement();
+                    }
+                  });
+                },
+              ),
+              Container(
+                width: 100,
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  validator: validateMaxRange,
+                  onChanged: (newValue) {},
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                  ],
+                  controller: TextEditingController(
+                    text: maxAge.toString(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    if (maxAge < 17) {
+                      maxAge += 1;
+                      onIncrement();
+                    }
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -451,7 +644,54 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     buildTextField('Center Name', validateServiceName,
                         maxLength: 20),
                     buildTextField('Service Price', validatePrice),
-                    buildTextField('Age Range', validateAgeRange),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceBetween, // Adjust this as needed
+                      children: [
+                        Expanded(
+                          child: buildIncrementDecrementMinAgeField(
+                            'Min Age',
+                            minAge,
+                            () {
+                              setState(() {
+                                minAge += 1;
+                              });
+                            },
+                            () {
+                              setState(() {
+                                if (minAge >= 4) {
+                                  minAge -= 1;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                            width:
+                                4), // Add spacing between the fields (adjust as needed)
+                        Expanded(
+                          child: buildIncrementDecrementMaxAgeField(
+                            'Max Age',
+                            maxAge,
+                            () {
+                              setState(() {
+                                maxAge += 1;
+                              });
+                            },
+                            () {
+                              setState(() {
+                                if (maxAge >= 4) {
+                                  maxAge -= 1;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+// max age
+
                     buildIncrementDecrementField(
                       'Service Capacity',
                       capacityValue,
@@ -467,7 +707,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                           }
                         });
                       },
-                    ),
+                    ), // capacity
                     buildTextField('Service Description', validateDescription,
                         maxLength: 225),
                     SizedBox(height: 4.0),
@@ -497,13 +737,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              selectedTimeSlot = 0;
+                              selectedTimeSlot = '8-11 AM';
 
                               timeSlotSelected = true;
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: selectedTimeSlot == 0
+                            primary: selectedTimeSlot == '8-11 AM'
                                 ? Color.fromARGB(255, 0, 65, 105)
                                 : const Color.fromARGB(255, 111, 176, 234),
                             onPrimary: Colors.white,
@@ -517,13 +757,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              selectedTimeSlot = 1;
+                              selectedTimeSlot = '2-5 PM';
 
                               timeSlotSelected = true;
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: selectedTimeSlot == 1
+                            primary: selectedTimeSlot == '2-5 PM'
                                 ? Color.fromARGB(255, 0, 65, 105)
                                 : Color.fromARGB(255, 111, 176, 234),
                             onPrimary: Colors.white,

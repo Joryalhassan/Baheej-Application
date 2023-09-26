@@ -114,9 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Card(
                         margin: EdgeInsets.all(10),
                         child: ListTile(
-                          title: Text(service.name),
+                          title: Text(service.serviceName),
                           subtitle: Text(
-                            'Start Date: ${service.startDate.toLocal().toString().split(' ')[0]} - End Date: ${service.endDate.toLocal().toString().split(' ')[0]}',
+                            'Start Date: ${service.selectedStartDate.toLocal().toString().split(' ')[0]} - End Date: ${service.selectedEndDate.toLocal().toString().split(' ')[0]}',
                           ),
                         ),
                       );
