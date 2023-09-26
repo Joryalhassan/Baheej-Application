@@ -26,9 +26,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
   UserCredential? resultaccount;
 
   Future<void> signspup() async {
-    try {
-
-      if (resultaccount == null) {
+  try {
+    if (resultaccount == null) {
       // Check if passwords match before proceeding
       if (_passwordTextController.text != _confirmPasswordTextController.text) {
         showDialog(
@@ -57,108 +56,111 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
       );
     }
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(resultaccount!.user!.uid)
-          .set({
-        'fname': _FnameTextController.text.trim(),
-        'lname': _LnameTextController.text.trim(),
-        'email': _emailTextController.text.trim(),
-        'type': 'guardian',
-        'phonenumber': _PhoneNumTextController.text.trim(),
-      });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(resultaccount!.user!.uid)
+        .set({
+      'fname': _FnameTextController.text.trim(),
+      'lname': _LnameTextController.text.trim(),
+      'email': _emailTextController.text.trim(),
+      'type': 'guardian',
+      'phonenumber': _PhoneNumTextController.text.trim(),
+    });
 
-     // Show success dialog here
-       _showSuccessDialog();
-       
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
+     // void _showSuccessDialog() {
         showDialog(
           context: context,
-          builder: (ctx) => AlertDialog(
-            content: const Text("The password provided is too weak."),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                },
-                child: Container(
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(14),
-                  child: const Text("OK"),
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Success'),
+              content: Text('Service added successfully!'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
         );
-        print('The password provided is too weak.');
-      } 
-      else if (e.code == 'email-already-in-use') {
-   showDialog(
-  context: context,
-  builder: (ctx) => AlertDialog(
-    content: const Text("Email already exists"),
-    actions: <Widget>[
-      Center(
-        child: Container(
-          width: 90, // Adjust the width as needed
-          child: TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.red),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20), // Adjust the radius as needed
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: const Text(
-                "OK",
-                style: TextStyle(fontSize: 14 , color: Colors.black),
-              ), // Adjust the font size as needed
-            ),
-          ),
-        ),
-      ),
-    ],
-  ),
-);
-print('The account already exists for that email.');
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-  }
+     // }
 
+    // Show success dialog here
+   // _showSuccessDialog(); 
 
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Success'),
-          content: Text('Service added successfully!'),
-          actions: [
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomeScreen()),
+    );
+  } on FirebaseAuthException catch (e) {
+    // Handle authentication exceptions
+    if (e.code == 'weak-password') {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          content: const Text("The password provided is too weak."),
+          actions: <Widget>[
             TextButton(
-              child: Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(ctx).pop();
               },
+              child: Container(
+                color: Colors.green,
+                padding: const EdgeInsets.all(14),
+                child: const Text("OK"),
+              ),
             ),
           ],
-        );
-      },
-    );
+        ),
+      );
+      print('The password provided is too weak.');
+    } else if (e.code == 'email-already-in-use') {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          content: const Text("Email already exists"),
+          actions: <Widget>[
+            Center(
+              child: Container(
+                width: 90, // Adjust the width as needed
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // Adjust the radius as needed
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: const Text(
+                      "OK",
+                      style: TextStyle(fontSize: 14 , color: Colors.black),
+                    ), // Adjust the font size as needed
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      print('The account already exists for that email.');
+    }
+  } catch (e) {
+    print(e.toString());
   }
+}
+
+
+
+
+
 
 
   @override
