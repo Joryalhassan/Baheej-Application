@@ -123,19 +123,19 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
     final match = ageRangePattern.firstMatch(value);
 
-    // final minAge = int.tryParse(match.group(1) ?? '');
-    // final maxAge = int.tryParse(match.group(2) ?? '');
+    final minAge = int.tryParse(match?.group(1) ?? '');
+    final maxAge = int.tryParse(match?.group(2) ?? '');
 
     if (minAge == null) {
-      return 'fill min age.';
+      return 'Min age should be at least 4';
     }
+    // if (minAge > 4 || minAge > maxAge) {
+    //   return 'not';
+    // }
 
-    if (minAge < 4) {
-      return 'min age = 4';
-    }
-    if (minAge > 17) {
-      return 'max age = 17';
-    }
+    // if (maxAge == null || maxAge > 17) {
+    //   return 'Max age should be at most 17';
+    // }
 
     return null;
   }
@@ -148,18 +148,19 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
     final match = ageRangePattern.firstMatch(value);
 
-    // final minAge = int.tryParse(match.group(1) ?? '');
-    // final maxAge = int.tryParse(match.group(2) ?? '');
+    final minAge = int.tryParse(match?.group(1) ?? '');
+    final maxAge = int.tryParse(match?.group(2) ?? '');
 
-    if (maxAge == null) {
-      return 'fill max age.';
+    if (minAge == null || minAge < 4) {
+      return 'Min age should be at least 4';
     }
 
-    if (maxAge < 4) {
-      return 'min age = 4';
+    if (maxAge == null || maxAge > 17) {
+      return 'Max age should be at most 17';
     }
-    if (maxAge > 17) {
-      return 'min age = 4';
+
+    if (maxAge < minAge) {
+      return 'Max age cannot be less than min age';
     }
 
     return null;

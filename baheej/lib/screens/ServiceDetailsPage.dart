@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -13,6 +17,56 @@ class ServiceDetailsPage extends StatefulWidget {
 }
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
+  Map<String, dynamic>? paymentIntent;
+
+  void makePayment() async {
+    // I think can we change payment (apple pay)
+    try {
+      paymentIntent = await createPaymentIntent();
+      var gpay = PaymentSheetGooglePay(
+          merchantCountryCode: "US", currencyCode: 'us', testEnv: true);
+      Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+        paymentIntentClientSecret: paymentIntent!["client_secret"],
+        style: ThemeMode.dark,
+        merchantDisplayName: "baheej",
+        googlePay: gpay, // can replace apple pay
+      ));
+
+      displayPaymentSheet();
+    } catch (e) {}
+  }
+
+  displayPaymentSheet() async {
+    try {
+      await Stripe.instance.presentPaymentSheet();
+      print("Done");
+    } catch (e) {
+      print("fail");
+    }
+  }
+
+  createPaymentIntent() async {
+    try {
+      Map<String, dynamic> body = {
+        "amount": "1000",
+        "currency": "SAR",
+      };
+      http.Response response = await http.post(
+          Uri.parse("https://api.stripe.com/v1/payment_intents"),
+          body: body,
+          headers: {
+            "Authorization":
+                "Bearer sk_test_51Ntfi6HEEOvMnOrx0QhRmQKoOVj8dOic3IJd6CMDRWeSYVwoVxBoR4TVMvIe0Ps0LIasU8icVzwQ6oiBAjdkvxpq00QSl4zjdN",
+            "Content-Type":
+                "application/x-www-form-urlencoded", // Fix typo here
+          });
+      return json.decode(response.body);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   List<String> selectedKids = [];
   bool isKidsPanelExpanded = false; // List to track selected kids
   int minAge = 0;
@@ -38,30 +92,31 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           );
         },
       );
-    } else if (selectedKids.isNotEmpty) {
-      // Kids are selected, and the kids selection panel is expanded
-      // Proceed with booking logic here
-
-      // Kids are not selected, and the kids selection panel is not expanded
-      // Show a message to select kids first
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Warning!'),
-            content: Text('there are no kids'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
     }
+    //  else if (selectedKids.isNotEmpty) {
+    //   // Kids are selected, and the kids selection panel is expanded
+    //   // Proceed with booking logic here
+
+    //   // Kids are not selected, and the kids selection panel is not expanded
+    //   // Show a message to select kids first
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: Text('Warning!'),
+    //         content: Text('there are no kids'),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: () {
+    //               Navigator.of(context).pop();
+    //             },
+    //             child: Text('OK'),
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
   }
 
   @override
@@ -609,21 +664,21 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   width: double.infinity,
                   height: 70 * fem,
                   decoration: BoxDecoration(
-                    //color: Color.fromARGB(255, 117, 150, 183),
                     borderRadius: BorderRadius.circular(20 * fem),
                   ),
-                  child: Center(
-                    child: ElevatedButton(
-                      onPressed: bookService, // Call the bookService function
-                      style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 59, 138,
-                            207), // Change the background color here
-                        onPrimary: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        minimumSize: Size(120, 48),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      makePayment(); // Call the makePayment function when the button is pressed
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 59, 138, 207),
+                      onPrimary: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
                       ),
+                      minimumSize: Size(120, 48),
+                    ),
+                    child: Center(
                       child: Text(
                         'Book Now',
                         style: TextStyle(
@@ -635,7 +690,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       ),
                     ),
                   ),
-                ),
+                )
               ],
             ),
           ),
