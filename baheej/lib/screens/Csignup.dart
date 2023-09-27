@@ -80,28 +80,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          content: const Text("Sign up successful!"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop(); // Close the dialog
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
-                );
-              },
-              child: Container(
-                color: Colors.green,
-                padding: const EdgeInsets.all(14),
-                child: const Text("OK"),
-              ),
-            ),
-          ],
-        ),
-      );
+      // Show success dialog here
+      _showSuccessDialog();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         showDialog(
@@ -163,6 +143,26 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Guardian signed in successfully!'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   //district drop down menu
@@ -300,7 +300,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       return 'Password must include at least one uppercase letter,\none lowercase letter, one digit and between 8 and\n20 characters long';
     }
 
-    // Check for a minimum length of 6 characters
+    // Check for a minimum length of 8 characters
     if (value.length < 8 || value.length > 20) {
       return 'Password must include at least one uppercase letter,\none lowercase letter, one digit and between 8 and\n20 characters long';
     }
