@@ -151,7 +151,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Success'),
-          content: Text('Guardian signed in successfully!'),
+          content: Text('Center signed in successfully!'),
           actions: [
             TextButton(
               child: Text('OK'),
