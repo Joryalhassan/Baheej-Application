@@ -4,7 +4,7 @@ import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:baheej/screens/ResetPassword.dart';
 import 'package:baheej/screens/Csignup.dart';
-import 'package:baheej/utlis/utilas.dart'; // تأكد من استيراد المكتبة الصحيحة
+import 'package:baheej/utlis/utilas.dart';
 
 class SignInScreenC extends StatefulWidget {
   const SignInScreenC({Key? key}) : super(key: key);
@@ -23,27 +23,23 @@ class _SignInScreenCState extends State<SignInScreenC> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-   extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: true, // Extend body behind the app bar
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent, // Make app bar transparent
         elevation: 0,
         title: const Text(
           "Sign Up",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              hexStringToColor("CB2B93"),
-              hexStringToColor("9546C4"),
-              hexStringToColor("5E61F4"),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+          image: DecorationImage(
+            image: AssetImage('assets/images/back6.png'),
+            fit: BoxFit.cover,
           ),
         ),
         child: SingleChildScrollView(
@@ -64,13 +60,33 @@ class _SignInScreenCState extends State<SignInScreenC> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Enter Email", style: TextStyle(color: Colors.white)),
-                    TextField(
+                    Text("Enter Email",
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                    TextFormField(
                       controller: _emailTextController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.person_outline),
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
                         errorText:
                             emailErrorText, // Display the email error message
+                        prefixIcon: Icon(Icons.person_outline),
                       ),
                     ),
                   ],
@@ -83,14 +99,32 @@ class _SignInScreenCState extends State<SignInScreenC> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("Enter Password",
-                        style: TextStyle(color: Colors.white)),
-                    TextField(
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                    TextFormField(
                       controller: _passwordTextController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.lock_outline),
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
                         errorText:
                             passwordErrorText, // Display the password error message
+                        prefixIcon: Icon(Icons.lock_outline),
                       ),
                     ),
                   ],
@@ -136,7 +170,7 @@ class _SignInScreenCState extends State<SignInScreenC> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HomeScreenCenter(),//check if it center or gaurdian
+                          builder: (context) => HomeScreenCenter(),
                         ),
                       );
                     }).catchError((error) {
@@ -163,7 +197,7 @@ class _SignInScreenCState extends State<SignInScreenC> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text("Don't have an account?",
-            style: TextStyle(color: Colors.white70)),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -175,36 +209,35 @@ class _SignInScreenCState extends State<SignInScreenC> {
           },
           child: const Text(
             " Sign Up",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         )
       ],
     );
   }
 
-
-
- Row forgetPassword() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      const Text("Forget Password?", style: TextStyle(color: Colors.white70)),
-      const SizedBox(width: 8), // Add some horizontal spacing
-      GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResetPassword(),
-            ),
-          );
-        },
-        child: const Text(
-          "Reset Your Password",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      )
-    ],
-  );
-}
+  Row forgetPassword() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Forget Password?",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ResetPassword(),
+              ),
+            );
+          },
+          child: const Text(
+            "Reset Your Password",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
 }
