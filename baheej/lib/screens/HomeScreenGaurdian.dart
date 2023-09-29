@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/Addkids.dart';
-import 'package:baheej/screens/Service.dart'; // Import the Service class from your appropriate file
+import 'package:baheej/screens/Service.dart';
 
+//
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
 
@@ -14,12 +15,12 @@ class HomeScreenGaurdian extends StatefulWidget {
 }
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
-  int _currentIndex = 0;
+  //int _currentIndex = 0;
   Future<List<Service>>? _services;
-
   @override
   void initState() {
     super.initState();
+    // Initialize _services by fetching data from Firebase
     _services = fetchDataFromFirebase();
   }
 
@@ -34,7 +35,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       final serviceName = data['serviceName'] ?? ' Title';
       final description = data['serviceDesc'] ?? ' Description';
       final centerName = data['centerName'] ?? 'Center Name';
-      final selectedTimeSlot = data['selectedTimeSlot'] ?? "time slot";
+      final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
+      // print('Service Time from Firestore: $selectedTimeSlot');
       final capacityValue = data['capacityValue'] ?? 0;
       final servicePrice = data['servicePrice'] ?? 0.0;
       final selectedStartDate =
@@ -95,6 +97,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final userEmail = user?.email;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -128,6 +132,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               } else if (snapshot.data == null || snapshot.data!.isEmpty) {
                 return Center(child: Text('No services available.'));
               } else {
+                //here to view info in the card
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
@@ -140,7 +145,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                         margin: EdgeInsets.only(top: 20),
                         child: ListTile(
                           title: Text(service.serviceName),
-                          subtitle: Text(service.description),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(service.description),
+                              Text(service
+                                  .selectedTimeSlot), // Display time slot here
+                            ],
+                          ),
                         ),
                       ),
                     );
