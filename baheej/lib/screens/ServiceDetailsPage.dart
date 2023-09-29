@@ -1,11 +1,16 @@
 import 'dart:convert';
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -17,27 +22,125 @@ class ServiceDetailsPage extends StatefulWidget {
 }
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
-  Map<String, dynamic>? paymentIntent;
-
-  void makePayment() async {
-    // I think can we change payment (apple pay)
+  double total = 0.0;
+  // Define a map to store the selected kids' names
+  Map<String, String> selectedKidsNames = {};
+  // Function to add service details to Firestore
+  Future<void> addServiceToFirestore(
+      String selectedTimeSlot, String? userEmail) async {
     try {
-      paymentIntent = await createPaymentIntent();
-      var gpay = PaymentSheetGooglePay(
-          merchantCountryCode: "US", currencyCode: 'us', testEnv: true);
-      Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-        paymentIntentClientSecret: paymentIntent!["client_secret"],
-        style: ThemeMode.dark,
-        merchantDisplayName: "baheej",
-        googlePay: gpay, // can replace apple pay
-      ));
+      final firestore = FirebaseFirestore.instance;
+      if (userEmail == null) {
+        print('Error: userEmail is null. Cannot add service to Firestore.');
+        return; // Return early or handle the error as needed
+      }
+      final selectedKidsNames = await getSelectedKidsNames(selectedKids);
 
-      displayPaymentSheet();
-    } catch (e) {}
+      // Create a map with the service details
+      final serviceData = {
+        'serviceName': widget.service.serviceName,
+        'serviceDescription': widget.service.description,
+        'centerName': widget.service.centerName,
+        'selectedStartDate': widget.service.selectedStartDate,
+        'selectedEndDate': widget.service.selectedStartDate,
+        'maxAge': widget.service.maxAge,
+        'minAge': widget.service.minAge,
+        'servicePrice': widget.service.servicePrice,
+        'selectedTimeSlot': selectedTimeSlot,
+        'selectedKids': selectedKids,
+        //here if you want it as map put selectedKidsNames .
+        //'selectedKidsNames': selectedKidsNames,
+        'totalPrice': total, // Store the calculated total price
+        'userEmail': userEmail,
+      };
+
+      // Add the selected kids' names to the service data
+
+      // Add the data to the 'ServiceBook' collection
+      await firestore.collection('ServiceBook').add(serviceData);
+
+      // Handle success or show a confirmation to the user
+    } catch (error) {
+      // Handle any errors here
+      print('Error booking service: $error');
+      // You can also show an error message to the user if needed
+    }
   }
 
-  displayPaymentSheet() async {
+  Future<Map<String, String>> getSelectedKidsNames(List<String> kidIds) async {
+    final firestore = FirebaseFirestore.instance;
+    final selectedKidsNames = <String, String>{};
+
+    for (var kidId in kidIds) {
+      final kidDoc = await firestore.collection('Kids').doc(kidId).get();
+      if (kidDoc.exists) {
+        final kidData = kidDoc.data() as Map<String, dynamic>;
+        final kidName = kidData['name'] as String;
+        selectedKidsNames[kidId] = kidName;
+      }
+    }
+
+    return selectedKidsNames;
+  }
+
+  Map<String, dynamic>? paymentIntent;
+
+  bool isplaying = false;
+  final controller = ConfettiController();
+
+  @override
+  void instance() {
+    super.initState();
+    controller.addListener(() {
+      setState(() {
+        isplaying = controller.state == ConfettiControllerState.playing;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.play();
+  }
+
+  void makePayment(BuildContext context) async {
+    try {
+      double totalPrice = calculateTotalPrice(widget.service);
+      paymentIntent = await createPaymentIntent(totalPrice);
+      var gpay = PaymentSheetGooglePay(
+        merchantCountryCode: "US",
+        currencyCode: 'us',
+        testEnv: true,
+      );
+
+      //Format the price as a string with English numerals
+      String formattedPrice =
+          NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
+
+      Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntent!["client_secret"],
+          style: ThemeMode.dark,
+          merchantDisplayName: "baheej",
+          googlePay: gpay,
+        ),
+      );
+
+      displayPaymentSheet(context);
+      final user = FirebaseAuth.instance.currentUser;
+      final userEmail = user?.email;
+      // If payment was successful, store booking information
+      // storeBookingInfo(userEmail, widget.service, kidsNames);
+
+      // Call the function to store service information in Firestore
+      await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  void displayPaymentSheet(BuildContext context) async {
     try {
       await Stripe.instance.presentPaymentSheet();
       print("Done");
@@ -46,21 +149,21 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     }
   }
 
-  createPaymentIntent() async {
+  Future<Map<String, dynamic>> createPaymentIntent(double totalPrice) async {
     try {
       Map<String, dynamic> body = {
-        "amount": "1000",
-        "currency": "SAR",
+        "amount": (totalPrice * 100).toInt().toString(), // Amount in cents
+        "currency": "usd", // Currency code
       };
       http.Response response = await http.post(
-          Uri.parse("https://api.stripe.com/v1/payment_intents"),
-          body: body,
-          headers: {
-            "Authorization":
-                "Bearer sk_test_51Ntfi6HEEOvMnOrx0QhRmQKoOVj8dOic3IJd6CMDRWeSYVwoVxBoR4TVMvIe0Ps0LIasU8icVzwQ6oiBAjdkvxpq00QSl4zjdN",
-            "Content-Type":
-                "application/x-www-form-urlencoded", // Fix typo here
-          });
+        Uri.parse("https://api.stripe.com/v1/payment_intents"),
+        body: body,
+        headers: {
+          "Authorization":
+              "Bearer sk_test_51Ntfi6HEEOvMnOrx0QhRmQKoOVj8dOic3IJd6CMDRWeSYVwoVxBoR4TVMvIe0Ps0LIasU8icVzwQ6oiBAjdkvxpq00QSl4zjdN",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      );
       return json.decode(response.body);
     } catch (e) {
       throw Exception(e);
@@ -72,7 +175,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   int minAge = 0;
   int maxAge = 0;
 
-  void bookService() {
+  void bookService(VoidCallback onKidsSelected) {
     if (selectedKids.isEmpty) {
       // No kids selected, show a message
       showDialog(
@@ -92,35 +195,15 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           );
         },
       );
+    } else {
+      // Kids are selected, call the callback function
+      onKidsSelected();
     }
-    //  else if (selectedKids.isNotEmpty) {
-    //   // Kids are selected, and the kids selection panel is expanded
-    //   // Proceed with booking logic here
-
-    //   // Kids are not selected, and the kids selection panel is not expanded
-    //   // Show a message to select kids first
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: Text('Warning!'),
-    //         content: Text('there are no kids'),
-    //         actions: [
-    //           TextButton(
-    //             onPressed: () {
-    //               Navigator.of(context).pop();
-    //             },
-    //             child: Text('OK'),
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    // }
   }
 
   @override
   Widget build(BuildContext context) {
+    total = widget.service.servicePrice * selectedKids.length.toDouble();
     final double fem = 1.0;
     final double ffem = 1.0;
     return Scaffold(
@@ -169,7 +252,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x3f000000),
+                        color: Color.fromARGB(62, 212, 208, 214),
                         offset: Offset(0 * fem, 4 * fem),
                         blurRadius: 2 * fem,
                       ),
@@ -199,7 +282,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                   fontSize: 25 * ffem,
                                   fontWeight: FontWeight.w400,
                                   height: 2.4 * ffem / fem,
-                                  color: Color(0xff000000),
+                                  color: Color.fromARGB(255, 12, 12, 12),
                                 ),
                               ),
                               Text(
@@ -472,40 +555,40 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       //
                       //
 
-                      // Center(
-                      //   child: Container(
-                      //     margin: EdgeInsets.only(
-                      //       right: 280 * fem,
-                      //       top: 10 * fem,
-                      //     ),
-                      //     child: Column(
-                      //       children: [
-                      //         Text(
-                      //           "Time slot:",
-                      //           textAlign: TextAlign.center,
-                      //           style: TextStyle(
-                      //             fontFamily: 'Imprima',
-                      //             fontSize: 25 * ffem,
-                      //             fontWeight: FontWeight.w400,
-                      //             height: 1 * ffem / fem,
-                      //             color: Color(0xff000000),
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           widget.service.selectedTimeSlot,
-                      //           textAlign: TextAlign.center,
-                      //           style: TextStyle(
-                      //             fontFamily: 'Imprima',
-                      //             fontSize: 20 * ffem,
-                      //             fontWeight: FontWeight.w300,
-                      //             height: 1 * ffem / fem,
-                      //             color: Color(0xff000000),
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
+                      Center(
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            right: 280 * fem,
+                            top: 10 * fem,
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                "Time slot:",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Imprima',
+                                  fontSize: 25 * ffem,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1 * ffem / fem,
+                                  color: Color(0xff000000),
+                                ),
+                              ),
+                              Text(
+                                widget.service.selectedTimeSlot,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Imprima',
+                                  fontSize: 20 * ffem,
+                                  fontWeight: FontWeight.w300,
+                                  height: 1 * ffem / fem,
+                                  color: Color(0xff000000),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
 
                       // Display Kids selection panel
                       Container(
@@ -573,8 +656,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                             setState(() {
                                               if (value != null && value) {
                                                 selectedKids.add(kid.id);
+
+                                                // selectedKidsNames[kid.id] =
+                                                //     kidName;
                                               } else {
                                                 selectedKids.remove(kid.id);
+
+                                                // selectedKidsNames
+                                                //     .remove(kid.id);
                                               }
                                             });
                                           },
@@ -668,7 +757,15 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   ),
                   child: ElevatedButton(
                     onPressed: () {
-                      makePayment(); // Call the makePayment function when the button is pressed
+                      bookService(() {
+                        // Simulate a successful payment, then trigger fireworks
+                        makePayment(context);
+
+                        //addServiceToFirestore();
+
+                        // Check if payment is successful (you can replace this with your actual logic)
+                        //bool paymentSuccessful = true;
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
@@ -680,7 +777,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Book Now',
+                        'Payment Now',
                         style: TextStyle(
                           fontFamily: 'Imprima',
                           fontSize: 20 * ffem,
@@ -700,9 +797,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   }
 
   // Calculate the total price here
-  String calculateTotalPrice(Service service) {
+  double calculateTotalPrice(Service service) {
     // Calculate the total price based on the service price and the number of selected kids
-    double totalPrice = service.servicePrice * (1 + selectedKids.length);
-    return totalPrice.toStringAsFixed(2);
+    double totalPrice = service.servicePrice * (selectedKids.length);
+    return totalPrice;
   }
 }

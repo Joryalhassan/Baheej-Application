@@ -120,21 +120,18 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'This field is required';
     }
 
-    final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
-    final match = ageRangePattern.firstMatch(value);
+    // final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
+    // final match = ageRangePattern.firstMatch(value);
 
-    final minAge = int.tryParse(match?.group(1) ?? '');
-    final maxAge = int.tryParse(match?.group(2) ?? '');
+    // final minAge = int.tryParse(match?.group(1) ?? '');
+    // final maxAge = int.tryParse(match?.group(2) ?? '');
 
-    if (minAge == null) {
-      return 'Min age should be at least 4';
-    }
-    // if (minAge > 4 || minAge > maxAge) {
-    //   return 'not';
+    // if (minAge == null) {
+    //   return 'Min age should be at least 4';
     // }
 
-    // if (maxAge == null || maxAge > 17) {
-    //   return 'Max age should be at most 17';
+    // if (minAge > maxAge) {
+    //   return 'Min age should be less than or equal to max age';
     // }
 
     return null;
@@ -145,23 +142,19 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'This field is required';
     }
 
-    final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
-    final match = ageRangePattern.firstMatch(value);
+    // final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
+    // final match = ageRangePattern.firstMatch(value);
 
-    final minAge = int.tryParse(match?.group(1) ?? '');
-    final maxAge = int.tryParse(match?.group(2) ?? '');
+    // final minAge = int.tryParse(match?.group(1) ?? '');
+    // final maxAge = int.tryParse(match?.group(2) ?? '');
 
-    if (minAge == null || minAge < 4) {
-      return 'Min age should be at least 4';
-    }
+    // if (maxAge == null || maxAge > 17) {
+    //   return 'Max age should be at most 17';
+    // }
 
-    if (maxAge == null || maxAge > 17) {
-      return 'Max age should be at most 17';
-    }
-
-    if (maxAge < minAge) {
-      return 'Max age cannot be less than min age';
-    }
+    // if (maxAge < minAge) {
+    //   return 'Max age should be greater than or equal to min age';
+    // }
 
     return null;
   }
@@ -199,7 +192,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceName': serviceName,
         'servicePrice': selectedPrice,
         'serviceCapacity': capacityValue,
-        'serviceTime': selectedTimeSlot,
+        'selectedTimeSlot': selectedTimeSlot,
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
@@ -832,43 +825,4 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       });
     }
   }
-
-  // Widget buildIncrementDecrementField(
-  //   String label,
-  //   int value,
-  //   VoidCallback increment,
-  //   VoidCallback decrement,
-  // ) {
-  //   return Container(
-  //     margin: EdgeInsets.only(bottom: 8),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           label,
-  //           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-  //         ),
-  //         SizedBox(height: 4),
-  //         Row(
-  //           children: [
-  //             IconButton(
-  //               icon: Icon(Icons.remove),
-  //               onPressed: decrement,
-  //             ),
-  //             Text(
-  //               value.toString(),
-  //               style: TextStyle(
-  //                 fontSize: 16,
-  //               ),
-  //             ),
-  //             IconButton(
-  //               icon: Icon(Icons.add),
-  //               onPressed: increment,
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

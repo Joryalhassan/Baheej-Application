@@ -24,4 +24,7 @@ class Service {
     required this.servicePrice,
     required this.selectedTimeSlot,
   });
+  // Define constants for the timeslots
+  static const String timeslotMorning = '8-11 AM';
+  static const String timeslotAfternoon = '2-5 PM';
 }
