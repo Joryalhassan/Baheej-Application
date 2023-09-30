@@ -42,12 +42,14 @@ class HistoryScreen extends StatelessWidget {
 
                 final centerName = data['centerName'];
                 final serviceName = data['serviceName'];
-                //final selectedKids = data['selectedKids'] as Map<String, dynamic>;
-
+                final selectedKidsMap = data['selectedKidsNames'] as Map<String, dynamic>?;
                 final selectedStartDate = data['selectedStartDate'] as Timestamp;
                 final selectedEndDate = data['selectedEndDate'] as Timestamp;
                 final totalPrice = data['totalPrice'] as double;
-               final selectedKidsMap = data['selectedKidsNames'] as Map<String, dynamic>?;
+                final selectedTimeSlot = data['selectedTimeSlot'];
+
+
+
 
                 String selectedKidsString = '';
 
@@ -64,6 +66,7 @@ class HistoryScreen extends StatelessWidget {
                   selectedKidsString,
                   selectedStartDate.toDate(),
                   selectedEndDate.toDate(),
+                  selectedTimeSlot,
                   totalPrice,
                 );
               },
@@ -80,50 +83,85 @@ Widget buildServiceCard(
     String selectedKidsString,
     DateTime selectedStartDate,
     DateTime selectedEndDate,
-    double totalPrice,
+    String selectedTimeSlot,
+
+    double totalPrice
+    
    ) {
 
     // Format selectedStartDate and selectedEndDate to strings
     final startDateFormatted = DateFormat('yyyy-MM-dd').format(selectedStartDate);
     final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
 
+      
+      
       return Card(
-        elevation: 3,
-        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: ListTile(
-          title: Text(serviceName,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold, // Make it bolder
-            ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Center Name: $centerName',
-                style: TextStyle(fontSize: 16),
-              ),
-              Text(
-                'Selected Kids: $selectedKidsString',
-                style: TextStyle(fontSize: 16),
-              ),
-              Text(
-                'Start Date: $startDateFormatted',
-                style: TextStyle(fontSize: 16),
-              ),
-              Text(
-                'End Date: $endDateFormatted',
-                style: TextStyle(fontSize: 16),
-              ),
-              Text(
-                'Total Price: $totalPrice',
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
+  elevation: 3,
+  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+  child: Stack(
+    children: [
+      ListTile(
+        title: Text(
+          serviceName,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      );
-  
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 10), // Add a SizedBox for spacing
+
+            Text(
+             '$centerName',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Selected Kids: $selectedKidsString',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'From: $startDateFormatted' '     To: $endDateFormatted ',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'At: $selectedTimeSlot',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Total Price: $totalPrice' ' SAR',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+      Positioned(
+        bottom: 12, // Adjust the position as needed
+        right: 12, // Adjust the position as needed
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Adjust padding
+          decoration: BoxDecoration(
+            color: Colors.green, // Customize the background color
+            borderRadius: BorderRadius.circular(8), // Adjust the border radius
+          ),
+          child: Text(
+            'Booked',
+            style: TextStyle(
+              fontSize: 14, // Adjust font size
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // Customize the text color
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+);
+
+
+
+
+
  }
 }
