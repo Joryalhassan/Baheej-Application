@@ -81,7 +81,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
    //   ),
   //  );
  // }
-
   void _handleAddKids() {
     Navigator.push(
       context,
@@ -117,56 +116,96 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 180), // Adjust the top padding as needed
-            child: FutureBuilder<List<Service>>(
-              future: _services,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No services available.'));
-                } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final service = snapshot.data![index];
-                      return GestureDetector(
-                        onTap: () {
-                          // _navigateToServiceDetails(context, service);
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(0.2),
-                          child: Card(
-                            elevation: 3,
-                            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                            color: Color.fromARGB(255, 251, 241, 241),
-                            child: Container(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    service.serviceName,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+            padding: EdgeInsets.only(top: 180),
+            child: SingleChildScrollView(
+              child: FutureBuilder<List<Service>>(
+                future: _services,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.data == null || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No services available.'));
+                  } else {
+                    return Column(
+                      children: snapshot.data!.map((service) {
+                        return GestureDetector(
+                          onTap: () {
+                            // _navigateToServiceDetails(context, service);
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(0.2),
+                            child: Card(
+                              elevation: 3,
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 16),
+                              color: Color.fromARGB(255, 251, 241, 241),
+                              child: Container(
+                                padding: EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      service.serviceName,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text('Service Type: ${service.description}'),
-                                  Text('Service Time: ${service.selectedTimeSlot}'),
-                                ],
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Service Type: ${service.description}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Service Time: ${service.selectedTimeSlot}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            // Handle the "View Details" button tap
+                                          },
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                'View Details',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                }
-              },
+                        );
+                      }).toList(),
+                    );
+                  }
+                },
+              ),
             ),
           ),
         ],
@@ -256,4 +295,3 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 }
-
