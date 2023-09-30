@@ -2,32 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
-import 'package:baheej/screens/ServiceDetailsPage.dart';
-import 'package:baheej/screens/Addkids.dart';
-
-class Service {
-  final String serviceName;
-  final String description;
-  final String centerName;
-  final int selectedTimeSlot;
-  final int capacityValue;
-  final double servicePrice;
-  final DateTime selectedStartDate;
-  final DateTime selectedEndDate;
-  final String ageRange;
-
-  Service({
-    required this.serviceName,
-    required this.description,
-    required this.centerName,
-    required this.selectedEndDate,
-    required this.selectedStartDate,
-    required this.ageRange,
-    required this.capacityValue,
-    required this.servicePrice,
-    required this.selectedTimeSlot,
-  });
-}
+//import 'package:baheej/screens/ServiceDetailsPage.dart';
+import 'package:baheej/screens/AddKidsPage.dart';
+import 'package:baheej/screens/Service.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -37,7 +14,6 @@ class HomeScreenGaurdian extends StatefulWidget {
 }
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
-  int _currentIndex = 0;
   Future<List<Service>>? _services;
 
   @override
@@ -54,17 +30,18 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
     return querySnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
-      final serviceName = data['serviceName'] ?? 'Default Title';
-      final description = data['serviceDesc'] ?? 'Default Description';
-      final centerName = data['centerName'] ?? 'Default Center Name';
-      final selectedTimeSlot = data['selectedTimeSlot'] ?? 0;
+      final serviceName = data['serviceName'] ?? ' Title';
+      final description = data['serviceDesc'] ?? ' Description';
+      final centerName = data['centerName'] ?? 'Center Name';
+      final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
       final capacityValue = data['capacityValue'] ?? 0;
       final servicePrice = data['servicePrice'] ?? 0.0;
       final selectedStartDate =
           (data['selectedStartDate'] as Timestamp?)?.toDate() ?? DateTime.now();
       final selectedEndDate =
           (data['selectedEndDate'] as Timestamp?)?.toDate() ?? DateTime.now();
-      final ageRange = data['ageRange'] ?? 'Default Age Range';
+      final minAge = data['minAge'] ?? 4;
+      final maxAge = data['maxAge'] ?? 17;
 
       return Service(
         serviceName: serviceName,
@@ -75,7 +52,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         servicePrice: servicePrice,
         selectedStartDate: selectedStartDate,
         selectedEndDate: selectedEndDate,
-        ageRange: ageRange,
+        minAge: minAge,
+        maxAge: maxAge,
       );
     }).toList();
   }
@@ -94,25 +72,15 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       print("Error signing out: $e");
     }
   }
-
-  void _navigateToServiceDetails(Service service) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ServiceDetailsPage(
-          serviceName: service.serviceName,
-          serviceDescription: service.description,
-          centerName: service.centerName,
-          selectedTimeSlot: service.selectedTimeSlot,
-          capacityValue: service.capacityValue,
-          servicePrice: service.servicePrice,
-          selectedStartDate: service.selectedStartDate,
-          selectedEndDate: service.selectedEndDate,
-          ageRange: service.ageRange,
-        ),
-      ),
-    );
-  }
+//void _navigateToServiceDetails(BuildContext context, Service service) {
+   // Navigator.push(
+   //   context,
+    //  MaterialPageRoute(
+    //    builder: (context) =>
+    //        ServiceDetailsPage(service: service), // Pass the service object
+   //   ),
+  //  );
+ // }
 
   void _handleAddKids() {
     Navigator.push(
@@ -125,6 +93,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -140,44 +110,64 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       ),
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backG.png', // Replace with your image path
+              'assets/images/backG.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Your content goes here
-          FutureBuilder<List<Service>>(
-            future: _services,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                return Center(child: Text('No services available.'));
-              } else {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final service = snapshot.data![index];
-                    return GestureDetector(
-                      onTap: () {
-                        _navigateToServiceDetails(service);
-                      },
-                      child: Card(
-                        margin: EdgeInsets.only(top: 20),
-                        child: ListTile(
-                          title: Text(service.serviceName),
-                          subtitle: Text(service.description),
+          Padding(
+            padding: EdgeInsets.only(top: 180), // Adjust the top padding as needed
+            child: FutureBuilder<List<Service>>(
+              future: _services,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (snapshot.data == null || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No services available.'));
+                } else {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final service = snapshot.data![index];
+                      return GestureDetector(
+                        onTap: () {
+                          // _navigateToServiceDetails(context, service);
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(0.2),
+                          child: Card(
+                            elevation: 3,
+                            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                            color: Color.fromARGB(255, 251, 241, 241),
+                            child: Container(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    service.serviceName,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text('Service Type: ${service.description}'),
+                                  Text('Service Time: ${service.selectedTimeSlot}'),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }
-            },
+                      );
+                    },
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -266,3 +256,4 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 }
+
