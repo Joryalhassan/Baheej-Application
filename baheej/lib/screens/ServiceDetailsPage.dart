@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:confetti/confetti.dart';
+//import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
@@ -47,9 +47,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'minAge': widget.service.minAge,
         'servicePrice': widget.service.servicePrice,
         'selectedTimeSlot': selectedTimeSlot,
-        'selectedKids': selectedKids,
+        //'selectedKids': selectedKids,
         //here if you want it as map put selectedKidsNames .
-        //'selectedKidsNames': selectedKidsNames,
+        'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
       };
@@ -85,24 +85,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
   Map<String, dynamic>? paymentIntent;
 
-  bool isplaying = false;
-  final controller = ConfettiController();
-
-  @override
-  void instance() {
-    super.initState();
-    controller.addListener(() {
-      setState(() {
-        isplaying = controller.state == ConfettiControllerState.playing;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    controller.play();
-  }
+  //payment method .
 
   void makePayment(BuildContext context) async {
     try {
@@ -110,11 +93,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       paymentIntent = await createPaymentIntent(totalPrice);
       var gpay = PaymentSheetGooglePay(
         merchantCountryCode: "US",
-        currencyCode: 'us',
+        currencyCode: 'SAR',
         testEnv: true,
       );
 
-      //Format the price as a string with English numerals
+      // Format the price as a string with English numerals
       String formattedPrice =
           NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
@@ -128,10 +111,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       );
 
       displayPaymentSheet(context);
+
       final user = FirebaseAuth.instance.currentUser;
       final userEmail = user?.email;
-      // If payment was successful, store booking information
-      // storeBookingInfo(userEmail, widget.service, kidsNames);
 
       // Call the function to store service information in Firestore
       await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
@@ -139,12 +121,49 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       print("Error: $e");
     }
   }
+// payment
 
   void displayPaymentSheet(BuildContext context) async {
     try {
       await Stripe.instance.presentPaymentSheet();
+      // Show a success message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Payment Successful'),
+            content: Text('Your payment was successful!'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+
       print("Done");
     } catch (e) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Payment cancled'),
+            content: Text('Your payment was canceld!'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
       print("fail");
     }
   }
@@ -153,7 +172,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     try {
       Map<String, dynamic> body = {
         "amount": (totalPrice * 100).toInt().toString(), // Amount in cents
-        "currency": "usd", // Currency code
+        "currency": "SAR", // Currency code
       };
       http.Response response = await http.post(
         Uri.parse("https://api.stripe.com/v1/payment_intents"),
@@ -224,7 +243,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: IconButton(
                     icon: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 255, 255, 255),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
@@ -238,23 +257,33 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       0, 0, 0, 5 * fem), //5 size of the card
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xffffffff)),
+                    border:
+                        //Color.fromARGB(255, 229, 226, 226)
+                        Border.all(color: Color.fromARGB(255, 250, 249, 249)),
                     borderRadius: BorderRadius.circular(20 * fem),
                     gradient: LinearGradient(
                       begin: Alignment(0, -1),
                       end: Alignment(0, 1),
                       colors: <Color>[
-                        Color.fromARGB(255, 255, 231, 231),
-                        Color.fromARGB(255, 238, 184, 233),
-                        Color.fromARGB(237, 214, 240, 254),
+                        Color.fromARGB(255, 250, 249, 249),
+                        Color.fromARGB(255, 250, 249, 249),
+                        Color.fromARGB(255, 250, 249, 249)
+
+                        // Color.fromARGB(255, 255, 231, 231),
+                        // Color.fromARGB(255, 238, 184, 233),
+                        // Color.fromARGB(237, 214, 240, 254),
                       ],
                       stops: <double>[0, 0, 1],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Color.fromARGB(62, 212, 208, 214),
-                        offset: Offset(0 * fem, 4 * fem),
-                        blurRadius: 2 * fem,
+                        //Color.fromARGB(62, 212, 208, 214),
+                        color: Color.fromARGB(60, 173, 170, 174),
+                        offset: Offset(
+                          8 * fem,
+                          8 * fem,
+                        ),
+                        blurRadius: 4 * fem,
                       ),
                     ],
                   ),
@@ -262,29 +291,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        margin: EdgeInsets.only(bottom: 30 * fem),
+                        margin: EdgeInsets.only(
+                            right: 250 * fem, left: 0 * fem, bottom: 10 * fem),
                         width: 400 * fem,
                         height: 95 * fem,
-                        // decoration: BoxDecoration(
-                        //   //Color.fromARGB(255, 194, 202, 205), grey
-                        //   //Color.fromARGB(255, 190, 214, 239), blue
-                        //   color: Color.fromARGB(237, 214, 240, 254),
-                        //   borderRadius: BorderRadius.circular(20 * fem),
-                        // ),
                         child: Center(
                           child: Column(
                             children: [
-                              Text(
-                                "Service Name:",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 25 * ffem,
-                                  fontWeight: FontWeight.w400,
-                                  height: 2.4 * ffem / fem,
-                                  color: Color.fromARGB(255, 12, 12, 12),
-                                ),
-                              ),
                               Text(
                                 widget.service
                                     .serviceName, // Display service name
@@ -292,42 +305,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 25 * ffem,
-                                  fontWeight: FontWeight.w200,
-                                  height: 1 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      Center(
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 20 * fem),
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              Text(
-                                "Description:",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 25 * ffem,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                              Text(
-                                widget.service
-                                    .description, // Display service description
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w300,
-                                  height: 1 * ffem / fem,
+                                  //fontWeight: FontWeight.w200,
+                                  fontWeight: FontWeight.bold,
+                                  height: 3 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
                               ),
@@ -337,28 +317,18 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       ),
 
                       Container(
-                        margin:
-                            EdgeInsets.fromLTRB(0 * fem, 0, 20 * fem, 53 * fem),
+                        margin: EdgeInsets.fromLTRB(
+                            10 * fem, 0, 200 * fem, 20 * fem),
                         width: double.infinity,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Center(
                               child: Container(
-                                margin: EdgeInsets.only(right: 10 * fem),
+                                margin: EdgeInsets.only(
+                                    right: 10 * fem, left: 10 * fem),
                                 child: Column(
                                   children: [
-                                    Text(
-                                      "Center Name:",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: 'Imprima',
-                                        fontSize: 25 * ffem,
-                                        fontWeight: FontWeight.w400,
-                                        height: 1 * ffem / fem,
-                                        color: Color(0xff000000),
-                                      ),
-                                    ),
                                     Text(
                                       widget.service
                                           .centerName, // Display center name
@@ -366,7 +336,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                       style: TextStyle(
                                         fontFamily: 'Imprima',
                                         fontSize: 20 * ffem,
-                                        fontWeight: FontWeight.w300,
+                                        fontWeight: FontWeight.w500,
                                         height: 1 * ffem / fem,
                                         color: Color(0xff000000),
                                       ),
@@ -375,40 +345,54 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 ),
                               ),
                             ),
-                            Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "Service Price:",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: 'Imprima',
-                                      fontSize: 25 * ffem,
-                                      fontWeight: FontWeight.w400,
-                                      height: 1 * ffem / fem,
-                                      color: Color(0xff000000),
-                                    ),
-                                  ),
-                                  Text(
-                                    '\$ ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: 'Imprima',
-                                      fontSize: 20 * ffem,
-                                      fontWeight: FontWeight.w300,
-                                      height: 1 * ffem / fem,
-                                      color: Color(0xff000000),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),
+                      // Container(
+                      //   margin: EdgeInsets.only(
+                      //       right: 200 * fem,
+                      //       left: 10 * fem,
+                      //       bottom: 10 * fem,
+                      //       top: 0 * fem),
+                      //   width: double.infinity,
+                      //   child: Row(
+                      //     crossAxisAlignment: CrossAxisAlignment.center,
+                      //     children: [
+                      //       // Center(
+                      //       //   child: Column(
+                      //       //     children: [
+                      //       //       // Text(
+                      //       //       //   "Service Price:",
+                      //       //       //   textAlign: TextAlign.center,
+                      //       //       //   style: TextStyle(
+                      //       //       //     fontFamily: 'Imprima',
+                      //       //       //     fontSize: 25 * ffem,
+                      //       //       //     fontWeight: FontWeight.w400,
+                      //       //       //     height: 1 * ffem / fem,
+                      //       //       //     color: Color(0xff000000),
+                      //       //       //   ),
+                      //       //       // ),
+                      //       //       Text(
+                      //       //         '\$ ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
+                      //       //         textAlign: TextAlign.center,
+                      //       //         style: TextStyle(
+                      //       //           fontFamily: 'Imprima',
+                      //       //           fontSize: 20 * ffem,
+                      //       //           fontWeight: FontWeight.w400,
+                      //       //           height: 1 * ffem / fem,
+                      //       //           color: Color(0xff000000),
+                      //       //         ),
+                      //       //       ),
+                      //       //     ],
+                      //       //   ),
+                      //       // ),
+                      //     ],
+                      //   ),
+                      // ),
+
                       Container(
                         margin: EdgeInsets.symmetric(
-                          horizontal: 10 * fem,
+                          horizontal: 20 * fem,
                         ),
                         width: double.infinity,
                         child: Column(
@@ -421,49 +405,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        "Start Date:",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 25 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      Text(
-                                        '${DateFormat('MM/dd/yyyy').format(widget.service.selectedStartDate)}', // Display selected start date
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 20 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 100 * fem,
-                                ),
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "End Date:",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 25 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      Text(
-                                        '${DateFormat('MM/dd/yyyy').format(widget.service.selectedEndDate)}', // Display selected end date
+                                        'Start Date : ${DateFormat('MM/dd/yyyy').format(widget.service.selectedStartDate)}', // Display selected start date
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontFamily: 'Imprima',
@@ -478,63 +420,23 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 ),
                               ],
                             ),
-                            // Add max and min age here
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Center(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "Max Age:",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 25 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 2 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      Text(
-                                        widget.service.maxAge.toString(),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 20 * ffem,
-                                          fontWeight: FontWeight.w300,
-                                          height: 1 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 130 * fem,
+                                  child: Column(),
                                 ),
                                 Center(
                                   child: Column(
                                     children: [
                                       Text(
-                                        "Min Age:",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 25 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 2 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      Text(
-                                        widget.service.minAge.toString(),
+                                        'End Date   : ${DateFormat('MM/dd/yyyy').format(widget.service.selectedEndDate)}', // Display selected end date
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontFamily: 'Imprima',
                                           fontSize: 20 * ffem,
-                                          fontWeight: FontWeight.w300,
-                                          height: 1 * ffem / fem,
+                                          fontWeight: FontWeight.w400,
+                                          height: 2 * ffem / fem,
                                           color: Color(0xff000000),
                                         ),
                                       ),
@@ -543,32 +445,59 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 ),
                               ],
                             ),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      right: 8,
+                                      top: 5 *
+                                          fem), // Adjust the value as needed
+                                  child: Text(
+                                    "Age range: ",
+                                    style: TextStyle(
+                                      fontFamily: 'Imprima',
+                                      fontSize: 20 * ffem,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1 * ffem / fem,
+                                      color: Color(0xff000000),
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '${widget.service.minAge} - ${widget.service.maxAge}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Imprima',
+                                    fontSize: 20 * ffem,
+                                    fontWeight: FontWeight.w300,
+                                    height: 2 * ffem / fem,
+                                    color: Color(0xff000000),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            //end row
                           ],
                         ),
                       ),
-
-                      //!!!!!!!!! make sure  with jory //!!!!!!!
-                      //
-                      //
-                      //
-                      //
-                      //
-                      //
-
+                      // service time
                       Center(
                         child: Container(
                           margin: EdgeInsets.only(
-                            right: 280 * fem,
+                            right: 160 * fem,
                             top: 10 * fem,
+                            left: 15,
                           ),
-                          child: Column(
+                          child: Row(
                             children: [
                               Text(
-                                "Time slot:",
-                                textAlign: TextAlign.center,
+                                ' Time: ',
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
-                                  fontSize: 25 * ffem,
+                                  fontSize: 20 * ffem,
                                   fontWeight: FontWeight.w400,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
@@ -576,11 +505,83 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               ),
                               Text(
                                 widget.service.selectedTimeSlot,
-                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 20 * ffem,
                                   fontWeight: FontWeight.w300,
+                                  height: 1 * ffem / fem,
+                                  color: Color(0xff000000),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      Container(
+                        margin: EdgeInsets.only(
+                            right: 200 * fem,
+                            left: 15 * fem,
+                            bottom: 10 * fem,
+                            top: 15 * fem),
+                        width: double.infinity,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              ' Price: ',
+                              style: TextStyle(
+                                fontFamily: 'Imprima',
+                                fontSize: 20 * ffem,
+                                fontWeight: FontWeight.w400,
+                                height: 1 * ffem / fem,
+                                color: Color(0xff000000),
+                              ),
+                            ),
+                            Text(
+                              '\$ ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Imprima',
+                                fontSize: 20 * ffem,
+                                fontWeight: FontWeight.w300,
+                                height: 1 * ffem / fem,
+                                color: Color(0xff000000),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Center(
+                        child: Container(
+                          margin: EdgeInsets.only(
+                              bottom: 35 * fem,
+                              top: 8 * fem,
+                              right: 250 * fem,
+                              left: 16 * fem),
+                          width: double.infinity,
+                          child: Column(
+                            children: [
+                              Text(
+                                "Description",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Imprima',
+                                  fontSize: 24 * ffem,
+                                  fontWeight: FontWeight.w300,
+                                  height: 1 * ffem / fem,
+                                  color: Color(0xff000000),
+                                ),
+                              ),
+                              Text(
+                                widget.service
+                                    .description, // Display service description
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Imprima',
+                                  fontSize: 20 * ffem,
+                                  fontWeight: FontWeight.w200,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -605,19 +606,23 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 59, 138,
-                                    207), // Change the button's background color
+                                primary: Color.fromARGB(255, 59, 138, 207),
+                                onPrimary: Colors
+                                    .white, // Change text color when pressed
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Change the button's shape
+                                  borderRadius: BorderRadius.circular(30.0),
                                 ),
+                                minimumSize: Size(120, 48), // Set button size
                               ),
                               child: Text(
                                 'Select Your Kids',
                                 style: TextStyle(
                                   color: Color.fromARGB(255, 255, 255, 255),
                                   fontSize: 20, // Change the text color
-                                  height: 1 * ffem / fem, // the title place
+                                  height: 1 * ffem / fem,
+                                  fontFamily: 'Imprima',
+                                  fontWeight:
+                                      FontWeight.w400, // the title place
                                 ),
                               ),
                             ),
@@ -709,7 +714,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   padding: EdgeInsets.fromLTRB(35 * fem, 0, 27 * fem, 0),
                   decoration: BoxDecoration(
                     color: Color.fromARGB(255, 59, 138, 207),
-                    borderRadius: BorderRadius.circular(10 * fem),
+                    borderRadius: BorderRadius.circular(30 * fem),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -780,7 +785,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         'Payment Now',
                         style: TextStyle(
                           fontFamily: 'Imprima',
-                          fontSize: 20 * ffem,
+                          fontSize: 25 * ffem,
                           fontWeight: FontWeight.w400,
                           height: 1 * ffem / fem,
                         ),
