@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
+//import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/AddKidsPage.dart';
 import 'package:baheej/screens/Service.dart';
 
@@ -16,6 +17,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -64,19 +66,59 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   }
 
   void _handleLogout() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      print("Signed Out");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SignInScreen(),
-        ),
-      );
-    } catch (e) {
-      print("Error signing out: $e");
-    }
+    // Show a confirmation dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Logout"),
+          content: Text("Are you sure you want to log out?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Perform the logout action here
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  print("Signed Out");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Logged out successfully"),
+                    ),
+                  );
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SignInScreen(),
+                    ),
+                  );
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
+   //void _navigateToServiceDetails(BuildContext context, Service service) {
+   // Navigator.push(
+   //   context,
+    //  MaterialPageRoute(
+    //    builder: (context) =>
+    //        ServiceDetailsPage(service: service), // Pass the service object
+   //   ),
+  //  );
+ // }
+
 
   void _handleSearch(String query) {
     setState(() {
@@ -104,6 +146,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
+      key: _scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text("Home"),
@@ -124,8 +167,9 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               fit: BoxFit.cover,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 80, left: 16, right: 16),
+                 Padding(
+            padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+            
             child: Column(
               children: [
                 TextField(
@@ -139,14 +183,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   ),
                   toolbarOptions: null, // Remove paste button
                 ),
-                Expanded(
+               Expanded(
                   child: ListView.builder(
                     itemCount: _filteredServices.length,
                     itemBuilder: (context, index) {
                       final service = _filteredServices[index];
                       return GestureDetector(
                         onTap: () {
-                          // Handle tapping on a service
+                          
                         },
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(0.2),
@@ -187,7 +231,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          // Handle the "View Details" button tap
+                                          // _navigateToServiceDetails(context, service);
                                         },
                                         child: Row(
                                           children: [
