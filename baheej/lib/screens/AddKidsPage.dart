@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 
 class AddKidsPage extends StatefulWidget {
@@ -12,6 +13,8 @@ class _AddKidsPageState extends State<AddKidsPage> {
   TextEditingController ageController = TextEditingController();
   List<String> addedKidNames = []; // Maintain a list of added kid names
 
+  final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+
   Future<void> _addKidToFirestore(String name, int age) async {
     try {
       if (age >= 2 && age <= 12) {
@@ -19,6 +22,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
         await kidCollection.add({
           'name': name,
           'age': age,
+          'userEmail': currentUserEmail, // Include user's email
         });
 
         // Add the name to the list of added kid names
@@ -31,6 +35,10 @@ class _AddKidsPageState extends State<AddKidsPage> {
             backgroundColor: Colors.green,
           ),
         );
+
+        // Clear the text fields
+        nameController.text = '';
+        ageController.text = '';
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -59,7 +67,10 @@ class _AddKidsPageState extends State<AddKidsPage> {
         title: Text('Add Kids'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Kids').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('Kids')
+            .where('userEmail', isEqualTo: currentUserEmail)
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return CircularProgressIndicator();
