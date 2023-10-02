@@ -1,9 +1,9 @@
-import 'package:baheej/screens/addKids.dart';
+import 'package:baheej/screens/AddKidsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
-import 'package:baheej/screens/Addkids.dart';
+import 'package:baheej/screens/AddKidsPage.dart';
 import 'package:baheej/screens/Service.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
@@ -95,7 +95,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Addkids(),
+        builder: (context) => AddKidsPage(),
       ),
     );
   }
