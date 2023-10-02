@@ -1,29 +1,36 @@
-
 import 'package:flutter/material.dart';
 //import 'package:baheej/screens/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
+//import 'package:baheej/screens/firebase_service.dart';
 
 class Service {
-  final String name;
-  final int timeSlot; // 0 for 8-11 AM, 1 for 2-5 PM
-  final double price;
+  final String serviceName;
   final String description;
-  final int capacity;
-  final int age;
-  final DateTime startDate;
-  final DateTime endDate;
+  final String centerName;
+  final String selectedTimeSlot;
+  final int capacityValue;
+  final double servicePrice;
+  final DateTime selectedStartDate;
+  final DateTime selectedEndDate;
+  final int minAge;
+  final int maxAge;
 
   Service({
-    required this.name,
-    required this.timeSlot,
-    required this.price,
+    required this.serviceName,
     required this.description,
-    required this.capacity,
-    required this.age,
-    required this.startDate,
-    required this.endDate,
+    required this.centerName,
+    required this.selectedEndDate,
+    required this.selectedStartDate,
+    required this.minAge,
+    required this.maxAge,
+    required this.capacityValue,
+    required this.servicePrice,
+    required this.selectedTimeSlot,
   });
+  // Define constants for the timeslots
+  static const String timeslotMorning = '8-11 AM';
+  static const String timeslotAfternoon = '2-5 PM';
 
 //   // Convert Service object to JSON
 //   Map<String, dynamic> toJson() {

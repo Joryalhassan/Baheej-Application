@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:baheej/screens/SignInScreen.dart';
+
 import 'package:baheej/screens/Service.dart';
+
 import 'package:baheej/screens/ServiceFormScreen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentIndex = index;
     });
 
-    // Handle navigation when the "Add Service" icon .
+    // Handle navigation when the "Add Service" icon is tapped.
 
     if (index == 1) {
       Navigator.push(
@@ -40,21 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
       });
-    }
-  }
-
-  // Function to handle user logout
-
-  void _handleLogout() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      print("Signed Out");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
-      );
-    } catch (e) {
-      print("Error signing out: $e");
     }
   }
 
@@ -94,9 +82,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     IconButton(
                       icon: Icon(Icons.logout), // Logout icon
 
-                      onPressed: _handleLogout, // Call the logout function
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut().then((value) {
+                          print("Signed Out");
 
-                      color: Colors.white,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignInScreen()),
+                          );
+                        });
+                      },
                     ),
                   ],
                   floating: false,
@@ -114,9 +110,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Card(
                         margin: EdgeInsets.all(10),
                         child: ListTile(
-                          title: Text(service.name),
+                          title: Text(service.serviceName),
                           subtitle: Text(
-                            'Start Date: ${service.startDate.toLocal().toString().split(' ')[0]} - End Date: ${service.endDate.toLocal().toString().split(' ')[0]}',
+                            'Start Date: ${service.selectedStartDate.toLocal().toString().split(' ')[0]} - End Date: ${service.selectedEndDate.toLocal().toString().split(' ')[0]}',
                           ),
                         ),
                       );

@@ -1,6 +1,10 @@
-import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/addKids.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/Addkids.dart';
+import 'package:baheej/screens/Service.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -10,19 +14,55 @@ class HomeScreenGaurdian extends StatefulWidget {
 }
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
-  int _currentIndex = 0;
+  late List<Service> _allServices;
+  List<Service> _filteredServices = [];
+  TextEditingController _searchController = TextEditingController();
 
-  // Function to handle the bottom navigation item selection.
-
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
+  @override
+  void initState() {
+    super.initState();
+    fetchDataFromFirebase().then((services) {
+      setState(() {
+        _allServices = services;
+        _filteredServices = services;
+      });
     });
-
-    //if (index == 0) {}
   }
 
-  // Function to handle user logout
+  Future<List<Service>> fetchDataFromFirebase() async {
+    final firestore = FirebaseFirestore.instance;
+    final collection = firestore.collection('center-service');
+    final querySnapshot = await collection.get();
+
+    return querySnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      final serviceName = data['serviceName'] ?? ' Title';
+      final description = data['serviceDesc'] ?? ' Description';
+      final centerName = data['centerName'] ?? 'Center Name';
+      final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
+      final capacityValue = data['capacityValue'] ?? 0;
+      final servicePrice = data['servicePrice'] ?? 0.0;
+      final selectedStartDate =
+          (data['selectedStartDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final selectedEndDate =
+          (data['selectedEndDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final minAge = data['minAge'] ?? 4;
+      final maxAge = data['maxAge'] ?? 17;
+
+      return Service(
+        serviceName: serviceName,
+        description: description,
+        centerName: centerName,
+        selectedTimeSlot: selectedTimeSlot,
+        capacityValue: capacityValue,
+        servicePrice: servicePrice,
+        selectedStartDate: selectedStartDate,
+        selectedEndDate: selectedEndDate,
+        minAge: minAge,
+        maxAge: maxAge,
+      );
+    }).toList();
+  }
 
   void _handleLogout() async {
     try {
@@ -30,50 +70,160 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       print("Signed Out");
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
+        MaterialPageRoute(
+          builder: (context) => SignInScreen(),
+        ),
       );
     } catch (e) {
       print("Error signing out: $e");
     }
   }
 
+  void _handleSearch(String query) {
+    setState(() {
+      _filteredServices = _allServices
+          .where((service) =>
+              service.serviceName
+                  .toLowerCase()
+                  .startsWith(query.toLowerCase()) ||
+              service.description.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  void _handleAddKids() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Addkids(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true, // Extend the body behind the app bar
+    final user = FirebaseAuth.instance.currentUser;
 
+    return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text("Home"),
-
-        backgroundColor: Colors.transparent, // Make the app bar transparent
-
-        elevation: 0, // Remove the app bar shadow
-
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout), // Logout Icon
-
-            onPressed: _handleLogout, // Call the logout function
+            icon: Icon(Icons.logout),
+            onPressed: _handleLogout,
           ),
         ],
       ),
-
       body: Stack(
         children: [
-          // Background Image
-
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backG.png', // Replace with your image path
-
+              'assets/images/backG.png',
               fit: BoxFit.cover,
             ),
           ),
-
-          // Your content goes here
+          Padding(
+            padding: EdgeInsets.only(top: 80, left: 16, right: 16),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    _handleSearch(value);
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search services...',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  toolbarOptions: null, // Remove paste button
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _filteredServices.length,
+                    itemBuilder: (context, index) {
+                      final service = _filteredServices[index];
+                      return GestureDetector(
+                        onTap: () {
+                          // Handle tapping on a service
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(0.2),
+                          child: Card(
+                            elevation: 3,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            color: Color.fromARGB(255, 251, 241, 241),
+                            child: Container(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    service.serviceName,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Service Type: ${service.description}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Service Time: ${service.selectedTimeSlot}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          // Handle the "View Details" button tap
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'View Details',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 14,
+                                              color: Colors.grey,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
-
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         color: Color.fromARGB(255, 245, 198, 239),
@@ -85,19 +235,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.history), // Home Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.history),
+                  color: Colors.white,
                   onPressed: () {
-                    // Handle home button tap
+                    // Handle history button tap
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 5), // Add margin to the top
-
+                  padding: EdgeInsets.only(top: 5),
                   child: Text(
-                    'Booking Service',
+                    'History',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -110,16 +257,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      1, 50, 17, 1), // Add margin to the top
-
-                  child: Text(
-                    'Add Child',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                IconButton(
+                  icon: Icon(Icons.person_add),
+                  color: Colors.white,
+                  onPressed: _handleAddKids,
+                ),
+                Text(
+                  'Add Kids',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -129,10 +276,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.person), // Profile Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.person),
+                  color: Colors.white,
                   onPressed: () {
                     // Handle profile button tap
                   },
@@ -150,20 +295,15 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           ],
         ),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
           // Handle the floating action button tap (Home)
-
-          // You can navigate to the home screen or perform any other action here
         },
         child: Icon(
-          Icons.add_reaction_outlined, // Home Icon
-
-          color: Colors.white, // Set FAB icon color to white.
+          Icons.add_reaction_outlined,
+          color: Colors.white,
         ),
       ),
     );
