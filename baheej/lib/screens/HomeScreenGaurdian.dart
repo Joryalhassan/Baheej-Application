@@ -253,24 +253,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                 ),
               ],
             ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person_add),
-                  color: Colors.white,
-                  onPressed: _handleAddKids,
-                ),
-                Text(
-                  'Add Kids',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
             SizedBox(width: 25),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -298,9 +280,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          // Handle the floating action button tap (Home)
-        },
+        onPressed:
+            _handleAddKids, // Call the _handleAddKids function when the button is pressed
         child: Icon(
           Icons.add_reaction_outlined,
           color: Colors.white,

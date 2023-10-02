@@ -11,6 +11,22 @@ class _AddKidsPageState extends State<AddKidsPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
 
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Center Name is required';
+    }
+
+    if (value.length < 4 || value.length > 25) {
+      return 'Center Name must be between 4 and 25 letters';
+    }
+
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
+      return 'Center Name should only contain letters';
+    }
+
+    return null;
+  }
+
   Future<void> _addKidToFirestore(String name, int age) async {
     try {
       final kidCollection = FirebaseFirestore.instance.collection('Kids');
@@ -82,7 +98,16 @@ class _AddKidsPageState extends State<AddKidsPage> {
                       final name = nameController.text;
                       final ageStr = ageController.text;
 
-                      if (name.isNotEmpty && ageStr.isNotEmpty) {
+                      final validationMessage = _validateName(name);
+
+                      if (validationMessage != null) {
+                        // Show the validation error message to the user
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(validationMessage),
+                          ),
+                        );
+                      } else if (ageStr.isNotEmpty) {
                         final age = int.tryParse(ageStr);
                         if (age != null) {
                           await _addKidToFirestore(name, age);
