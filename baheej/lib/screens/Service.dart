@@ -11,6 +11,7 @@ class Service {
   final DateTime selectedEndDate;
   final int minAge;
   final int maxAge;
+  // final Map<String, String> selectedKidsNames; // Define the property
 
   Service({
     required this.serviceName,
@@ -23,6 +24,7 @@ class Service {
     required this.capacityValue,
     required this.servicePrice,
     required this.selectedTimeSlot,
+    // required this.selectedKidsNames,
   });
   // Define constants for the timeslots
   static const String timeslotMorning = '8-11 AM';

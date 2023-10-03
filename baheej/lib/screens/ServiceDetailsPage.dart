@@ -9,8 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:baheej/screens/HomeScreenGaurdian.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:baheej/screens/HomeScreenGaurdian.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -83,6 +83,31 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     return selectedKidsNames;
   }
 
+  // Future<bool> hasConflictingService(
+  //     String selectedTimeSlot,
+  //     List<String> selectedKids,
+  //     DateTime selectedStartDate,
+  //     DateTime selectedEndDate) async {
+  //   final firestore = FirebaseFirestore.instance;
+  //   final user = FirebaseAuth.instance.currentUser;
+  //   final userEmail = user?.email;
+
+  //   if (userEmail == null) {
+  //     return false; // Handle the case where the user email is not available
+  //   }
+
+  //   final querySnapshot = await firestore
+  //       .collection('ServiceBook')
+  //       .where('userEmail', isEqualTo: userEmail)
+  //       .where('selectedTimeSlot', isEqualTo: selectedTimeSlot)
+  //       .where('selectedKidsNames', isEqualTo: selectedKids)
+  //       .where('selectedStartDate', isEqualTo: selectedStartDate)
+  //       .where('selectedEndDate', isEqualTo: selectedEndDate)
+  //       .get();
+
+  //   return querySnapshot.docs.isNotEmpty;
+  // }
+
   Map<String, dynamic>? paymentIntent;
 
   //payment method .
@@ -121,6 +146,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       print("Error: $e");
     }
   }
+
 // payment
 
   void displayPaymentSheet(BuildContext context) async {
@@ -225,7 +251,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     total = widget.service.servicePrice * selectedKids.length.toDouble();
     final double fem = 1.0;
     final double ffem = 1.0;
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text("Service details"),
+        backgroundColor: Color.fromARGB(0, 255, 255, 255),
+        elevation: 0,
+      ),
       body: Stack(
         children: [
           Image.asset(
@@ -240,15 +273,15 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               children: [
                 Container(
                   margin: EdgeInsets.only(left: 16, top: 55), //16 the arraw
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Color.fromARGB(255, 255, 255, 255),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
+                  // child: IconButton(
+                  //   // icon: Icon(
+                  //   //     //Icons.arrow_back,
+                  //   //     //color: Color.fromARGB(255, 255, 255, 255),
+                  //   //     ),
+                  //   onPressed: () {
+                  //     Navigator.pop(context);
+                  //   },
+                  // ),
                 ),
                 SizedBox(height: 70),
                 Container(
@@ -348,47 +381,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           ],
                         ),
                       ),
-                      // Container(
-                      //   margin: EdgeInsets.only(
-                      //       right: 200 * fem,
-                      //       left: 10 * fem,
-                      //       bottom: 10 * fem,
-                      //       top: 0 * fem),
-                      //   width: double.infinity,
-                      //   child: Row(
-                      //     crossAxisAlignment: CrossAxisAlignment.center,
-                      //     children: [
-                      //       // Center(
-                      //       //   child: Column(
-                      //       //     children: [
-                      //       //       // Text(
-                      //       //       //   "Service Price:",
-                      //       //       //   textAlign: TextAlign.center,
-                      //       //       //   style: TextStyle(
-                      //       //       //     fontFamily: 'Imprima',
-                      //       //       //     fontSize: 25 * ffem,
-                      //       //       //     fontWeight: FontWeight.w400,
-                      //       //       //     height: 1 * ffem / fem,
-                      //       //       //     color: Color(0xff000000),
-                      //       //       //   ),
-                      //       //       // ),
-                      //       //       Text(
-                      //       //         '\$ ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
-                      //       //         textAlign: TextAlign.center,
-                      //       //         style: TextStyle(
-                      //       //           fontFamily: 'Imprima',
-                      //       //           fontSize: 20 * ffem,
-                      //       //           fontWeight: FontWeight.w400,
-                      //       //           height: 1 * ffem / fem,
-                      //       //           color: Color(0xff000000),
-                      //       //         ),
-                      //       //       ),
-                      //       //     ],
-                      //       //   ),
-                      //       // ),
-                      //     ],
-                      //   ),
-                      // ),
 
                       Container(
                         margin: EdgeInsets.symmetric(
@@ -539,7 +531,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               ),
                             ),
                             Text(
-                              '\$ ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
+                              '\SAR ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Imprima',
@@ -594,7 +586,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       // Display Kids selection panel
                       Container(
                         margin: EdgeInsets.fromLTRB(
-                            90 * fem, 0, 71 * fem, 40 * fem),
+                            20 * fem, 0, 71 * fem, 40 * fem),
                         width: double.infinity,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,18 +598,19 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 59, 138, 207),
-                                onPrimary: Colors
-                                    .white, // Change text color when pressed
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0),
-                                ),
-                                minimumSize: Size(120, 48), // Set button size
+                                primary: Color.fromARGB(255, 213, 214, 214),
+                                onPrimary: Color.fromARGB(255, 217, 231,
+                                    253), // Change text color when pressed
+                                // shape: RoundedRectangleBorder(
+                                //   borderRadius: BorderRadius.circular(30.0),
+                                // ),
+                                ///shadowColor: Color(black),
+                                minimumSize: Size(100, 48), // Set button size
                               ),
                               child: Text(
                                 'Select Your Kids',
                                 style: TextStyle(
-                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  color: Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 20, // Change the text color
                                   height: 1 * ffem / fem,
                                   fontFamily: 'Imprima',
@@ -713,8 +706,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   //80 change the size
                   padding: EdgeInsets.fromLTRB(35 * fem, 0, 27 * fem, 0),
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 59, 138, 207),
-                    borderRadius: BorderRadius.circular(30 * fem),
+                    color: Color.fromARGB(255, 213, 214, 214),
+                    //borderRadius: BorderRadius.circular(30 * fem),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -728,7 +721,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                             fontSize: 20 * ffem,
                             fontWeight: FontWeight.w400,
                             height: 1.6666666667 * ffem / fem,
-                            color: Color.fromARGB(255, 255, 255, 255),
+                            color: Color.fromARGB(255, 0, 0, 0),
                           ),
                         ),
                       ),
@@ -737,7 +730,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         width: 1 * fem,
                         height: 46 * fem,
                         decoration: BoxDecoration(
-                          color: Color(0xfffdfdfd),
+                          color: Color.fromARGB(255, 6, 6, 6),
                         ),
                       ),
                       Text(
@@ -747,7 +740,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           fontSize: 20 * ffem,
                           fontWeight: FontWeight.w400,
                           height: 1.6666666667 * ffem / fem,
-                          color: Color.fromARGB(255, 255, 255, 255),
+                          color: Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
                     ],
@@ -782,7 +775,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Payment Now',
+                        'Pay Now',
                         style: TextStyle(
                           fontFamily: 'Imprima',
                           fontSize: 25 * ffem,
