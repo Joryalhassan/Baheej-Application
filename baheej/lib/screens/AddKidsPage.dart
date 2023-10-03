@@ -19,6 +19,23 @@ class _AddKidsPageState extends State<AddKidsPage> {
     try {
       if (age >= 2 && age <= 12) {
         final kidCollection = FirebaseFirestore.instance.collection('Kids');
+
+        // Check if a kid with the same name exists for the current user's email
+        final existingKid = await kidCollection
+            .where('userEmail', isEqualTo: currentUserEmail)
+            .where('name', isEqualTo: name)
+            .get();
+
+        if (existingKid.docs.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Kid with the same name already exists.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
         await kidCollection.add({
           'name': name,
           'age': age,
