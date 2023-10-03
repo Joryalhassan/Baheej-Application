@@ -598,7 +598,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 213, 214, 214),
+                                primary: Color.fromARGB(255, 231, 232,
+                                    232), //primary: Color.fromARGB(255, 213, 214, 214),
                                 onPrimary: Color.fromARGB(255, 217, 231,
                                     253), // Change text color when pressed
                                 // shape: RoundedRectangleBorder(
@@ -706,7 +707,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   //80 change the size
                   padding: EdgeInsets.fromLTRB(35 * fem, 0, 27 * fem, 0),
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 213, 214, 214),
+                    color: Color.fromARGB(255, 255, 255, 255),
                     //borderRadius: BorderRadius.circular(30 * fem),
                   ),
                   child: Row(
@@ -719,7 +720,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           style: TextStyle(
                             fontFamily: 'Imprima',
                             fontSize: 20 * ffem,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.bold,
                             height: 1.6666666667 * ffem / fem,
                             color: Color.fromARGB(255, 0, 0, 0),
                           ),
@@ -738,7 +739,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         style: TextStyle(
                           fontFamily: 'Imprima',
                           fontSize: 20 * ffem,
-                          fontWeight: FontWeight.w400,
+                          fontWeight: FontWeight.bold,
                           height: 1.6666666667 * ffem / fem,
                           color: Color.fromARGB(255, 0, 0, 0),
                         ),
