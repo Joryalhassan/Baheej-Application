@@ -120,19 +120,15 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'This field is required';
     }
 
-    // final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
-    // final match = ageRangePattern.firstMatch(value);
+    final minAge = int.tryParse(value);
+    if (minAge == null) {
+      return 'Please enter a valid age';
+    }
 
-    // final minAge = int.tryParse(match?.group(1) ?? '');
-    // final maxAge = int.tryParse(match?.group(2) ?? '');
-
-    // if (minAge == null) {
-    //   return 'Min age should be at least 4';
-    // }
-
-    // if (minAge > maxAge) {
-    //   return 'Min age should be less than or equal to max age';
-    // }
+    // Ensure that min age is not greater than max age
+    if (minAge > maxAge) {
+      return 'Minimum age cannot be greater than maximum age';
+    }
 
     return null;
   }
@@ -142,19 +138,15 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'This field is required';
     }
 
-    // final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
-    // final match = ageRangePattern.firstMatch(value);
+    final maxAge = int.tryParse(value);
+    if (maxAge == null) {
+      return 'Please enter a valid age';
+    }
 
-    // final minAge = int.tryParse(match?.group(1) ?? '');
-    // final maxAge = int.tryParse(match?.group(2) ?? '');
-
-    // if (maxAge == null || maxAge > 17) {
-    //   return 'Max age should be at most 17';
-    // }
-
-    // if (maxAge < minAge) {
-    //   return 'Max age should be greater than or equal to min age';
-    // }
+    // Ensure that max age is not less than min age
+    if (maxAge < minAge) {
+      return 'NOT Valid';
+    }
 
     return null;
   }
@@ -315,7 +307,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
   Widget buildIncrementDecrementMinAgeField(
     String label,
-    int value,
+    int minAge, // Change from value to minAge
     void Function() onIncrement,
     void Function() onDecrement,
   ) {
@@ -380,6 +372,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 onPressed: () {
                   setState(() {
                     if (minAge < 17) {
+                      // Change from minAge < 17 to minAge <= 17
                       minAge += 1;
                       onIncrement();
                     }
@@ -395,7 +388,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
   Widget buildIncrementDecrementMaxAgeField(
     String label,
-    int value,
+    int maxAge, // Change from value to maxAge
     void Function() onIncrement,
     void Function() onDecrement,
   ) {
@@ -416,6 +409,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 onPressed: () {
                   setState(() {
                     if (maxAge > 4) {
+                      // Change from maxAge > 4 to maxAge >= 4
                       maxAge -= 1;
                       onDecrement();
                     }

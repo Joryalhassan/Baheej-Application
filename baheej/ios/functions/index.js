@@ -98,4 +98,23 @@ exports.StripePayEndpointIntentId = functions.https.onRequest(async (req, res) =
         // See https://stripe.com/docs/declines/codes for more.
         return res.send({ error: e.message });
     }
+    
 });
+// const functions = require("firebase-functions");
+// const admin = require("firebase-admin");
+// admin.initializeApp();
+
+// exports.sendNotification = functions.https.onCall(async (data, context) => {
+//   const message = {
+//     notification: {
+//       title: "Notification Title",
+//       body: data.message, // The message entered by the center
+//     },
+//     topic: "guardians", // Send notification to the "guardians" topic
+//   };
+
+//   // Send the notification
+//   await admin.messaging().send(message);
+
+//   return { success: true };
+// });

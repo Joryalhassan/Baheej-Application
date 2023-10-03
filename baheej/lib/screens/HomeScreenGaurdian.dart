@@ -1,12 +1,12 @@
+import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
-import 'package:baheej/screens/ServiceDetailsPage.dart';
+//import 'package:baheej/screens/AddKidsPage.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
 
-//
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
 
@@ -15,19 +15,24 @@ class HomeScreenGaurdian extends StatefulWidget {
 }
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
-  //int _currentIndex = 0;
-  Future<List<Service>>? _services;
+  late List<Service> _allServices;
+  List<Service> _filteredServices = [];
+  TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    // Initialize _services by fetching data from Firebase
-    _services = fetchDataFromFirebase();
+    fetchDataFromFirebase().then((services) {
+      setState(() {
+        _allServices = services;
+        _filteredServices = services;
+      });
+    });
   }
 
   Future<List<Service>> fetchDataFromFirebase() async {
     final firestore = FirebaseFirestore.instance;
     final collection = firestore.collection('center-service');
-
     final querySnapshot = await collection.get();
 
     return querySnapshot.docs.map((doc) {
@@ -36,7 +41,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       final description = data['serviceDesc'] ?? ' Description';
       final centerName = data['centerName'] ?? 'Center Name';
       final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
-      // print('Service Time from Firestore: $selectedTimeSlot');
       final capacityValue = data['capacityValue'] ?? 0;
       final servicePrice = data['servicePrice'] ?? 0.0;
       final selectedStartDate =
@@ -76,14 +80,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     }
   }
 
-  void _navigateToServiceDetails(BuildContext context, Service service) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            ServiceDetailsPage(service: service), // Pass the service object
-      ),
-    );
+  void _handleSearch(String query) {
+    setState(() {
+      _filteredServices = _allServices
+          .where((service) =>
+              service.serviceName
+                  .toLowerCase()
+                  .startsWith(query.toLowerCase()) ||
+              service.description.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
   }
 
   void _handleAddKids() {
@@ -98,7 +104,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userEmail = user?.email;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -114,52 +120,115 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       ),
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backG.png', // Replace with your image path
+              'assets/images/backG.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Your content goes here
-          FutureBuilder<List<Service>>(
-            future: _services,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                return Center(child: Text('No services available.'));
-              } else {
-                //here to view info in the card
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final service = snapshot.data![index];
-                    return GestureDetector(
-                      onTap: () {
-                        _navigateToServiceDetails(context, service);
-                      },
-                      child: Card(
-                        margin: EdgeInsets.only(top: 20),
-                        child: ListTile(
-                          title: Text(service.serviceName),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(service.description),
-                              Text(service
-                                  .selectedTimeSlot), // Display time slot here
-                            ],
+          Padding(
+            padding: EdgeInsets.only(top: 80, left: 16, right: 16),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    _handleSearch(value);
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search services...',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  toolbarOptions: null, // Remove paste button
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _filteredServices.length,
+                    itemBuilder: (context, index) {
+                      final service = _filteredServices[index];
+                      return GestureDetector(
+                        onTap: () {
+                          // Handle tapping on a service
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(0.2),
+                          child: Card(
+                            elevation: 3,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            color: Color.fromARGB(255, 251, 241, 241),
+                            child: Container(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    service.serviceName,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Service Type: ${service.description}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Service Time: ${service.selectedTimeSlot}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ServiceDetailsPage(
+                                                      service: service),
+                                            ),
+                                          );
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'View Details',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 14,
+                                              color: Colors.grey,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }
-            },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
