@@ -531,7 +531,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               ),
                             ),
                             Text(
-                              '\SAR ${widget.service.servicePrice.toStringAsFixed(2)}', // Display service price
+                              ' ${widget.service.servicePrice.toStringAsFixed(2)}\SAR', // Display service price
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Imprima',
@@ -735,7 +735,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         ),
                       ),
                       Text(
-                        '\$ ${calculateTotalPrice(widget.service)}', // Calculate and display total price
+                        ' ${calculateTotalPrice(widget.service)}\SAR', // Calculate and display total price
                         style: TextStyle(
                           fontFamily: 'Imprima',
                           fontSize: 20 * ffem,
