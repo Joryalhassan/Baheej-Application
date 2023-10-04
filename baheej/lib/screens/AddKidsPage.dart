@@ -55,7 +55,7 @@ class AddKidsPage extends StatefulWidget {
 class _AddKidsPageState extends State<AddKidsPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
-  List<String> addedKidNames = []; // Maintain a list of added kid names
+  List<String> addedKidNames = [];
 
   final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
 
@@ -64,7 +64,6 @@ class _AddKidsPageState extends State<AddKidsPage> {
       if (age >= 2 && age <= 12) {
         final kidCollection = FirebaseFirestore.instance.collection('Kids');
 
-        // Check if a kid with the same name exists for the current user's email
         final existingKid = await kidCollection
             .where('userEmail', isEqualTo: currentUserEmail)
             .where('name', isEqualTo: name)
@@ -83,13 +82,11 @@ class _AddKidsPageState extends State<AddKidsPage> {
         await kidCollection.add({
           'name': name,
           'age': age,
-          'userEmail': currentUserEmail, // Include user's email
+          'userEmail': currentUserEmail,
         });
 
-        // Add the name to the list of added kid names
         addedKidNames.add(name);
 
-        // Show a success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Kid "$name" added successfully!'),
@@ -97,7 +94,6 @@ class _AddKidsPageState extends State<AddKidsPage> {
           ),
         );
 
-        // Clear the text fields
         nameController.text = '';
         ageController.text = '';
       } else {
@@ -124,31 +120,57 @@ class _AddKidsPageState extends State<AddKidsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remove the app bar
-      appBar: null,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('Kids')
-            .where('userEmail', isEqualTo: currentUserEmail)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return CircularProgressIndicator();
-          }
-          final kids = snapshot.data!.docs;
-          List<Widget> kidWidgets = [];
-          for (var kid in kids) {
-            final kidData = kid.data() as Map<String, dynamic>;
-            final kidName = kidData['name'] as String;
-            final kidAge = kidData['age'] as int;
-            kidWidgets.add(
-              KidCard(name: kidName, age: kidAge), // Use the KidCard widget
-            );
-          }
-          return ListView(
-            children: kidWidgets,
-          );
-        },
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Colors.black, // Set the icon color to black
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop(); // Go back to the previous page
+          },
+        ),
+      ),
+      body: Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'My Kids',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Kids')
+                  .where('userEmail', isEqualTo: currentUserEmail)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return CircularProgressIndicator();
+                }
+                final kids = snapshot.data!.docs;
+                List<Widget> kidWidgets = [];
+                for (var kid in kids) {
+                  final kidData = kid.data() as Map<String, dynamic>;
+                  final kidName = kidData['name'] as String;
+                  final kidAge = kidData['age'] as int;
+                  kidWidgets.add(
+                    KidCard(name: kidName, age: kidAge),
+                  );
+                }
+                return ListView(
+                  children: kidWidgets,
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -156,14 +178,14 @@ class _AddKidsPageState extends State<AddKidsPage> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Add Kid'), // Change the dialog title
+                title: Text('Add Kid'),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     TextField(
                       controller: nameController,
                       decoration: InputDecoration(labelText: 'Name'),
-                      maxLength: 20, // Limit to 20 characters
+                      maxLength: 20,
                     ),
                     TextField(
                       controller: ageController,
@@ -171,8 +193,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(
-                            2), // Limit to 2 characters
+                        LengthLimitingTextInputFormatter(2),
                       ],
                     ),
                   ],
@@ -218,7 +239,6 @@ class _AddKidsPageState extends State<AddKidsPage> {
                       final name = nameController.text;
                       final ageStr = ageController.text;
 
-                      // Check for empty fields first
                       if (name.isEmpty || ageStr.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -229,7 +249,6 @@ class _AddKidsPageState extends State<AddKidsPage> {
                         return;
                       }
 
-                      // Validate name length
                       if (!isNameValid(name)) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -241,7 +260,6 @@ class _AddKidsPageState extends State<AddKidsPage> {
                         return;
                       }
 
-                      // Validate name contains only letters
                       if (!containsOnlyLetters(name)) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
