@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,8 +13,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Index for the selected bottom navigation item.
+  int _currentIndex = 0;
   List<Service> services = [];
+  String userName = ''; // Initialize userName
 
   void onTabTapped(int index) {
     setState(() {
@@ -22,6 +24,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (index == 1) {
       navigateToServiceFormScreen();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the user's name from Firestore when the screen initializes
+    fetchUserName();
+  }
+
+  void fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final firstName =
+            userData['username'] ?? ''; // Get the first name from Firestore
+        setState(() {
+          userName = firstName;
+        });
+      }
     }
   }
 
@@ -36,13 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               child: Text('No'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Text('Yes'),
               onPressed: () async {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 try {
                   await FirebaseAuth.instance.signOut();
                   showLogoutSuccessDialog();
@@ -81,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               child: Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 navigateToSignInScreen();
               },
             ),
@@ -100,11 +128,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // final user = FirebaseAuth.instance.currentUser;
+    // final userName = user?.displayName ?? 'User';
+
     return Scaffold(
       extendBody: true,
       body: Stack(
         children: [
-          // Background Image
           Image.asset(
             'assets/images/backG.png',
             fit: BoxFit.cover,
@@ -118,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   title: Text(
-                    'Home',
+                    'Welcome $userName',
                     style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.w700,
@@ -229,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
+        onPressed: () async {
           navigateToServiceFormScreen();
         },
         child: Icon(
