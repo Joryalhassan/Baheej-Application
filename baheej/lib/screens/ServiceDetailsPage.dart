@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-//import 'package:confetti/confetti.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
@@ -8,12 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/main.dart';
-
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:baheej/screens/HomeScreenGaurdian.dart';
-
-enum PaymentResult { success, failure, canceled }
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -58,8 +51,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'userEmail': userEmail,
       };
 
-      // Add the selected kids' names to the service data
-
       // Add the data to the 'ServiceBook' collection
       await firestore.collection('ServiceBook').add(serviceData);
 
@@ -87,61 +78,47 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     return selectedKidsNames;
   }
 
+// payment
+
+//step1
   Map<String, dynamic>? paymentIntent;
 
-  //payment method .
-
-  void makePayment(BuildContext context) async {
+//step 4
+  Future<void> makePayment(BuildContext context) async {
     try {
       double totalPrice = calculateTotalPrice(widget.service);
+      paymentIntent = await createPaymentIntent(totalPrice);
 
-      // Check for existing services with the same date, time, and kids' names
+      var gpay = PaymentSheetGooglePay(
+        merchantCountryCode: "US",
+        currencyCode: 'SAR',
+        testEnv: true,
+      );
+      String formattedPrice =
+          NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-      {
-        // No existing service found, proceed with payment
-        paymentIntent = await createPaymentIntent(totalPrice);
-        var gpay = PaymentSheetGooglePay(
-          merchantCountryCode: "US",
-          currencyCode: 'SAR',
-          testEnv: true,
-        );
+      Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntent!["client_secret"],
+          style: ThemeMode.dark,
+          merchantDisplayName: "baheej",
+          googlePay: gpay,
+        ),
+      );
 
-        // Format the price as a string with English numerals
-        String formattedPrice =
-            NumberFormat.currency(locale: 'en_US', symbol: '')
-                .format(totalPrice);
-
-        Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: paymentIntent!["client_secret"],
-            style: ThemeMode.dark,
-            merchantDisplayName: "baheej",
-            googlePay: gpay,
-          ),
-        );
-
-        // Display the payment sheet and await the result
-        final paymentResult = await displayPaymentSheet(context);
-
-        if (paymentResult == paymentResult) {
-          final user = FirebaseAuth.instance.currentUser;
-          final userEmail = user?.email;
-
-          // Call the function to store service information in Firestore
-          await addServiceToFirestore(
-              widget.service.selectedTimeSlot, userEmail);
-        } else {
-          print("Payment failed or was canceled.");
-        }
-      }
-    } catch (e) {
-      print("Error: $e");
+      displayPaymentSheet(context);
+    } catch (e, s) {
+      print('exception:$e$s');
     }
   }
 
-  Future<PaymentResult> displayPaymentSheet(BuildContext context) async {
+  void displayPaymentSheet(BuildContext context) async {
     try {
       await Stripe.instance.presentPaymentSheet();
+      final user = FirebaseAuth.instance.currentUser;
+      final userEmail = user?.email;
+
+      await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
       // Show a success message
       showDialog(
         context: context,
@@ -162,12 +139,29 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       );
 
       print("Done");
-      return PaymentResult.success;
     } catch (e) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Payment cancled'),
+            content: Text('Your payment was canceld!'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
       print("fail");
-      return PaymentResult.canceled;
     }
   }
+
+//step 2
 
   Future<Map<String, dynamic>> createPaymentIntent(double totalPrice) async {
     try {
@@ -175,15 +169,17 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         "amount": (totalPrice * 100).toInt().toString(), // Amount in cents
         "currency": "SAR", // Currency code
       };
+
       http.Response response = await http.post(
         Uri.parse("https://api.stripe.com/v1/payment_intents"),
         body: body,
         headers: {
           "Authorization":
-              "Bearer sk_test_51Ntfi6HEEOvMnOrx0QhRmQKoOVj8dOic3IJd6CMDRWeSYVwoVxBoR4TVMvIe0Ps0LIasU8icVzwQ6oiBAjdkvxpq00QSl4zjdN",
+              "Bearer sk_test_51NxYJkAzFvFRBXEyLv2uL2YXnoi10BOsD6BlEJdyA8hc6O0g6qa4XeQetTJpq0jHZjw966vT7VqZAs2ZaJO8F1Pv00tJ9qnZNk",
           "Content-Type": "application/x-www-form-urlencoded",
         },
       );
+
       return json.decode(response.body);
     } catch (e) {
       throw Exception(e);
@@ -195,7 +191,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   int minAge = 0;
   int maxAge = 0;
 
-  void bookService(VoidCallback onKidsSelected) async {
+  void bookService(VoidCallback onKidsSelected) {
     if (selectedKids.isEmpty) {
       // No kids selected, show a message
       showDialog(
@@ -216,7 +212,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         },
       );
     } else {
-      makePayment(context);
+      // Kids are selected, call the callback function
+      onKidsSelected();
     }
   }
 
@@ -247,15 +244,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               children: [
                 Container(
                   margin: EdgeInsets.only(left: 16, top: 55), //16 the arraw
-                  // child: IconButton(
-                  //   // icon: Icon(
-                  //   //     //Icons.arrow_back,
-                  //   //     //color: Color.fromARGB(255, 255, 255, 255),
-                  //   //     ),
-                  //   onPressed: () {
-                  //     Navigator.pop(context);
-                  //   },
-                  // ),
                 ),
                 SizedBox(height: 70),
                 Container(
@@ -325,7 +313,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
                       Container(
                         margin: EdgeInsets.fromLTRB(
-                            10 * fem, 0, 200 * fem, 20 * fem),
+                            0 * fem, 0, 200 * fem, 20 * fem),
                         width: double.infinity,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -418,7 +406,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 Padding(
                                   padding: EdgeInsets.only(
                                       right: 8,
-                                      top: 5 *
+                                      top: 5 * fem,
+                                      left: 0 *
                                           fem), // Adjust the value as needed
                                   child: Text(
                                     "Age range: ",
@@ -455,7 +444,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           margin: EdgeInsets.only(
                             right: 160 * fem,
                             top: 10 * fem,
-                            left: 15,
+                            left: 0,
                           ),
                           child: Row(
                             children: [
@@ -486,8 +475,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
                       Container(
                         margin: EdgeInsets.only(
-                            right: 200 * fem,
-                            left: 15 * fem,
+                            right: 190 * fem,
+                            left: 0 * fem,
                             bottom: 10 * fem,
                             top: 15 * fem),
                         width: double.infinity,
@@ -525,16 +514,16 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               bottom: 35 * fem,
                               top: 8 * fem,
                               right: 250 * fem,
-                              left: 16 * fem),
+                              left: 0 * fem),
                           width: double.infinity,
                           child: Column(
                             children: [
                               Text(
-                                "Description",
+                                "Description:",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
-                                  fontSize: 24 * ffem,
+                                  fontSize: 25 * ffem,
                                   fontWeight: FontWeight.w300,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
@@ -732,13 +721,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     onPressed: () {
                       bookService(() {
                         // Simulate a successful payment, then trigger fireworks
-
+                        makePayment(context);
                         //addServiceToFirestore();
-
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;
                       });
-                      // makePayment(context);
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
@@ -769,7 +756,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     );
   }
 
-  // Calculate the total price here
+  //Calculate the total price here
   double calculateTotalPrice(Service service) {
     // Calculate the total price based on the service price and the number of selected kids
     double totalPrice = service.servicePrice * (selectedKids.length);
