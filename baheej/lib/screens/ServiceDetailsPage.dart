@@ -8,9 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:baheej/main.dart';
 
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:baheej/screens/HomeScreenGaurdian.dart';
+
+enum PaymentResult { success, failure, canceled }
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -23,6 +26,7 @@ class ServiceDetailsPage extends StatefulWidget {
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   double total = 0.0;
+
   // Define a map to store the selected kids' names
   Map<String, String> selectedKidsNames = {};
   // Function to add service details to Firestore
@@ -83,31 +87,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     return selectedKidsNames;
   }
 
-  // Future<bool> hasConflictingService(
-  //     String selectedTimeSlot,
-  //     List<String> selectedKids,
-  //     DateTime selectedStartDate,
-  //     DateTime selectedEndDate) async {
-  //   final firestore = FirebaseFirestore.instance;
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   final userEmail = user?.email;
-
-  //   if (userEmail == null) {
-  //     return false; // Handle the case where the user email is not available
-  //   }
-
-  //   final querySnapshot = await firestore
-  //       .collection('ServiceBook')
-  //       .where('userEmail', isEqualTo: userEmail)
-  //       .where('selectedTimeSlot', isEqualTo: selectedTimeSlot)
-  //       .where('selectedKidsNames', isEqualTo: selectedKids)
-  //       .where('selectedStartDate', isEqualTo: selectedStartDate)
-  //       .where('selectedEndDate', isEqualTo: selectedEndDate)
-  //       .get();
-
-  //   return querySnapshot.docs.isNotEmpty;
-  // }
-
   Map<String, dynamic>? paymentIntent;
 
   //payment method .
@@ -115,41 +94,52 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   void makePayment(BuildContext context) async {
     try {
       double totalPrice = calculateTotalPrice(widget.service);
-      paymentIntent = await createPaymentIntent(totalPrice);
-      var gpay = PaymentSheetGooglePay(
-        merchantCountryCode: "US",
-        currencyCode: 'SAR',
-        testEnv: true,
-      );
 
-      // Format the price as a string with English numerals
-      String formattedPrice =
-          NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
+      // Check for existing services with the same date, time, and kids' names
 
-      Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntent!["client_secret"],
-          style: ThemeMode.dark,
-          merchantDisplayName: "baheej",
-          googlePay: gpay,
-        ),
-      );
+      {
+        // No existing service found, proceed with payment
+        paymentIntent = await createPaymentIntent(totalPrice);
+        var gpay = PaymentSheetGooglePay(
+          merchantCountryCode: "US",
+          currencyCode: 'SAR',
+          testEnv: true,
+        );
 
-      displayPaymentSheet(context);
+        // Format the price as a string with English numerals
+        String formattedPrice =
+            NumberFormat.currency(locale: 'en_US', symbol: '')
+                .format(totalPrice);
 
-      final user = FirebaseAuth.instance.currentUser;
-      final userEmail = user?.email;
+        Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: paymentIntent!["client_secret"],
+            style: ThemeMode.dark,
+            merchantDisplayName: "baheej",
+            googlePay: gpay,
+          ),
+        );
 
-      // Call the function to store service information in Firestore
-      await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
+        // Display the payment sheet and await the result
+        final paymentResult = await displayPaymentSheet(context);
+
+        if (paymentResult == paymentResult) {
+          final user = FirebaseAuth.instance.currentUser;
+          final userEmail = user?.email;
+
+          // Call the function to store service information in Firestore
+          await addServiceToFirestore(
+              widget.service.selectedTimeSlot, userEmail);
+        } else {
+          print("Payment failed or was canceled.");
+        }
+      }
     } catch (e) {
       print("Error: $e");
     }
   }
 
-// payment
-
-  void displayPaymentSheet(BuildContext context) async {
+  Future<PaymentResult> displayPaymentSheet(BuildContext context) async {
     try {
       await Stripe.instance.presentPaymentSheet();
       // Show a success message
@@ -172,25 +162,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       );
 
       print("Done");
+      return PaymentResult.success;
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Payment cancled'),
-            content: Text('Your payment was canceld!'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
       print("fail");
+      return PaymentResult.canceled;
     }
   }
 
@@ -220,7 +195,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   int minAge = 0;
   int maxAge = 0;
 
-  void bookService(VoidCallback onKidsSelected) {
+  void bookService(VoidCallback onKidsSelected) async {
     if (selectedKids.isEmpty) {
       // No kids selected, show a message
       showDialog(
@@ -241,8 +216,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         },
       );
     } else {
-      // Kids are selected, call the callback function
-      onKidsSelected();
+      // Wrap the string in a list
     }
   }
 

@@ -13,70 +13,104 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // Index for the selected bottom navigation item.
-
   List<Service> services = [];
-
-  // Function to handle the bottom navigation item selection.
 
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
     });
 
-    // Handle navigation when the "Add Service" icon .
-
     if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ServiceFormScreen()),
-      ).then((newService) {
-        // Check if a new service was returned
+      navigateToServiceFormScreen();
+    }
+  }
 
-        if (newService != null) {
-          setState(() {
-            // Add the new service to the list
+  Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  showLogoutSuccessDialog();
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-            services.add(newService);
-          });
-        }
+  void navigateToServiceFormScreen() async {
+    final newService = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ServiceFormScreen()),
+    );
+
+    if (newService != null) {
+      setState(() {
+        services.add(newService);
       });
     }
   }
 
-  // Function to handle user logout
+  void showLogoutSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  void _handleLogout() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      print("Signed Out");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
-      );
-    } catch (e) {
-      print("Error signing out: $e");
-    }
+  void navigateToSignInScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Extend the body to the bottom app bar.
-
+      extendBody: true,
       body: Stack(
         children: [
           // Background Image
-
           Image.asset(
-            'assets/images/backG.png', // Replace with your image path
-
+            'assets/images/backG.png',
             fit: BoxFit.cover,
-
             width: double.infinity,
-
             height: double.infinity,
           ),
-
           NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return <Widget>[
@@ -92,10 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   actions: [
                     IconButton(
-                      icon: Icon(Icons.logout), // Logout icon
-
-                      onPressed: _handleLogout, // Call the logout function
-
+                      icon: Icon(Icons.logout),
+                      onPressed: _handleLogout,
                       color: Colors.white,
                     ),
                   ],
@@ -128,26 +160,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(), // Circular notch at the center.
-
-        color: Color.fromARGB(
-            255, 245, 198, 239), // Set bottom app bar color to pink.
-
+        shape: CircularNotchedRectangle(),
+        color: Color.fromARGB(255, 245, 198, 239),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SizedBox(width: 24), // Add spacing to the left
-
+            SizedBox(width: 24),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.history), // Booking with History Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.history),
+                  color: Colors.white,
                   onPressed: () {
                     // Handle booking history button tap
                   },
@@ -161,15 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-
-            SizedBox(), // Add empty space in the center
-
+            SizedBox(),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 50), // Add margin to the bottom
-
+                  padding: EdgeInsets.only(top: 50),
                   child: Text(
                     'Add Service',
                     style: TextStyle(
@@ -180,19 +202,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-
             SizedBox(width: 25),
-
-            // Add empty space in the center
-
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.person), // Profile Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.person),
+                  color: Colors.white,
                   onPressed: () {
                     // Handle profile button tap
                   },
@@ -206,35 +222,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-
-            SizedBox(width: 32), // Add spacing to the right
+            SizedBox(width: 32),
           ],
         ),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(
-            255, 174, 207, 250), // Set FAB background color to pink.
-
-        onPressed: () async {
-          final newService = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ServiceFormScreen()),
-          );
-
-          if (newService != null) {
-            setState(() {
-              services.add(newService);
-            });
-          }
+        backgroundColor: Color.fromARGB(255, 174, 207, 250),
+        onPressed: () {
+          navigateToServiceFormScreen();
         },
-
         child: Icon(
           Icons.add,
-
-          color: Colors.white, // Set FAB icon color to white.
+          color: Colors.white,
         ),
       ),
     );
