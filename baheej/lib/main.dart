@@ -1,20 +1,17 @@
 import 'package:baheej/firebase_options.dart';
-import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:http/http.dart' as http;
-import 'package:baheej/screens/HomeScreenCenter.dart';
 
 //jory
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Stripe.publishableKey =
-      'pk_test_51Ntfi6HEEOvMnOrxSoaSpQ9RPr9icRWMzFbgO3j8m6Jw3QROlSnqhJjp0CP476rfKkp13a17mJTAj6CZLAwY4E1Q004homRat7';
+      "pk_test_51NxYJkAzFvFRBXEyZnGjEuJ7jTJPSyBsKtpMvLAO4J1Kz1kAlAF8GsmbmYecdjQi7uMNAcC89JuyPPKPgH8cpQw700qsNegMUZ";
+  await Stripe.instance.applySettings();
 
-  FirebaseApp app;
+  //FirebaseApp app;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -46,7 +43,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: HomeScreenGaurdian(),
     );
   }
 }

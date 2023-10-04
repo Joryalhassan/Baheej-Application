@@ -6,6 +6,7 @@ import 'package:baheej/screens/SignInScreen.dart';
 //import 'package:baheej/screens/AddKidsPage.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
+import 'package:baheej/screens/HistoryScreen.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -246,7 +247,10 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   icon: Icon(Icons.history),
                   color: Colors.white,
                   onPressed: () {
-                    // Handle history button tap
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HistoryScreen()),
+                    );
                   },
                 ),
                 Padding(

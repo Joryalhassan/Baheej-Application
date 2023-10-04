@@ -216,7 +216,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         },
       );
     } else {
-      // Wrap the string in a list
+      makePayment(context);
     }
   }
 
@@ -732,13 +732,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     onPressed: () {
                       bookService(() {
                         // Simulate a successful payment, then trigger fireworks
-                        makePayment(context);
 
                         //addServiceToFirestore();
 
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;
                       });
+                      // makePayment(context);
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
