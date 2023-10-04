@@ -3,6 +3,50 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 
+class KidCard extends StatelessWidget {
+  final String name;
+  final int age;
+
+  KidCard({required this.name, required this.age});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // Handle tapping on a kid card
+      },
+      child: Card(
+        elevation: 3,
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: Color.fromARGB(255, 251, 241, 241),
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Name: $name',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Age: $age',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 4),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class AddKidsPage extends StatefulWidget {
   @override
   _AddKidsPageState createState() => _AddKidsPageState();
@@ -80,9 +124,8 @@ class _AddKidsPageState extends State<AddKidsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Kids'),
-      ),
+      // Remove the app bar
+      appBar: null,
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('Kids')
@@ -99,10 +142,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
             final kidName = kidData['name'] as String;
             final kidAge = kidData['age'] as int;
             kidWidgets.add(
-              ListTile(
-                title: Text('Name: $kidName'),
-                subtitle: Text('Age: $kidAge'),
-              ),
+              KidCard(name: kidName, age: kidAge), // Use the KidCard widget
             );
           }
           return ListView(
@@ -116,7 +156,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Add Kid'),
+                title: Text('Add Kid'), // Change the dialog title
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
