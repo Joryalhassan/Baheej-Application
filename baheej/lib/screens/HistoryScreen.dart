@@ -19,61 +19,58 @@ class HistoryScreen extends StatelessWidget {
         title: Text('Booked Services History'),
       ),
       body: FutureBuilder<QuerySnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('ServiceBook')
-            .where('userEmail', isEqualTo: currentUserEmail) //////////////////////////////////IMPORTANT//////////////////////////
-            .get(),
+  future: FirebaseFirestore.instance
+      .collection('ServiceBook')
+      .where('userEmail', isEqualTo: currentUserEmail)
+      .get(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return CircularProgressIndicator(); // Loading indicator
+    } else if (snapshot.hasError) {
+      return Text('Error: ${snapshot.error}');
+    } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Center(
+        child: Text('No booked services found'), // Centered text
+      );
+    } else {
+      final bookedServices = snapshot.data!.docs;
+      return ListView.builder(
+        itemCount: bookedServices.length,
+        itemBuilder: (context, index) {
+          final serviceDocument = bookedServices[index];
+          final data = serviceDocument.data() as Map<String, dynamic>;
 
+          final centerName = data['centerName'];
+          final serviceName = data['serviceName'];
+          final selectedKidsMap = data['selectedKidsNames'] as Map<String, dynamic>?;
+          final selectedStartDate = data['selectedStartDate'] as Timestamp;
+          final selectedEndDate = data['selectedEndDate'] as Timestamp;
+          final totalPrice = data['totalPrice'] as double;
+          final selectedTimeSlot = data['selectedTimeSlot'];
 
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Loading indicator
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Text('No booked services found');
-          } else {
-            final bookedServices = snapshot.data!.docs;
-            return ListView.builder(
-              itemCount: bookedServices.length,
-              itemBuilder: (context, index) {
-                final serviceDocument = bookedServices[index];
-                final data = serviceDocument.data() as Map<String, dynamic>;
+          String selectedKidsString = '';
 
-                final centerName = data['centerName'];
-                final serviceName = data['serviceName'];
-                final selectedKidsMap = data['selectedKidsNames'] as Map<String, dynamic>?;
-                final selectedStartDate = data['selectedStartDate'] as Timestamp;
-                final selectedEndDate = data['selectedEndDate'] as Timestamp;
-                final totalPrice = data['totalPrice'] as double;
-                final selectedTimeSlot = data['selectedTimeSlot'];
-
-
-
-
-                String selectedKidsString = '';
-
-                if (selectedKidsMap != null) {
-                // Convert the values of 'selectedKidsMap' into a single string
-               selectedKidsString = selectedKidsMap.values.join(', ');
-                }
-
-
-
-                return buildServiceCard(
-                  centerName,
-                  serviceName,
-                  selectedKidsString,
-                  selectedStartDate.toDate(),
-                  selectedEndDate.toDate(),
-                  selectedTimeSlot,
-                  totalPrice,
-                );
-              },
-            );
+          if (selectedKidsMap != null) {
+            // Convert the values of 'selectedKidsMap' into a single string
+            selectedKidsString = selectedKidsMap.values.join(', ');
           }
+
+          return buildServiceCard(
+            centerName,
+            serviceName,
+            selectedKidsString,
+            selectedStartDate.toDate(),
+            selectedEndDate.toDate(),
+            selectedTimeSlot,
+            totalPrice,
+          );
         },
-      ),
+      );
+    }
+  },
+)
+
+
     );
   }
 
