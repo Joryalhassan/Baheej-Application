@@ -110,7 +110,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
   }
 
   bool isNameValid(String name) {
-    return name.length >= 10 && name.length <= 35;
+    return name.length >= 10 && name.length <= 40;
   }
 
   bool containsOnlyLettersAndSpaces(String name) {
@@ -195,7 +195,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
                     TextField(
                       controller: nameController,
                       decoration: InputDecoration(labelText: 'Full Name'),
-                      maxLength: 20,
+                      maxLength: 40,
                     ),
                     TextField(
                       controller: ageController,
@@ -252,7 +252,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
                       if (name.isEmpty || ageStr.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Name and age can\'t be empty.'),
+                            content: Text('Name and Age can\'t be empty.'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -263,7 +263,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'Name must be between 10 and 35 characters.'),
+                                'Name must be between 10 and 40 characters.'),
                             backgroundColor: Colors.red,
                           ),
                         );
