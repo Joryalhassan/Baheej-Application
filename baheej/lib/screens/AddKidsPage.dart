@@ -4,10 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 
 class KidCard extends StatelessWidget {
-  final String name;
+  final String Fname;
+  final String Lname;
   final int age;
 
-  KidCard({required this.name, required this.age});
+  KidCard({required this.Fname, required this.Lname, required this.age});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,15 @@ class KidCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Name: $name',
+                'First Name: $Fname',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Last Name: $Lname',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -53,26 +62,40 @@ class AddKidsPage extends StatefulWidget {
 }
 
 class _AddKidsPageState extends State<AddKidsPage> {
-  TextEditingController nameController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   List<String> addedKidNames = [];
 
-  final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+  String? currentUserEmail; // Updated to handle null case
 
-  Future<void> _addKidToFirestore(String name, int age) async {
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      currentUserEmail = currentUser.email;
+    }
+  }
+
+  Future<void> _addKidToFirestore(
+      String firstName, String lastName, int age) async {
     try {
       if (age >= 2 && age <= 12) {
         final kidCollection = FirebaseFirestore.instance.collection('Kids');
 
+        // Check for existing kid with the same First Name and Last Name
         final existingKid = await kidCollection
             .where('userEmail', isEqualTo: currentUserEmail)
-            .where('name', isEqualTo: name)
+            .where('firstName', isEqualTo: firstName)
+            .where('lastName', isEqualTo: lastName)
             .get();
 
         if (existingKid.docs.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Kid with the same name already exists.'),
+              content: Text(
+                  'Kid with the same First Name and Last Name already exists.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -80,21 +103,24 @@ class _AddKidsPageState extends State<AddKidsPage> {
         }
 
         await kidCollection.add({
-          'name': name,
+          'firstName': firstName,
+          'lastName': lastName,
           'age': age,
           'userEmail': currentUserEmail,
         });
 
-        addedKidNames.add(name);
+        addedKidNames.add(
+            '$firstName $lastName'); // Add the Full Name to the list of added kid names
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Kid "$name" added successfully!'),
+            content: Text('Kid "$firstName $lastName" added successfully!'),
             backgroundColor: Colors.green,
           ),
         );
 
-        nameController.text = '';
+        firstNameController.text = '';
+        lastNameController.text = '';
         ageController.text = '';
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,12 +149,12 @@ class _AddKidsPageState extends State<AddKidsPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(
-          color: Colors.black, // Set the icon color to black
+          color: Colors.black,
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop(); // Go back to the previous page
+            Navigator.of(context).pop();
           },
         ),
       ),
@@ -158,10 +184,11 @@ class _AddKidsPageState extends State<AddKidsPage> {
                 List<Widget> kidWidgets = [];
                 for (var kid in kids) {
                   final kidData = kid.data() as Map<String, dynamic>;
-                  final kidName = kidData['name'] as String;
+                  final firstName = kidData['firstName'] as String;
+                  final lastName = kidData['lastName'] as String;
                   final kidAge = kidData['age'] as int;
                   kidWidgets.add(
-                    KidCard(name: kidName, age: kidAge),
+                    KidCard(Fname: firstName, Lname: lastName, age: kidAge),
                   );
                 }
                 return ListView(
@@ -183,8 +210,13 @@ class _AddKidsPageState extends State<AddKidsPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(labelText: 'Name'),
+                      controller: firstNameController,
+                      decoration: InputDecoration(labelText: 'First Name'),
+                      maxLength: 20,
+                    ),
+                    TextField(
+                      controller: lastNameController,
+                      decoration: InputDecoration(labelText: 'Last Name'),
                       maxLength: 20,
                     ),
                     TextField(
@@ -236,45 +268,40 @@ class _AddKidsPageState extends State<AddKidsPage> {
                     ),
                     child: Text('Done'),
                     onPressed: () async {
-                      final name = nameController.text;
+                      final firstName = firstNameController.text;
+                      final lastName = lastNameController.text;
                       final ageStr = ageController.text;
 
-                      if (name.isEmpty || ageStr.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Name and age can\'t be empty.'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (!isNameValid(name)) {
+                      if (firstName.isEmpty ||
+                          lastName.isEmpty ||
+                          ageStr.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'Name must be between 4 and 20 characters.'),
+                                'First Name, Last Name, and Age can\'t be empty.'),
                             backgroundColor: Colors.red,
                           ),
                         );
                         return;
                       }
 
-                      if (!containsOnlyLetters(name)) {
+                      if (!isNameValid(firstName) || !isNameValid(lastName)) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Name must contain only letters.'),
+                            content: Text(
+                                'First Name and Last Name must be between 4 and 20 characters.'),
                             backgroundColor: Colors.red,
                           ),
                         );
                         return;
                       }
 
-                      if (addedKidNames.contains(name)) {
+                      if (!containsOnlyLetters(firstName) ||
+                          !containsOnlyLetters(lastName)) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                Text('Kid with the same name already exists.'),
+                            content: Text(
+                                'First Name and Last Name must contain only letters.'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -283,8 +310,20 @@ class _AddKidsPageState extends State<AddKidsPage> {
 
                       final age = int.tryParse(ageStr);
                       if (age != null && age >= 2 && age <= 12) {
-                        await _addKidToFirestore(name, age);
-                        Navigator.of(context).pop();
+                        final isDuplicate =
+                            addedKidNames.contains('$firstName $lastName');
+                        if (isDuplicate) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Kid with the same First Name and Last Name already exists.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        } else {
+                          await _addKidToFirestore(firstName, lastName, age);
+                          Navigator.of(context).pop();
+                        }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -306,3 +345,8 @@ class _AddKidsPageState extends State<AddKidsPage> {
     );
   }
 }
+
+void main() => runApp(MaterialApp(
+      home: AddKidsPage(),
+      debugShowCheckedModeBanner: false,
+    ));
