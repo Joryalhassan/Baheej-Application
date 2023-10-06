@@ -196,111 +196,138 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "First Name",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: _FnameTextController,
-                        maxLength: 12, // Limit the input to 12 characters
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline),
-                          filled: true,
-                          fillColor: Colors.grey[300],
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 12,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'First Name is required';
-                          }
-                          if (value.length < 2 || value.length > 12) {
-                            return 'First Name must be between 2 and 12 letters';
-                          }
-                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                            return 'First Name can only contain letters';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
+                 
+      
+
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                    height: 20,
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Last Name",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: _LnameTextController,
-                        maxLength: 12, // Limit the input to 12 characters
-                        decoration: InputDecoration(
-                          // labelText: "Enter Last Name",
-                          prefixIcon: Icon(Icons.person_outline),
-                          filled: true,
-                          fillColor: Colors.grey[300],
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 12,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Last Name is required';
-                          }
-                          if (value.length < 2 || value.length > 12) {
-                            return 'Last Name must be between 2 and 12 letters';
-                          }
-                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                            return 'Last Name can only contain letters';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "First Name",
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
                   ),
+                  TextFormField(
+                    controller: _FnameTextController,
+                    maxLength: 12, // Limit the input to 12 characters
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.person_outline),
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                    ),
+                    onChanged: (text) {
+                      // Remove spaces from the input
+                      final newText = text.replaceAll(RegExp(r'\s+'), '');
+                      if (newText != text) {
+                        _FnameTextController.value = _FnameTextController.value.copyWith(
+                          text: newText,
+                          selection: TextSelection(baseOffset: newText.length, extentOffset: newText.length),
+                          composing: TextRange.empty,
+                        );
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'First Name is required';
+                      }
+                      if (value.length < 2 || value.length > 12) {
+                        return 'First Name must be between 2 and 12 letters';
+                      }
+                      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                        return 'First Name can only contain letters';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Last Name",
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  TextFormField(
+                    controller: _LnameTextController,
+                    maxLength: 12, // Limit the input to 12 characters
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.person_outline),
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                    ),
+                    onChanged: (text) {
+                      // Remove spaces from the input
+                      final newText = text.replaceAll(RegExp(r'\s+'), '');
+                      if (newText != text) {
+                        _LnameTextController.value = _LnameTextController.value.copyWith(
+                          text: newText,
+                          selection: TextSelection(baseOffset: newText.length, extentOffset: newText.length),
+                          composing: TextRange.empty,
+                        );
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Last Name is required';
+                      }
+                      if (value.length < 2 || value.length > 12) {
+                        return 'Last Name must be between 2 and 12 letters';
+                      }
+                      if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                        return 'Last Name can only contain letters';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
