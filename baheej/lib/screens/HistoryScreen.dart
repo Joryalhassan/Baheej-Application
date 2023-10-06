@@ -115,16 +115,14 @@ class HistoryScreen extends StatelessWidget {
                   icon: Icon(Icons.home),
                   color: Colors.white,
                   onPressed: () {
-                    // Check if there is a route to pop
-                    if (Navigator.of(context).canPop()) {
-                      // You are not on the home screen, navigate to HomeScreenGaurdian
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomeScreenGaurdian(),
-                        ),
-                      );
-                    }
+                    // Use pushAndRemoveUntil to navigate to the home page directly
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomeScreenGaurdian(),
+                      ),
+                      (route) => false, // Remove all previous routes
+                    );
                   },
                 ),
                 Padding(
