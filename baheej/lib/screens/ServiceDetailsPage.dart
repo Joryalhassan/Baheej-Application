@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
+//import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -78,6 +79,91 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     return selectedKidsNames;
   }
 
+  // Function to check if a service with the same details exists
+  Future<bool> doesServiceExist(
+    String selectedTimeSlot,
+    String userEmail,
+    List<String> selectedKids,
+  ) async {
+    final firestore = FirebaseFirestore.instance;
+    final query = firestore
+        .collection('ServiceBook')
+        .where('userEmail', isEqualTo: userEmail);
+
+    // Add conditions for the specific service details
+    query
+        .where('selectedStartDate', isEqualTo: widget.service.selectedStartDate)
+        .where('selectedEndDate', isEqualTo: widget.service.selectedEndDate)
+        .where('selectedTimeSlot', isEqualTo: selectedTimeSlot);
+
+    // Check if selected kids names match
+    query.where('selectedKidsNames', isEqualTo: selectedKids);
+
+    final querySnapshot = await query.get();
+    return querySnapshot.docs.isNotEmpty;
+  }
+
+  // Function to show a confirmation dialog
+  Future<void> showConfirmationDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text(
+              'You have a service with the same date and time slot. Are you sure you want to proceed?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context)
+                    .pop(false); // Return false when "No" is clicked
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context)
+                    .pop(true); // Return true when "Yes" is clicked
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      // User clicked "Yes," proceed with the payment
+      makePayment(context);
+    } else {
+      // User clicked "No," navigate to the page to book another service
+      // You can implement the navigation logic here
+      // For example: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AnotherBookingPage()));
+    }
+  }
+
+  // Function to handle booking
+  Future<void> handleBooking() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final userEmail = user?.email ?? '';
+
+    final selectedTimeSlot = widget.service.selectedTimeSlot ??
+        ''; // Provide a default value if it's null
+    final selectedKids = selectedKidsNames.keys.toList();
+
+    // Check if a service with the same details exists
+    final serviceExists =
+        await doesServiceExist(selectedTimeSlot, userEmail, selectedKids);
+
+    if (serviceExists) {
+      // Show a confirmation dialog
+      await showConfirmationDialog(context);
+    } else {
+      // Service with the same details does not exist, proceed with the payment
+      makePayment(context);
+    }
+  }
+
 // payment
 
 //step1
@@ -130,7 +216,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               TextButton(
                 child: Text('OK'),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => HomeScreenGaurdian(),
+                    ),
+                  ); // Close the dialog and navigate to HomeGuardianScreen
                 },
               ),
             ],
@@ -144,8 +234,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Payment cancled'),
-            content: Text('Your payment was canceld!'),
+            title: Text('Payment canceled'),
+            content: Text('Your payment was canceled!'),
             actions: <Widget>[
               TextButton(
                 child: Text('OK'),
@@ -720,11 +810,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
-                        // Simulate a successful payment, then trigger fireworks
-                        makePayment(context);
-                        //addServiceToFirestore();
-                        // Check if payment is successful (you can replace this with your actual logic)
-                        //bool paymentSuccessful = true;
+                        handleBooking();
                       });
                     },
                     style: ElevatedButton.styleFrom(
@@ -737,7 +823,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Pay Now',
+                        'Pay to book ',
                         style: TextStyle(
                           fontFamily: 'Imprima',
                           fontSize: 25 * ffem,

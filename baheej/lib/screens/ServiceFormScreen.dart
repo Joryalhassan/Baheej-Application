@@ -57,7 +57,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
   String? validateCapacity(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Field required';
+      return 'Field \n required';
     }
     final intValue = int.tryParse(value);
     if (intValue == null) {
@@ -127,7 +127,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
     // Ensure that min age is not greater than max age
     if (minAge > maxAge) {
-      return 'Minimum age cannot be greater than maximum age';
+      return 'Minimum age cannot \n be greater than maximum age';
     }
 
     return null;
@@ -145,7 +145,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
     // Ensure that max age is not less than min age
     if (maxAge < minAge) {
-      return 'NOT Valid';
+      return 'max greater \n than min';
     }
 
     return null;
@@ -188,7 +188,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
-        // 'ageRange': ageRange,
+        'centerName': centerName,
         'minAge': minAge,
         'maxAge': maxAge
       });

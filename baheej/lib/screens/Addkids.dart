@@ -110,11 +110,11 @@ class _AddKidsPageState extends State<AddKidsPage> {
   }
 
   bool isNameValid(String name) {
-    return name.length >= 4 && name.length <= 20;
+    return name.length >= 10 && name.length <= 40;
   }
 
-  bool containsOnlyLetters(String name) {
-    return RegExp(r'^[a-zA-Z]+$').hasMatch(name);
+  bool containsOnlyLettersAndSpaces(String name) {
+    return RegExp(r'^[a-zA-Z ]+$').hasMatch(name);
   }
 
   @override
@@ -194,8 +194,8 @@ class _AddKidsPageState extends State<AddKidsPage> {
                   children: <Widget>[
                     TextField(
                       controller: nameController,
-                      decoration: InputDecoration(labelText: 'Name'),
-                      maxLength: 20,
+                      decoration: InputDecoration(labelText: 'Full Name'),
+                      maxLength: 40,
                     ),
                     TextField(
                       controller: ageController,
@@ -252,7 +252,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
                       if (name.isEmpty || ageStr.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Name and age can\'t be empty.'),
+                            content: Text('Name and Age can\'t be empty.'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -263,14 +263,14 @@ class _AddKidsPageState extends State<AddKidsPage> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'Name must be between 4 and 20 characters.'),
+                                'Name must be between 10 and 40 characters.'),
                             backgroundColor: Colors.red,
                           ),
                         );
                         return;
                       }
 
-                      if (!containsOnlyLetters(name)) {
+                      if (!containsOnlyLettersAndSpaces(name)) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Name must contain only letters.'),

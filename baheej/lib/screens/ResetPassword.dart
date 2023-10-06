@@ -12,7 +12,6 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   TextEditingController _emailTextController = TextEditingController();
   String _infoText = "";
-  Color _infoTextColor = Colors.red; // Color for error messages
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +88,8 @@ class _ResetPasswordState extends State<ResetPassword> {
                     Text(
                       _infoText,
                       style: TextStyle(
-                        color: _infoTextColor, // Use the updated color
+                        color: Colors.red,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -118,25 +116,27 @@ class _ResetPasswordState extends State<ResetPassword> {
           .collection('center')
           .where('email', isEqualTo: email)
           .get();
+      final querySnapshot1 = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
 
-      if (querySnapshot.docs.isEmpty) {
+      if (querySnapshot.docs.isEmpty && querySnapshot1.docs.isEmpty) {
         setState(() {
           _infoText = "Email not found. Please enter a valid email.";
-          _infoTextColor = Colors.red; // Set color for error message
         });
       } else {
+        // Email exists, send a password reset email
         await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
         setState(() {
           _infoText =
               "Password reset email sent. Please check your email to reset your password.";
-          _infoTextColor = Colors.green; // Set color for success message
         });
       }
     } catch (e) {
       setState(() {
         _infoText = "Error occurred. Please try again later.";
-        _infoTextColor = Colors.red; // Set color for error message
       });
     }
   }

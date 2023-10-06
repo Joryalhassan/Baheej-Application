@@ -7,7 +7,7 @@ class Service {
   final String selectedTimeSlot;
   final int capacityValue;
   final double servicePrice;
-  final DateTime selectedStartDate;
+  final DateTime selectedStartDate; // Make it nullable
   final DateTime selectedEndDate;
   final int minAge;
   final int maxAge;
