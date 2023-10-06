@@ -1,10 +1,11 @@
-import 'package:baheej/screens/ServiceDetailsPage';
+import 'package:baheej/screens/HistoryScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
-import 'package:baheej/screens/AddKidsPage.dart';
+import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
+import 'package:baheej/screens/ServiceDetailsPage.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -14,6 +15,7 @@ class HomeScreenGaurdian extends StatefulWidget {
 }
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
+  String FirstName = " ";
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
@@ -27,6 +29,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         _filteredServices = services;
       });
     });
+    fetchUserName();
   }
 
   Future<List<Service>> fetchDataFromFirebase() async {
@@ -36,16 +39,18 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
     return querySnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
-      final serviceName = data['serviceName'] ?? ' Title';
-      final description = data['serviceDesc'] ?? ' Description';
+      final serviceName = data['serviceName'] ?? 'Title';
+      final description = data['serviceDesc'] ?? 'Description';
+      final startDate = data['startDate'] != null
+          ? DateTime.parse(data['startDate'])
+          : DateTime.now();
+      final endDate = data['endDate'] != null
+          ? DateTime.parse(data['endDate'])
+          : DateTime.now();
       final centerName = data['centerName'] ?? 'Center Name';
       final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
       final capacityValue = data['capacityValue'] ?? 0;
       final servicePrice = data['servicePrice'] ?? 0.0;
-      final selectedStartDate =
-          (data['selectedStartDate'] as Timestamp?)?.toDate() ?? DateTime.now();
-      final selectedEndDate =
-          (data['selectedEndDate'] as Timestamp?)?.toDate() ?? DateTime.now();
       final minAge = data['minAge'] ?? 4;
       final maxAge = data['maxAge'] ?? 17;
 
@@ -56,8 +61,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         selectedTimeSlot: selectedTimeSlot,
         capacityValue: capacityValue,
         servicePrice: servicePrice,
-        selectedStartDate: selectedStartDate,
-        selectedEndDate: selectedEndDate,
+        selectedStartDate: startDate,
+        selectedEndDate: endDate,
         minAge: minAge,
         maxAge: maxAge,
       );
@@ -80,6 +85,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   }
 
   void _handleSearch(String query) {
+    query = query.trim(); // Trim the input value
     setState(() {
       _filteredServices = _allServices
           .where((service) =>
@@ -100,6 +106,25 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 
+  void fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final firstName =
+            userData['fname'] ?? ''; // Get the first name from Firestore
+        setState(() {
+          FirstName = firstName;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -107,7 +132,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("Home"),
+        title: Text('Home $FirstName'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -126,7 +151,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 80, left: 16, right: 16),
+            padding: EdgeInsets.only(top: 160, left: 16, right: 16),
             child: Column(
               children: [
                 TextField(
@@ -142,6 +167,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                 ),
                 Expanded(
                   child: ListView.builder(
+                    padding: EdgeInsets.only(top: 30),
                     itemCount: _filteredServices.length,
                     itemBuilder: (context, index) {
                       final service = _filteredServices[index];
@@ -170,7 +196,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    'Service Type: ${service.description}',
+                                    'center name: ${service.centerName}',
                                     style: TextStyle(
                                       fontSize: 16,
                                     ),
@@ -245,11 +271,18 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   icon: Icon(Icons.history),
                   color: Colors.white,
                   onPressed: () {
-                    // Handle history button tap
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HistoryScreen()),
+                    );
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 5),
+                  padding: EdgeInsets.only(
+                    top: 8,
+                    left: 20,
+                    bottom: 10,
+                  ),
                   child: Text(
                     'History',
                     style: TextStyle(
@@ -264,13 +297,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: Icon(Icons.person_add),
-                  color: Colors.white,
-                  onPressed: _handleAddKids,
-                ),
                 Text(
-                  'Add Kids',
+                  'View Kids',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -286,7 +314,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   icon: Icon(Icons.person),
                   color: Colors.white,
                   onPressed: () {
-                    // Handle profile button tap
+                    // _handleAddKids();
                   },
                 ),
                 Text(
@@ -306,7 +334,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
-          // Handle the floating action button tap (Home)
+          onPressed:
+          _handleAddKids();
         },
         child: Icon(
           Icons.add_reaction_outlined,
