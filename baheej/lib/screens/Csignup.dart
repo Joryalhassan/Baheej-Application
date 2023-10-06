@@ -6,6 +6,7 @@ import 'package:baheej/utlis/utilas.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class CsignUpScreen extends StatefulWidget {
   const CsignUpScreen({Key? key}) : super(key: key);
@@ -206,16 +207,15 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Center Name is required';
     }
-
     if (value.length < 4 || value.length > 25) {
       return 'Center Name must be between 4 and 25 characters';
     }
-
-    // Check if the name contains at least one letter and spaces
-    if (!RegExp(r'^(?=.*[a-zA-Z])[\w\s]+$').hasMatch(value)) {
-      return 'Center Name should contain at least one letter and spaces';
+    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+      return 'Center Name can only contain letters and spaces';
     }
-
+    if (value.trimLeft() != value) {
+      return 'Center Name cannot start with a space';
+    }
     return null;
   }
 
@@ -231,14 +231,13 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Phone Number is required';
+      return 'First Name is required';
     }
-    if (value.length != 10) {
-      return 'Phone Number must be exactly 10 digits';
+    if (value.length < 2 || value.length > 12) {
+      return 'First Name must be between 2 and 12 letters';
     }
-    final phoneRegex = RegExp(r'^05[0-9]{8}$');
-    if (!phoneRegex.hasMatch(value)) {
-      return 'Invalid Phone Number';
+    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+      return 'First Name can only contain letters';
     }
     return null;
   }
@@ -480,10 +479,17 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         ),
                         validator: _validatePhoneNumber,
                         maxLength: 10, // Maximum length set to 10
+                        keyboardType:
+                            TextInputType.number, // Allow numeric keyboard
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Allow only numeric input
+                        ],
                       ),
                     ],
                   ),
 
+                  //4
                   //4
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,7 +572,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "Commercial Register Number",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       TextFormField(
@@ -593,10 +601,15 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         ),
                         validator: _validateCommercialRegister,
                         maxLength: 10, // Maximum length set to 10
+                        keyboardType:
+                            TextInputType.number, // Allow numeric keyboard
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Allow only numeric input
+                        ],
                       ),
                     ],
                   ),
-
                   //6
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
