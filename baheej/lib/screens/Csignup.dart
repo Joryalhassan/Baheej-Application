@@ -208,11 +208,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
 
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name must be between 4 and 25 letters';
+      return 'Center Name must be between 4 and 25 characters';
     }
 
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
-      return 'Center Name should only contain letters';
+    // Check if the name contains at least one letter and spaces
+    if (!RegExp(r'^(?=.*[a-zA-Z])[\w\s]+$').hasMatch(value)) {
+      return 'Center Name should contain at least one letter and spaces';
     }
 
     return null;
@@ -231,9 +232,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Phone Number is required';
-    } else if (value.length != 10) {
+    }
+    if (value.length != 10) {
       return 'Phone Number must be exactly 10 digits';
-    } else if (!RegExp(r'^05\d{8}$').hasMatch(value)) {
+    }
+    final phoneRegex = RegExp(r'^05[0-9]{8}$');
+    if (!phoneRegex.hasMatch(value)) {
       return 'Invalid Phone Number';
     }
     return null;
