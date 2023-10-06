@@ -1,5 +1,5 @@
 import 'package:baheej/firebase_options.dart';
-import 'package:baheej/screens/Gsignup_screen.dart';
+import 'package:baheej/screens/GsignupScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
