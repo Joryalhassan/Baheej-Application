@@ -7,6 +7,7 @@ import 'package:baheej/utlis/utilas.dart';
 import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class CsignUpScreen extends StatefulWidget {
   const CsignUpScreen({Key? key}) : super(key: key);
@@ -207,15 +208,15 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Center Name is required';
     }
-
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name must be between 4 and 25 letters';
+      return 'Center Name must be between 4 and 25 characters';
     }
-
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
-      return 'Center Name should only contain letters';
+    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+      return 'Center Name can only contain letters and spaces';
     }
-
+    if (value.trimLeft() != value) {
+      return 'Center Name cannot start with a space';
+    }
     return null;
   }
 
@@ -231,11 +232,13 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Phone Number is required';
-    } else if (value.length != 10) {
-      return 'Phone Number must be exactly 10 digits';
-    } else if (!RegExp(r'^05\d{8}$').hasMatch(value)) {
-      return 'Invalid Phone Number';
+      return 'First Name is required';
+    }
+    if (value.length < 2 || value.length > 12) {
+      return 'First Name must be between 2 and 12 letters';
+    }
+    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+      return 'First Name can only contain letters';
     }
     return null;
   }
@@ -333,477 +336,488 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Stack(
-        children: [
-          // Background image
-          Image.asset(
-            'assets/images/back3.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            //color: Colors.white,
-          ),
-          // body: Container(
-          //   // Set a white background color
-          //   color: Colors.white,
-          //   width: MediaQuery.of(context).size.width,
-          //   height: MediaQuery.of(context).size.height,
-          SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    //1
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Center Name",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _userNameTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.person_outline),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: _validateName,
-                          maxLength: 25, // Add maxLength property here
-                        ),
-                      ],
-                    ),
-
-                    //2
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Email Id",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _emailTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.email),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: _validateEmail,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-
-                    //3
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Phone Number",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _PhoneNumTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.phone),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: _validatePhoneNumber,
-                          maxLength: 10, // Maximum length set to 10
-                        ),
-                      ],
-                    ),
-
-                    //4
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "District",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        DropdownButtonFormField<String>(
-                          value: _selectedDistrict ??
-                              '', // Set an initial value here
-                          items: [
-                            DropdownMenuItem<String>(
-                              value: '', // Add an empty value as an option
-                              child: Text('Select a District'),
-                            ),
-                            ...riyadhDistricts.map((district) {
-                              return DropdownMenuItem<String>(
-                                value: district,
-                                child: Text(district),
-                              );
-                            }).toList(),
-                          ],
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedDistrict = newValue;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty || value == '') {
-                              return 'Please select a valid district';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-
-                    //5
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Commercial Register Number",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _ComRegTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.format_list_numbered),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: _validateCommercialRegister,
-                          maxLength: 10, // Maximum length set to 10
-                        ),
-                      ],
-                    ),
-
-                    //6
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Description",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _DescriptionTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.description),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: _validateDescription,
-                          maxLength: 225,
-                        ),
-                      ],
-                    ),
-
-                    //7
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Password",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _passwordTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outlined),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                          ),
-                          validator: _validatePassword,
-                          maxLength: 20,
-                          obscureText:
-                              true, // Set this property to make it a password field
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: RichText(
-                        text: TextSpan(
+      body: Stack(children: [
+        // Background image
+        Image.asset(
+          'assets/images/back3.png',
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          //color: Colors.white,
+        ),
+        // body: Container(
+        //   // Set a white background color
+        //   color: Colors.white,
+        //   width: MediaQuery.of(context).size.width,
+        //   height: MediaQuery.of(context).size.height,
+        SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  //1
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Center Name",
                           style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                          children: [
-                            TextSpan(
-                              text: "Password must include:\n",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(
-                              text: "• at least one uppercase letter\n",
-                            ),
-                            TextSpan(
-                              text: "• at least one lowercase letter\n",
-                            ),
-                            TextSpan(
-                              text: "• at least one digit\n",
-                            ),
-                            TextSpan(
-                              text: "• between 8 and 20 characters long.",
-                            ),
-                          ],
                         ),
                       ),
-                    ),
-
-                    //8
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 20,
+                      TextFormField(
+                        controller: _userNameTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person_outline),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
                         ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Confirm Password",
+                        validator: _validateName,
+                        maxLength: 25, // Add maxLength property here
+                      ),
+                    ],
+                  ),
+
+                  //2
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Email Id",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _emailTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateEmail,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  //3
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Phone Number",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _PhoneNumTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.phone),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validatePhoneNumber,
+                        maxLength: 10, // Maximum length set to 10
+                        keyboardType:
+                            TextInputType.number, // Allow numeric keyboard
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Allow only numeric input
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  //4
+                  //4
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "District",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DropdownButtonFormField<String>(
+                        value: _selectedDistrict ??
+                            '', // Set an initial value here
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: '', // Add an empty value as an option
+                            child: Text('Select a District'),
+                          ),
+                          ...riyadhDistricts.map((district) {
+                            return DropdownMenuItem<String>(
+                              value: district,
+                              child: Text(district),
+                            );
+                          }).toList(),
+                        ],
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedDistrict = newValue;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty || value == '') {
+                            return 'Please select a valid district';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  //5
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Commercial Register Number",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _ComRegTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.format_list_numbered),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateCommercialRegister,
+                        maxLength: 10, // Maximum length set to 10
+                        keyboardType:
+                            TextInputType.number, // Allow numeric keyboard
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Allow only numeric input
+                        ],
+                      ),
+                    ],
+                  ),
+                  //6
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Description",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _DescriptionTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.description),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validateDescription,
+                        maxLength: 225,
+                      ),
+                    ],
+                  ),
+
+                  //7
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Password",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _passwordTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outlined),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validatePassword,
+                        maxLength: 20,
+                        obscureText:
+                            true, // Set this property to make it a password field
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Password must include:\n",
                             style: TextStyle(
-                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                        TextFormField(
-                          controller: _passwordConfirmTextController,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outlined),
-                            filled: true,
-                            fillColor: Colors.grey[300],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
+                          TextSpan(
+                            text: "• at least one uppercase letter\n",
                           ),
-                          validator: _validatePasswordConfirmation,
-                          obscureText:
-                              true, // Set this property to make it a password field
-                        ),
-                      ],
+                          TextSpan(
+                            text: "• at least one lowercase letter\n",
+                          ),
+                          TextSpan(
+                            text: "• at least one digit\n",
+                          ),
+                          TextSpan(
+                            text: "• between 8 and 20 characters long.",
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
 
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 59, 138, 207),
-                        onPrimary: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              33.0), // Increase the border radius
+                  //8
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Confirm Password",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        minimumSize: Size(150, 54), // Increase the button size
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          signUp();
-                        }
-                      },
-                      child: Text(
-                        'Sign Up',
-                        style:
-                            TextStyle(fontSize: 18), // Increase the font size
+                      TextFormField(
+                        controller: _passwordConfirmTextController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outlined),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: _validatePasswordConfirmation,
+                        obscureText:
+                            true, // Set this property to make it a password field
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 59, 138, 207),
+                      onPrimary: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            33.0), // Increase the border radius
+                      ),
+                      minimumSize: Size(150, 54), // Increase the button size
                     ),
-                  ],
-                ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        signUp();
+                      }
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(fontSize: 18), // Increase the font size
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }

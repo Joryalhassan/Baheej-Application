@@ -1,5 +1,4 @@
 import 'dart:convert';
-//import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
@@ -7,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/screens/HomeScreenGaurdian.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -19,11 +17,21 @@ class ServiceDetailsPage extends StatefulWidget {
 }
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
+  //defind anything you want
   double total = 0.0;
-
-  // Define a map to store the selected kids' names
   Map<String, String> selectedKidsNames = {};
-  // Function to add service details to Firestore
+  Map<String, dynamic>? paymentIntent;
+  String? userEmail; //for gaurdian kids display
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the current user's email when the widget is initialized
+    final user = FirebaseAuth.instance.currentUser;
+    userEmail = user?.email;
+  }
+
+  //store info in firebase
   Future<void> addServiceToFirestore(
       String selectedTimeSlot, String? userEmail) async {
     try {
@@ -32,16 +40,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         print('Error: userEmail is null. Cannot add service to Firestore.');
         return; // Return early or handle the error as needed
       }
-      final user = FirebaseAuth.instance.currentUser;
-      final currentUserEmail = user?.email;
-      if (currentUserEmail == null) {
-        print('Error: currentUserEmail is null.');
-        return; // Handle this case as needed
-      }
+      final selectedKidsNames = await getSelectedKidsNames(selectedKids);
 
-      await getSelectedKidsNames(selectedKids, currentUserEmail);
-
-      // Create a map with the service details
       final serviceData = {
         'serviceName': widget.service.serviceName,
         'serviceDescription': widget.service.description,
@@ -52,7 +52,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'minAge': widget.service.minAge,
         'servicePrice': widget.service.servicePrice,
         'selectedTimeSlot': selectedTimeSlot,
-        //'selectedKids': selectedKids,
         //here if you want it as map put selectedKidsNames .
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
@@ -61,163 +60,125 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
       // Add the data to the 'ServiceBook' collection
       await firestore.collection('ServiceBook').add(serviceData);
-
-      // Handle success or show a confirmation to the user
     } catch (error) {
-      // Handle any errors here
       print('Error booking service: $error');
-      // You can also show an error message to the user if needed
     }
   }
 
-  Future<Map<String, String>> getSelectedKidsNames(
-      List<String> kidIds, String currentUserEmail) async {
+  //function to get kids
+  Future<Map<String, String>> getSelectedKidsNames(List<String> kidIds) async {
     final firestore = FirebaseFirestore.instance;
     final selectedKidsNames = <String, String>{};
-
     for (var kidId in kidIds) {
       final kidDoc = await firestore.collection('Kids').doc(kidId).get();
-
       if (kidDoc.exists) {
         final kidData = kidDoc.data() as Map<String, dynamic>;
-        final kidEmail = kidData['userEmail'] as String;
-
-        if (kidEmail == currentUserEmail) {
-          final kidName = kidData['name'] as String;
-          selectedKidsNames[kidId] = kidName;
-        }
+        final kidName = kidData['name'] as String;
+        selectedKidsNames[kidId] = kidName;
       }
     }
-
     return selectedKidsNames;
   }
 
-  // Function to check if a service with the same details exists
-  Future<bool> doesServiceExist(
+//validation conflict service
+  Future<bool> checkForServiceConflict(
+    DateTime selectedStartDate,
+    DateTime selectedEndDate,
     String selectedTimeSlot,
-    String userEmail,
-    List<String> selectedKids,
   ) async {
     final firestore = FirebaseFirestore.instance;
-    final query = firestore
-        .collection('ServiceBook')
-        .where('userEmail', isEqualTo: userEmail);
+    final servicesSnapshot = await firestore.collection('ServiceBook').get();
 
-    // Add conditions for the specific service details
-    query
-        .where('selectedStartDate', isEqualTo: widget.service.selectedStartDate)
-        .where('selectedEndDate', isEqualTo: widget.service.selectedEndDate)
-        .where('selectedTimeSlot', isEqualTo: selectedTimeSlot);
+    for (var doc in servicesSnapshot.docs) {
+      final serviceData = doc.data() as Map<String, dynamic>;
 
-    // Check if selected kids names match
-    query.where('selectedKidsNames', isEqualTo: selectedKids);
+      // Extract the date and time from the Firestore document
+      final serviceStartDate =
+          (serviceData['selectedStartDate'] as Timestamp).toDate();
+      final serviceEndDate =
+          (serviceData['selectedEndDate'] as Timestamp).toDate();
+      final serviceTimeSlot = serviceData['selectedTimeSlot'] as String;
 
-    final querySnapshot = await query.get();
-    return querySnapshot.docs.isNotEmpty;
-  }
-
-  // Function to show a confirmation dialog
-  Future<void> showConfirmationDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmation'),
-          content: Text(
-              'You have a service with the same date and time slot. Are you sure you want to proceed?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context)
-                    .pop(false); // Return false when "No" is clicked
-              },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                Navigator.of(context)
-                    .pop(true); // Return true when "Yes" is clicked
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed == true) {
-      // User clicked "Yes," proceed with the payment
-      makePayment(context);
-    } else {
-      // User clicked "No," navigate to the page to book another service
-      // You can implement the navigation logic here
-      // For example: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AnotherBookingPage()));
+      // Check for conflicts by comparing start date, end date, time slot, and kids
+      if (selectedStartDate.isBefore(serviceEndDate) &&
+          selectedEndDate.isAfter(serviceStartDate) &&
+          selectedTimeSlot == serviceTimeSlot) {
+        return true; // Conflict found
+      }
     }
+
+    return false; // No conflict found
   }
 
-  // Function to handle booking
-  Future<void> handleBooking() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final userEmail = user?.email ?? '';
-
-    final selectedTimeSlot = widget.service.selectedTimeSlot ??
-        ''; // Provide a default value if it's null
-    final selectedKids = selectedKidsNames.keys.toList();
-
-    // Check if a service with the same details exists
-    final serviceExists =
-        await doesServiceExist(selectedTimeSlot, userEmail, selectedKids);
-
-    if (serviceExists) {
-      // Show a confirmation dialog
-      await showConfirmationDialog(context);
-    } else {
-      // Service with the same details does not exist, proceed with the payment
-      makePayment(context);
-    }
-  }
-
-// payment
-
-//step1
-  Map<String, dynamic>? paymentIntent;
-
-//step 4
-  Future<void> makePayment(BuildContext context) async {
+// create payment
+  void makePayment(BuildContext context) async {
     try {
       double totalPrice = calculateTotalPrice(widget.service);
       paymentIntent = await createPaymentIntent(totalPrice);
 
-      var gpay = PaymentSheetGooglePay(
-        merchantCountryCode: "US",
-        currencyCode: 'SAR',
-        testEnv: true,
-      );
-      String formattedPrice =
-          NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
+      final hasConflict = await checkForServiceConflict(
+          widget.service.selectedStartDate,
+          widget.service.selectedEndDate,
+          widget.service.selectedTimeSlot);
 
-      Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntent!["client_secret"],
-          style: ThemeMode.dark,
-          merchantDisplayName: "baheej",
-          googlePay: gpay,
-        ),
-      );
+      if (hasConflict) {
+        // Display a pop-up message with options to proceed or cancel
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(' Warning!'),
+              content: Text(
+                  'There is a conflict with a prebooked service for the selected time ,date for one of your kids!\nDo you want to proceed with the payment?'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('No'), // User chooses not to proceed
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                TextButton(
+                  child: Text('Yes'), // User chooses to proceed with payment
+                  onPressed: () async {
+                    Navigator.of(context).pop(); // Close the dialog
+                    displayPaymentSheet(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        paymentIntent = await createPaymentIntent(totalPrice);
+        var gpay = PaymentSheetGooglePay(
+          merchantCountryCode: "US",
+          currencyCode: 'SAR',
+          testEnv: true,
+        );
 
-      displayPaymentSheet(context);
-    } catch (e, s) {
-      print('exception:$e$s');
+        String formattedPrice =
+            NumberFormat.currency(locale: 'en_US', symbol: '')
+                .format(totalPrice);
+
+        Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: paymentIntent!["client_secret"],
+            style: ThemeMode.dark,
+            merchantDisplayName: "baheej",
+            googlePay: gpay,
+          ),
+        );
+
+        await displayPaymentSheet(context); // Always display payment sheet
+      }
+    } catch (e) {
+      print("Error: $e");
     }
   }
 
-  void displayPaymentSheet(BuildContext context) async {
+  displayPaymentSheet(BuildContext context) async {
     try {
       await Stripe.instance.presentPaymentSheet();
-      final user = FirebaseAuth.instance.currentUser;
-      final userEmail = user?.email;
-
-      await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
       // Show a success message
       showDialog(
         context: context,
@@ -229,30 +190,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               TextButton(
                 child: Text('OK'),
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => HomeScreenGaurdian(),
-                    ),
-                  ); // Close the dialog and navigate to HomeGuardianScreen
-                },
-              ),
-            ],
-          );
-        },
-      );
-
-      print("Done");
-    } catch (e) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Payment canceled'),
-            content: Text('Your payment was canceled!'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('OK'),
-                onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
               ),
@@ -260,11 +197,17 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           );
         },
       );
-      print("fail");
+
+      final user = FirebaseAuth
+          .instance.currentUser; //use it for display kids for this gaurd
+      final userEmail = user?.email;
+      await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
+
+      print("Done");
+    } catch (e) {
+      print("Payment failed or was canceled: $e");
     }
   }
-
-//step 2
 
   Future<Map<String, dynamic>> createPaymentIntent(double totalPrice) async {
     try {
@@ -272,7 +215,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         "amount": (totalPrice * 100).toInt().toString(), // Amount in cents
         "currency": "SAR", // Currency code
       };
-
       http.Response response = await http.post(
         Uri.parse("https://api.stripe.com/v1/payment_intents"),
         body: body,
@@ -282,7 +224,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       );
-
       return json.decode(response.body);
     } catch (e) {
       throw Exception(e);
@@ -294,7 +235,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   int minAge = 0;
   int maxAge = 0;
 
-  void bookService(VoidCallback onKidsSelected) {
+  void bookService(VoidCallback onKidsSelected) async {
     if (selectedKids.isEmpty) {
       // No kids selected, show a message
       showDialog(
@@ -315,7 +256,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         },
       );
     } else {
-      // Kids are selected, call the callback function
       onKidsSelected();
     }
   }
@@ -390,9 +330,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(
-                            right: 250 * fem, left: 0 * fem, bottom: 10 * fem),
+                            right: 230 * fem, left: 0 * fem, bottom: 10 * fem),
                         width: 400 * fem,
-                        height: 95 * fem,
+                        height: 80 * fem,
                         child: Center(
                           child: Column(
                             children: [
@@ -416,7 +356,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
                       Container(
                         margin: EdgeInsets.fromLTRB(
-                            0 * fem, 0, 200 * fem, 20 * fem),
+                            10 * fem, 0, 200 * fem, 20 * fem),
                         width: double.infinity,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -424,7 +364,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                             Center(
                               child: Container(
                                 margin: EdgeInsets.only(
-                                    right: 10 * fem, left: 18 * fem),
+                                    right: 10 * fem,
+                                    left: 10 * fem,
+                                    bottom: 20),
                                 child: Column(
                                   children: [
                                     Text(
@@ -487,7 +429,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        'End Date   : ${DateFormat('MM/dd/yyyy').format(widget.service.selectedEndDate)}', // Display selected end date
+                                        'End Date : ${DateFormat('MM/dd/yyyy').format(widget.service.selectedEndDate)}', // Display selected end date
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontFamily: 'Imprima',
@@ -509,8 +451,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 Padding(
                                   padding: EdgeInsets.only(
                                       right: 8,
-                                      top: 5 * fem,
-                                      left: 0 *
+                                      top: 5 *
                                           fem), // Adjust the value as needed
                                   child: Text(
                                     "Age range: ",
@@ -529,7 +470,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                   style: TextStyle(
                                     fontFamily: 'Imprima',
                                     fontSize: 20 * ffem,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w300,
                                     height: 2 * ffem / fem,
                                     color: Color(0xff000000),
                                   ),
@@ -547,7 +488,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           margin: EdgeInsets.only(
                             right: 160 * fem,
                             top: 10 * fem,
-                            left: 10,
+                            left: 15,
                           ),
                           child: Row(
                             children: [
@@ -566,7 +507,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w300,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -578,8 +519,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
                       Container(
                         margin: EdgeInsets.only(
-                            right: 190 * fem,
-                            left: 10 * fem,
+                            right: 200 * fem,
+                            left: 15 * fem,
                             bottom: 10 * fem,
                             top: 15 * fem),
                         width: double.infinity,
@@ -602,7 +543,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               style: TextStyle(
                                 fontFamily: 'Imprima',
                                 fontSize: 20 * ffem,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w300,
                                 height: 1 * ffem / fem,
                                 color: Color(0xff000000),
                               ),
@@ -617,17 +558,17 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               bottom: 35 * fem,
                               top: 8 * fem,
                               right: 250 * fem,
-                              left: 10 * fem),
+                              left: 16 * fem),
                           width: double.infinity,
                           child: Column(
                             children: [
                               Text(
-                                "Description:",
+                                "Description",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
-                                  fontSize: 23 * ffem,
-                                  fontWeight: FontWeight.w400,
+                                  fontSize: 24 * ffem,
+                                  fontWeight: FontWeight.w300,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -639,7 +580,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w200,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -664,12 +605,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 231, 232,
-                                    232), //primary: Color.fromARGB(255, 213, 214, 214),
+                                primary: Color.fromARGB(255, 255, 255,
+                                    255), //primary: Color.fromARGB(255, 213, 214, 214),
                                 onPrimary: Color.fromARGB(255, 217, 231,
                                     253), // Change text color when pressed
                                 // shape: RoundedRectangleBorder(
-                                //   borderRadius: BorderRadius.circular(30.0),
+                                // borderRadius: BorderRadius.circular(30.0),
                                 // ),
                                 ///shadowColor: Color(black),
                                 minimumSize: Size(100, 48), // Set button size
@@ -690,6 +631,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               StreamBuilder<QuerySnapshot>(
                                 stream: FirebaseFirestore.instance
                                     .collection('Kids')
+                                    .where('userEmail',
+                                        isEqualTo:
+                                            userEmail) // Filter by user email
                                     .snapshots(),
                                 builder: (context, snapshot) {
                                   if (!snapshot.hasData) {
@@ -723,12 +667,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                                 selectedKids.add(kid.id);
 
                                                 // selectedKidsNames[kid.id] =
-                                                //     kidName;
+                                                // kidName;
                                               } else {
                                                 selectedKids.remove(kid.id);
+                                                selectedKidsNames
+                                                    .remove(kidName);
 
                                                 // selectedKidsNames
-                                                //     .remove(kid.id);
+                                                // .remove(kid.id);
                                               }
                                             });
                                           },
@@ -823,12 +769,16 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
-                        handleBooking();
+                        // Simulate a successful payment, then trigger fireworks
+                        makePayment(context);
+                        //addServiceToFirestore();
+                        // Check if payment is successful (you can replace this with your actual logic)
+                        //bool paymentSuccessful = true;
                       });
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Color.fromARGB(255, 255, 255, 255),
+                      onPrimary: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
@@ -836,7 +786,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Pay to book ',
+                        'pay to book',
                         style: TextStyle(
                           fontFamily: 'Imprima',
                           fontSize: 25 * ffem,
@@ -855,9 +805,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     );
   }
 
-  //Calculate the total price here
+  // Calculate the total price here
   double calculateTotalPrice(Service service) {
-    // Calculate the total price based on the service price and the number of selected kids
     double totalPrice = service.servicePrice * (selectedKids.length);
     return totalPrice;
   }

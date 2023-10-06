@@ -233,6 +233,20 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
+                        onChanged: (text) {
+                          // Remove spaces from the input
+                          final newText = text.replaceAll(RegExp(r'\s+'), '');
+                          if (newText != text) {
+                            _FnameTextController.value =
+                                _FnameTextController.value.copyWith(
+                              text: newText,
+                              selection: TextSelection(
+                                  baseOffset: newText.length,
+                                  extentOffset: newText.length),
+                              composing: TextRange.empty,
+                            );
+                          }
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'First Name is required';
@@ -266,7 +280,6 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         controller: _LnameTextController,
                         maxLength: 12, // Limit the input to 12 characters
                         decoration: InputDecoration(
-                          // labelText: "Enter Last Name",
                           prefixIcon: Icon(Icons.person_outline),
                           filled: true,
                           fillColor: Colors.grey[300],
@@ -286,6 +299,20 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
+                        onChanged: (text) {
+                          // Remove spaces from the input
+                          final newText = text.replaceAll(RegExp(r'\s+'), '');
+                          if (newText != text) {
+                            _LnameTextController.value =
+                                _LnameTextController.value.copyWith(
+                              text: newText,
+                              selection: TextSelection(
+                                  baseOffset: newText.length,
+                                  extentOffset: newText.length),
+                              composing: TextRange.empty,
+                            );
+                          }
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Last Name is required';

@@ -129,6 +129,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   }
 
   void _handleSearch(String query) {
+    query = query.trim();
     setState(() {
       _filteredServices = _allServices
           .where((service) =>

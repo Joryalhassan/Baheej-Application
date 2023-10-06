@@ -34,6 +34,17 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
   //validation
 
+// Center name validation
+  String? validateCenterName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Center name is required';
+    }
+
+    // Add additional validation rules if needed
+
+    return null;
+  }
+
 //name
   String? validateServiceName(String? value) {
     if (value == null || value.isEmpty) {
@@ -74,6 +85,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     }
     return null;
   }
+
+//center name
 
 // description
   String? validateDescription(String? value) {
@@ -285,6 +298,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               setState(() {
                 if (label == 'Service Name') {
                   serviceName = value;
+                } else if (label == 'Center Name') {
+                  centerName = value; // Update centerName here
                 } else if (label == 'Service Price') {
                   selectedPrice = double.tryParse(value);
                 } else if (label == 'Service Capacity') {
@@ -312,7 +327,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     void Function() onDecrement,
   ) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8, right: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -335,14 +350,14 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 },
               ),
               Container(
-                width: 100,
+                width: 60,
                 child: TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.grey[300],
                     contentPadding: EdgeInsets.symmetric(
-                      vertical: 8,
+                      vertical: 6,
                       horizontal: 12,
                     ),
                     border: OutlineInputBorder(
@@ -393,7 +408,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     void Function() onDecrement,
   ) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8, right: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -417,14 +432,14 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 },
               ),
               Container(
-                width: 100,
+                width: 60,
                 child: TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.grey[300],
                     contentPadding: EdgeInsets.symmetric(
-                      vertical: 8,
+                      vertical: 6,
                       horizontal: 12,
                     ),
                     border: OutlineInputBorder(
@@ -656,7 +671,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         ),
                         SizedBox(
                             width:
-                                4), // Add spacing between the fields (adjust as needed)
+                                1), // Add spacing between the fields (adjust as needed)
                         Expanded(
                           child: buildIncrementDecrementMaxAgeField(
                             'Max Age',
@@ -698,7 +713,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     ), // capacity
                     buildTextField('Service Description', validateDescription,
                         maxLength: 225),
-                    SizedBox(height: 4.0),
+                    SizedBox(height: 2.0),
                     Row(
                       children: <Widget>[
                         Expanded(
