@@ -12,6 +12,7 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   TextEditingController _emailTextController = TextEditingController();
   String _infoText = "";
+  Color _infoTextColor = Colors.black; // Default text color
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +86,33 @@ class _ResetPasswordState extends State<ResetPassword> {
                     SizedBox(
                       height: 20,
                     ),
-                    Text(
-                      _infoText,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 16,
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(fontSize: 16, color: _infoTextColor),
+                        children: <TextSpan>[
+                          if (_infoText.startsWith("Email not found."))
+                            TextSpan(
+                              text: _infoText,
+                              style: TextStyle(
+                                color: Colors.red,
+                              ),
+                            )
+                          else if (_infoText.startsWith("Error occurred."))
+                            TextSpan(
+                              text: _infoText,
+                              style: TextStyle(
+                                color: Colors.red,
+                              ),
+                            )
+                          else
+                            TextSpan(
+                              text: _infoText,
+                              style: TextStyle(
+                                color: Colors
+                                    .green, // Green color for this message
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -112,18 +135,19 @@ class _ResetPasswordState extends State<ResetPassword> {
     final email = _emailTextController.text;
 
     try {
-      final querySnapshot = await FirebaseFirestore.instance
+      // Query Firestore to check if the entered email exists in your database
+      final querySnapshot1 = await FirebaseFirestore.instance
           .collection('center')
           .where('email', isEqualTo: email)
           .get();
-      final querySnapshot1 = await FirebaseFirestore.instance
+      final querySnapshot2 = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: email)
           .get();
-
-      if (querySnapshot.docs.isEmpty && querySnapshot1.docs.isEmpty) {
+      if (querySnapshot1.docs.isEmpty && querySnapshot2.docs.isEmpty) {
         setState(() {
           _infoText = "Email not found. Please enter a valid email.";
+          _infoTextColor = Colors.red; // Set text color to red
         });
       } else {
         // Email exists, send a password reset email
@@ -132,75 +156,77 @@ class _ResetPasswordState extends State<ResetPassword> {
         setState(() {
           _infoText =
               "Password reset email sent. Please check your email to reset your password.";
+          _infoTextColor = Colors.green; // Set text color to green
         });
       }
     } catch (e) {
       setState(() {
         _infoText = "Error occurred. Please try again later.";
+        _infoTextColor = Colors.red; // Set text color to red
       });
     }
   }
-}
 
-// Define buildStyledTextField function here
-Widget buildStyledTextField({
-  required TextEditingController controller,
-  required String labelText,
-  required IconData icon,
-  required String? Function(String?) validator,
-  bool showError = false,
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        labelText,
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
+  // Define buildStyledTextField function here
+  Widget buildStyledTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    required String? Function(String?) validator,
+    bool showError = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          labelText,
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
-      ),
-      SizedBox(height: 8),
-      Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.grey[300]!,
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              prefixIcon: Icon(icon),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                ),
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.grey[300]!,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                ),
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              borderRadius: BorderRadius.circular(16.0),
             ),
           ),
         ),
-      ),
-      if (showError &&
-          validator(controller.text) != null &&
-          validator(controller.text)!.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            validator(controller.text) ?? "",
-            style: TextStyle(
-              color: Colors.red,
-              fontSize: 12,
+        if (showError &&
+            validator(controller.text) != null &&
+            validator(controller.text)!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              validator(controller.text) ?? "",
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
             ),
           ),
-        ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class CustomBigButton extends StatelessWidget {

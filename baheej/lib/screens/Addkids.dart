@@ -18,7 +18,7 @@ class KidCard extends StatelessWidget {
       child: Card(
         elevation: 3,
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        color: Color.fromARGB(255, 251, 241, 241),
+        color: Color.fromARGB(255, 239, 249, 254),
         child: Container(
           padding: EdgeInsets.all(16),
           child: Column(
@@ -61,7 +61,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
 
   Future<void> _addKidToFirestore(String name, int age) async {
     try {
-      if (age >= 2 && age <= 12) {
+      if (age >= 4 && age <= 17) {
         final kidCollection = FirebaseFirestore.instance.collection('Kids');
 
         final existingKid = await kidCollection
@@ -99,7 +99,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Age must be between 2 and 12.'),
+            content: Text('Age must be between 4 and 17.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -292,14 +292,14 @@ class _AddKidsPageState extends State<AddKidsPage> {
                       }
 
                       final age = int.tryParse(ageStr);
-                      if (age != null && age >= 2 && age <= 12) {
+                      if (age != null && age >= 4 && age <= 17) {
                         await _addKidToFirestore(name, age);
                         Navigator.of(context).pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'Invalid age input. Age must be between 2 and 12.'),
+                                'Invalid age input. Age must be between 4 and 17.'),
                             backgroundColor: Colors.red,
                           ),
                         );

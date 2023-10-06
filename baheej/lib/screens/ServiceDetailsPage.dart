@@ -32,7 +32,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         print('Error: userEmail is null. Cannot add service to Firestore.');
         return; // Return early or handle the error as needed
       }
-      final selectedKidsNames = await getSelectedKidsNames(selectedKids);
+      final user = FirebaseAuth.instance.currentUser;
+      final currentUserEmail = user?.email;
+      if (currentUserEmail == null) {
+        print('Error: currentUserEmail is null.');
+        return; // Handle this case as needed
+      }
+
+      await getSelectedKidsNames(selectedKids, currentUserEmail);
 
       // Create a map with the service details
       final serviceData = {
@@ -40,7 +47,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'serviceDescription': widget.service.description,
         'centerName': widget.service.centerName,
         'selectedStartDate': widget.service.selectedStartDate,
-        'selectedEndDate': widget.service.selectedStartDate,
+        'selectedEndDate': widget.service.selectedEndDate,
         'maxAge': widget.service.maxAge,
         'minAge': widget.service.minAge,
         'servicePrice': widget.service.servicePrice,
@@ -63,16 +70,22 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     }
   }
 
-  Future<Map<String, String>> getSelectedKidsNames(List<String> kidIds) async {
+  Future<Map<String, String>> getSelectedKidsNames(
+      List<String> kidIds, String currentUserEmail) async {
     final firestore = FirebaseFirestore.instance;
     final selectedKidsNames = <String, String>{};
 
     for (var kidId in kidIds) {
       final kidDoc = await firestore.collection('Kids').doc(kidId).get();
+
       if (kidDoc.exists) {
         final kidData = kidDoc.data() as Map<String, dynamic>;
-        final kidName = kidData['name'] as String;
-        selectedKidsNames[kidId] = kidName;
+        final kidEmail = kidData['userEmail'] as String;
+
+        if (kidEmail == currentUserEmail) {
+          final kidName = kidData['name'] as String;
+          selectedKidsNames[kidId] = kidName;
+        }
       }
     }
 
@@ -350,9 +363,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       begin: Alignment(0, -1),
                       end: Alignment(0, 1),
                       colors: <Color>[
-                        Color.fromARGB(255, 250, 249, 249),
-                        Color.fromARGB(255, 250, 249, 249),
-                        Color.fromARGB(255, 250, 249, 249)
+                        Color.fromARGB(255, 239, 249, 254),
+                        Color.fromARGB(255, 239, 249, 254),
+                        Color.fromARGB(255, 239, 249, 254)
 
                         // Color.fromARGB(255, 255, 231, 231),
                         // Color.fromARGB(255, 238, 184, 233),
@@ -411,7 +424,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                             Center(
                               child: Container(
                                 margin: EdgeInsets.only(
-                                    right: 10 * fem, left: 10 * fem),
+                                    right: 10 * fem, left: 18 * fem),
                                 child: Column(
                                   children: [
                                     Text(
@@ -516,7 +529,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                   style: TextStyle(
                                     fontFamily: 'Imprima',
                                     fontSize: 20 * ffem,
-                                    fontWeight: FontWeight.w300,
+                                    fontWeight: FontWeight.w400,
                                     height: 2 * ffem / fem,
                                     color: Color(0xff000000),
                                   ),
@@ -534,7 +547,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           margin: EdgeInsets.only(
                             right: 160 * fem,
                             top: 10 * fem,
-                            left: 0,
+                            left: 10,
                           ),
                           child: Row(
                             children: [
@@ -553,7 +566,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w300,
+                                  fontWeight: FontWeight.w400,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -566,7 +579,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       Container(
                         margin: EdgeInsets.only(
                             right: 190 * fem,
-                            left: 0 * fem,
+                            left: 10 * fem,
                             bottom: 10 * fem,
                             top: 15 * fem),
                         width: double.infinity,
@@ -589,7 +602,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               style: TextStyle(
                                 fontFamily: 'Imprima',
                                 fontSize: 20 * ffem,
-                                fontWeight: FontWeight.w300,
+                                fontWeight: FontWeight.w400,
                                 height: 1 * ffem / fem,
                                 color: Color(0xff000000),
                               ),
@@ -604,7 +617,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               bottom: 35 * fem,
                               top: 8 * fem,
                               right: 250 * fem,
-                              left: 0 * fem),
+                              left: 10 * fem),
                           width: double.infinity,
                           child: Column(
                             children: [
@@ -613,8 +626,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
-                                  fontSize: 25 * ffem,
-                                  fontWeight: FontWeight.w300,
+                                  fontSize: 23 * ffem,
+                                  fontWeight: FontWeight.w400,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -626,7 +639,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w200,
+                                  fontWeight: FontWeight.w400,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -815,7 +828,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Colors.white,
+                      onPrimary: Color.fromARGB(255, 255, 255, 255),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
