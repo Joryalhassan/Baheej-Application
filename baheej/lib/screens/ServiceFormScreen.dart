@@ -16,39 +16,42 @@ class ServiceFormScreen extends StatefulWidget {
 class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-//TextField
+  // TextField Declarations
   String? serviceName;
   String? serviceCenter;
   String? centerName;
   String? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
-  int capacityValue = 0;
+  int capacityValue = 10;
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
   bool dateSelected = false;
   bool timeSlotSelected = false;
   int minAge = 4;
   int maxAge = 17;
-  //String? ageRange;
 
-  //validation
-
-// Center name validation
+  // Center name validation
   String? validateCenterName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Center name is required';
     }
 
-    // Add additional validation rules if needed
+    if (value.trim().isEmpty) {
+      return 'Center name should not be only spaces';
+    }
 
     return null;
   }
 
-//name
+  // Service name
   String? validateServiceName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Service name is required';
+    }
+
+    if (value.trim().isEmpty) {
+      return 'Service name should not be only spaces';
     }
 
     if (value.length < 5 || value.length > 20) {
@@ -58,14 +61,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     final RegExp serviceNamePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
 
     if (!serviceNamePattern.hasMatch(value)) {
-      return 'Service name should only contain letters, numbers, and spaces';
+      return 'Service name should only contain letters,\n numbers, and spaces';
     }
 
     return null;
   }
 
-  //capacity
-
+  // Capacity
   String? validateCapacity(String? value) {
     if (value == null || value.isEmpty) {
       return 'Field \n required';
@@ -86,9 +88,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-//center name
-
-// description
+  // Description
   String? validateDescription(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
@@ -108,10 +108,15 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-//price
+  // Price
   String? validatePrice(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
+    }
+    final RegExp validPricePattern = RegExp(r'^\d+(\.\d+)?$');
+
+    if (!validPricePattern.hasMatch(value)) {
+      return 'Only numbers are allowed';
     }
     final double? doubleValue = double.tryParse(value);
     if (doubleValue == null) {
@@ -126,8 +131,54 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-  //age range
+  // Widget buildPriceTextField() {
+  //   return Container(
+  //     margin: EdgeInsets.only(bottom: 8),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Service Price',
+  //           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //         ),
+  //         SizedBox(height: 4),
+  //         TextFormField(
+  //           keyboardType: TextInputType.phone, // Change here
+  //           inputFormatters: <TextInputFormatter>[
+  //             FilteringTextInputFormatter.digitsOnly,
+  //             // Allow only digits and a single dot
+  //             FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+  //           ],
+  //           decoration: InputDecoration(
+  //             hintText: '',
+  //             filled: true,
+  //             fillColor: Colors.grey[300],
+  //             contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+  //             border: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(12.0),
+  //             ),
+  //             focusedBorder: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(12.0),
+  //               borderSide: BorderSide(color: Colors.transparent),
+  //             ),
+  //             enabledBorder: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(12.0),
+  //               borderSide: BorderSide(color: Colors.transparent),
+  //             ),
+  //           ),
+  //           validator: validatePrice,
+  //           onChanged: (value) {
+  //             setState(() {
+  //               selectedPrice = double.tryParse(value);
+  //             });
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
+  // Age range validation
   String? validateMinRange(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
@@ -138,7 +189,6 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'Please enter a valid age';
     }
 
-    // Ensure that min age is not greater than max age
     if (minAge > maxAge) {
       return 'Minimum age cannot \n be greater than maximum age';
     }
@@ -156,7 +206,6 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       return 'Please enter a valid age';
     }
 
-    // Ensure that max age is not less than min age
     if (maxAge < minAge) {
       return 'max greater \n than min';
     }
@@ -164,8 +213,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-//store in firebase database
-
+  // Method to send data to Firebase
   void sendDataToFirebase() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -208,7 +256,6 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 
       // Data has been successfully added to Firestore.
       print('Service added to Firestore');
-      // show msg
       _showSuccessDialog();
     } catch (e) {
       print('Error adding service to Firestore: $e');
