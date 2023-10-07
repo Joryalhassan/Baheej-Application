@@ -113,21 +113,24 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 // create payment
   void makePayment(BuildContext context) async {
     try {
+      print('step 1');
       double totalPrice = calculateTotalPrice(widget.service);
       paymentIntent = await createPaymentIntent(totalPrice);
-
+      print('step 2');
       final hasConflict = await checkForServiceConflict(
           widget.service.selectedStartDate,
           widget.service.selectedEndDate,
           widget.service.selectedTimeSlot);
-
-      if (hasConflict) {
+      print('step 3');
+      if (!hasConflict) {
         // Display a pop-up message with options to proceed or cancel
+        // ignore: use_build_context_synchronously
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(' Warning!'),
+              // ignore: prefer_const_constructors
               content: Text(
                   'There is a conflict with a prebooked service for the selected time ,date for one of your kids!\nDo you want to proceed with the payment?'),
               actions: <Widget>[
@@ -141,6 +144,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: Text('Yes'), // User chooses to proceed with payment
                   onPressed: () async {
                     Navigator.of(context).pop(); // Close the dialog
+                    print('onPressed');
                     displayPaymentSheet(context);
                   },
                 ),
@@ -149,7 +153,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           },
         );
       } else {
+        print('else before createIntent');
         paymentIntent = await createPaymentIntent(totalPrice);
+        // ignore: prefer_const_constructors
         var gpay = PaymentSheetGooglePay(
           merchantCountryCode: "US",
           currencyCode: 'SAR',
@@ -178,16 +184,22 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
   displayPaymentSheet(BuildContext context) async {
     try {
+      print('before await');
       await Stripe.instance.presentPaymentSheet();
+      print('after await');
       // Show a success message
+      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            // ignore: prefer_const_constructors
             title: Text('Payment Successful'),
+            // ignore: prefer_const_constructors
             content: Text('Your payment was successful!'),
             actions: <Widget>[
               TextButton(
+                // ignore: prefer_const_constructors
                 child: Text('OK'),
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
@@ -226,6 +238,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       );
       return json.decode(response.body);
     } catch (e) {
+      print(e.toString());
       throw Exception(e);
     }
   }
