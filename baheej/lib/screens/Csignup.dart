@@ -232,13 +232,14 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
 
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'First Name is required';
+      return 'Phone Number is required';
     }
-    if (value.length < 2 || value.length > 12) {
-      return 'First Name must be between 2 and 12 letters';
+    if (value.length != 10) {
+      return 'Phone Number must be exactly 10 digits';
     }
-    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-      return 'First Name can only contain letters';
+    final phoneRegex = RegExp(r'^05[0-9]{8}$');
+    if (!phoneRegex.hasMatch(value)) {
+      return 'Invalid Phone Number';
     }
     return null;
   }
