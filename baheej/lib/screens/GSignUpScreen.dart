@@ -2,6 +2,8 @@ import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:baheej/screens/home-page.dart';
+import 'package:flutter/services.dart';
 
 class GSignUpScreen extends StatefulWidget {
   const GSignUpScreen({Key? key}) : super(key: key);
@@ -17,6 +19,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
   final TextEditingController _FnameTextController = TextEditingController();
   final TextEditingController _LnameTextController = TextEditingController();
   final TextEditingController _PhoneNumTextController = TextEditingController();
+  final TextEditingController _confirmPasswordTextController =
+      TextEditingController();
+
   String? selectedGender;
   String type = "guardian";
 
@@ -25,6 +30,29 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
   Future<void> signspup() async {
     try {
       if (resultaccount == null) {
+        // Check if passwords match before proceeding
+        if (_passwordTextController.text !=
+            _confirmPasswordTextController.text) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              content: const Text("Passwords do not match."),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Container(
+                    color: Colors.green,
+                    padding: const EdgeInsets.all(14),
+                    child: const Text("OK"),
+                  ),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
         resultaccount =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailTextController.text,
@@ -43,11 +71,18 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         'phonenumber': _PhoneNumTextController.text.trim(),
       });
 
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
+        MaterialPageRoute(
+          builder: (context) => SignInScreen(),
+        ),
+        (route) => false, // Remove all previous routes
       );
+
+      // Show success dialog here
+      _showSuccessDialog();
     } on FirebaseAuthException catch (e) {
+      // Handle authentication exceptions
       if (e.code == 'weak-password') {
         showDialog(
           context: context,
@@ -108,20 +143,26 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
     } catch (e) {
       print(e.toString());
     }
-    _showSnackBar('create account successfully!');
   }
 
-  void _showSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-
-      backgroundColor: Colors.green,
-
-      duration:
-          Duration(seconds: 3), // Duration for which the SnackBar is displayed
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Guardian signed in successfully!'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -145,7 +186,12 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
           height: double.infinity,
           //color: Colors.white,
         ),
-
+        //   body: Container(
+        // width: MediaQuery.of(context).size.width,
+        // height: MediaQuery.of(context).size.height,
+        // decoration: BoxDecoration(
+        //   color: Colors.white, // Change the background color to white
+        // ),
         SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
@@ -169,6 +215,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                       TextFormField(
                         controller: _FnameTextController,
+                        maxLength: 12, // Limit the input to 12 characters
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.person_outline),
                           filled: true,
@@ -189,6 +236,20 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
+                        onChanged: (text) {
+                          // Remove spaces from the input
+                          final newText = text.replaceAll(RegExp(r'\s+'), '');
+                          if (newText != text) {
+                            _FnameTextController.value =
+                                _FnameTextController.value.copyWith(
+                              text: newText,
+                              selection: TextSelection(
+                                  baseOffset: newText.length,
+                                  extentOffset: newText.length),
+                              composing: TextRange.empty,
+                            );
+                          }
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'First Name is required';
@@ -220,8 +281,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                       TextFormField(
                         controller: _LnameTextController,
+                        maxLength: 12, // Limit the input to 12 characters
                         decoration: InputDecoration(
-                          // labelText: "Enter Last Name",
                           prefixIcon: Icon(Icons.person_outline),
                           filled: true,
                           fillColor: Colors.grey[300],
@@ -241,6 +302,20 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
+                        onChanged: (text) {
+                          // Remove spaces from the input
+                          final newText = text.replaceAll(RegExp(r'\s+'), '');
+                          if (newText != text) {
+                            _LnameTextController.value =
+                                _LnameTextController.value.copyWith(
+                              text: newText,
+                              selection: TextSelection(
+                                  baseOffset: newText.length,
+                                  extentOffset: newText.length),
+                              composing: TextRange.empty,
+                            );
+                          }
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Last Name is required';
@@ -307,6 +382,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -323,6 +401,13 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                       TextFormField(
                         controller: _PhoneNumTextController,
+                        maxLength: 10, // Limit the input to exactly 10 digits
+                        keyboardType:
+                            TextInputType.phone, // Show numeric keyboard
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Allow only digits
+                        ],
                         decoration: InputDecoration(
                           // labelText: "Enter Phone Number",
                           prefixIcon: Icon(Icons.phone),
@@ -347,6 +432,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Phone Number is required';
+                          }
+                          if (value.length != 10) {
+                            return 'Phone Number must be exactly 10 digits';
                           }
                           final phoneRegex = RegExp(r'^05[0-9]{8}$');
                           if (!phoneRegex.hasMatch(value)) {
@@ -416,6 +504,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -433,6 +524,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       TextFormField(
                         controller: _passwordTextController,
                         obscureText: true,
+                        maxLength: 20, // Limit the input to 20 characters
                         decoration: InputDecoration(
                           // labelText: "Enter Password",
                           prefixIcon: Icon(Icons.lock_outlined),
@@ -475,6 +567,88 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Password must include:\n",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "• at least one uppercase letter\n",
+                          ),
+                          TextSpan(
+                            text: "• at least one lowercase letter\n",
+                          ),
+                          TextSpan(
+                            text: "• at least one digit\n",
+                          ),
+                          TextSpan(
+                            text: "• between 8 and 20 characters long.",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Confirm Password",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _confirmPasswordTextController,
+                        obscureText: true,
+                        maxLength: 20, // Limit the input to 20 characters
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outlined),
+                          filled: true,
+                          fillColor: Colors.grey[300],
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Confirm Password is required';
+                          }
+                          if (value != _passwordTextController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                   const SizedBox(
                     height: 20,
                   ),
@@ -495,7 +669,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                     },
                     child: Text(
                       'Sign Up',
-                      style: TextStyle(fontSize: 20), // Increase the font size
+                      style: TextStyle(fontSize: 18), // Increase the font size
                     ),
                   ),
                 ],

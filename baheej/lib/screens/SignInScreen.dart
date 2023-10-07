@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'HomeScreenCenter.dart';
 import 'HomeScreenGaurdian.dart';
-import 'GSignUpScreen.dart';
 import 'ResetPassword.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
