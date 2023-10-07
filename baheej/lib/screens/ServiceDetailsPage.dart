@@ -81,11 +81,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   }
 
 //validation conflict service
-  Future<bool> checkForServiceConflict(
+  Future<void> checkForServiceConflict(
     DateTime selectedStartDate,
     DateTime selectedEndDate,
     String selectedTimeSlot,
   ) async {
+    bool conflict = false;
     final firestore = FirebaseFirestore.instance;
     final servicesSnapshot = await firestore.collection('ServiceBook').get();
 
@@ -103,11 +104,42 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       if (selectedStartDate.isBefore(serviceEndDate) &&
           selectedEndDate.isAfter(serviceStartDate) &&
           selectedTimeSlot == serviceTimeSlot) {
-        return true; // Conflict found
-      }
-    }
-
-    return false; // No conflict found
+        conflict = true;
+        // ignore: use_build_context_synchronously
+        // Conflict found
+      } //if
+    } //for
+    if (conflict) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(' Warning!'),
+            content: Text(
+                'There is a conflict with a prebooked service for the selected time ,date for one of your kids!\nDo you want to proceed with the payment?'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('No'), // User chooses not to proceed
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+              TextButton(
+                child: Text('Yes'), // User chooses to proceed with payment
+                onPressed: () async {
+                  Navigator.of(context).pop(); // Close the dialog
+                  makePayment(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // ignore: use_build_context_synchronously
+      makePayment(context);
+    } // No conflict found
   }
 
 // create payment
@@ -117,66 +149,34 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       double totalPrice = calculateTotalPrice(widget.service);
       paymentIntent = await createPaymentIntent(totalPrice);
       print('step 2');
-      final hasConflict = await checkForServiceConflict(
-          widget.service.selectedStartDate,
-          widget.service.selectedEndDate,
-          widget.service.selectedTimeSlot);
+      // final hasConflict = await checkForServiceConflict(
+      //     widget.service.selectedStartDate,
+      //     widget.service.selectedEndDate,
+      //     widget.service.selectedTimeSlot);
       print('step 3');
-      if (!hasConflict) {
-        // Display a pop-up message with options to proceed or cancel
-        // ignore: use_build_context_synchronously
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(' Warning!'),
-              // ignore: prefer_const_constructors
-              content: Text(
-                  'There is a conflict with a prebooked service for the selected time ,date for one of your kids!\nDo you want to proceed with the payment?'),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('No'), // User chooses not to proceed
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                TextButton(
-                  child: Text('Yes'), // User chooses to proceed with payment
-                  onPressed: () async {
-                    Navigator.of(context).pop(); // Close the dialog
-                    print('onPressed');
-                    displayPaymentSheet(context);
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        print('else before createIntent');
-        paymentIntent = await createPaymentIntent(totalPrice);
-        // ignore: prefer_const_constructors
-        var gpay = PaymentSheetGooglePay(
-          merchantCountryCode: "US",
-          currencyCode: 'SAR',
-          testEnv: true,
-        );
 
-        String formattedPrice =
-            NumberFormat.currency(locale: 'en_US', symbol: '')
-                .format(totalPrice);
+      print('else before createIntent');
+      paymentIntent = await createPaymentIntent(totalPrice);
+      // ignore: prefer_const_constructors
+      var gpay = PaymentSheetGooglePay(
+        merchantCountryCode: "US",
+        currencyCode: 'SAR',
+        testEnv: true,
+      );
 
-        Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: paymentIntent!["client_secret"],
-            style: ThemeMode.dark,
-            merchantDisplayName: "baheej",
-            googlePay: gpay,
-          ),
-        );
+      String formattedPrice =
+          NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-        await displayPaymentSheet(context); // Always display payment sheet
-      }
+      Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntent!["client_secret"],
+          style: ThemeMode.dark,
+          merchantDisplayName: "baheej",
+          googlePay: gpay,
+        ),
+      );
+
+      await displayPaymentSheet(context); // Always display payment sheet
     } catch (e) {
       print("Error: $e");
     }
@@ -343,7 +343,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(
-                            right: 230 * fem, left: 0 * fem, bottom: 10 * fem),
+                            right: 225 * fem, left: 0 * fem, bottom: 10 * fem),
                         width: 400 * fem,
                         height: 80 * fem,
                         child: Center(
@@ -377,9 +377,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                             Center(
                               child: Container(
                                 margin: EdgeInsets.only(
-                                    right: 10 * fem,
-                                    left: 10 * fem,
-                                    bottom: 20),
+                                    right: 10 * fem, left: 10 * fem, bottom: 0),
                                 child: Column(
                                   children: [
                                     Text(
@@ -463,7 +461,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               children: [
                                 Padding(
                                   padding: EdgeInsets.only(
-                                      right: 8,
+                                      right: 6,
                                       top: 5 *
                                           fem), // Adjust the value as needed
                                   child: Text(
@@ -532,7 +530,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
                       Container(
                         margin: EdgeInsets.only(
-                            right: 200 * fem,
+                            right: 180 * fem,
                             left: 15 * fem,
                             bottom: 10 * fem,
                             top: 15 * fem),
@@ -570,7 +568,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           margin: EdgeInsets.only(
                               bottom: 35 * fem,
                               top: 8 * fem,
-                              right: 250 * fem,
+                              right: 230 * fem,
                               left: 16 * fem),
                           width: double.infinity,
                           child: Column(
@@ -728,7 +726,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.fromLTRB(40 * fem, 0, 65, 20 * fem),
+                  margin: EdgeInsets.fromLTRB(40 * fem, 0, 57, 20 * fem),
                   //80 change the size
                   padding: EdgeInsets.fromLTRB(35 * fem, 0, 27 * fem, 0),
                   decoration: BoxDecoration(
@@ -739,7 +737,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        margin: EdgeInsets.only(right: 10 * fem),
+                        margin: EdgeInsets.only(right: 6 * fem),
                         child: Text(
                           'Total Price',
                           style: TextStyle(
@@ -783,7 +781,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     onPressed: () {
                       bookService(() {
                         // Simulate a successful payment, then trigger fireworks
-                        makePayment(context);
+                        checkForServiceConflict(
+                            widget.service.selectedStartDate,
+                            widget.service.selectedEndDate,
+                            widget.service.selectedTimeSlot);
                         //addServiceToFirestore();
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;

@@ -1,4 +1,6 @@
 import 'package:baheej/firebase_options.dart';
+import 'package:baheej/screens/HomeScreenCenter.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:baheej/screens/SignInScreen.dart';
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const SignInScreen(),
+      home: const HomeScreenGaurdian(),
     );
   }
 }
