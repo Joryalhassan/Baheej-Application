@@ -145,18 +145,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 // create payment
   void makePayment(BuildContext context) async {
     try {
-      print('step 1');
       double totalPrice = calculateTotalPrice(widget.service);
       paymentIntent = await createPaymentIntent(totalPrice);
-      print('step 2');
-      // final hasConflict = await checkForServiceConflict(
-      //     widget.service.selectedStartDate,
-      //     widget.service.selectedEndDate,
-      //     widget.service.selectedTimeSlot);
-      print('step 3');
 
-      print('else before createIntent');
-      paymentIntent = await createPaymentIntent(totalPrice);
       // ignore: prefer_const_constructors
       var gpay = PaymentSheetGooglePay(
         merchantCountryCode: "US",
@@ -282,7 +273,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("Service details"),
+        title: OverflowBox(
+          maxWidth: double.infinity,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            "Service details",
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         backgroundColor: Color.fromARGB(0, 255, 255, 255),
         elevation: 0,
       ),
@@ -343,7 +341,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(
-                            right: 225 * fem, left: 0 * fem, bottom: 10 * fem),
+                            right: 100 * fem, left: 0 * fem, bottom: 10 * fem),
                         width: 400 * fem,
                         height: 80 * fem,
                         child: Center(
@@ -369,7 +367,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
                       Container(
                         margin: EdgeInsets.fromLTRB(
-                            10 * fem, 0, 200 * fem, 20 * fem),
+                            20 * fem, 0, 200 * fem, 20 * fem),
                         width: double.infinity,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -377,7 +375,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                             Center(
                               child: Container(
                                 margin: EdgeInsets.only(
-                                    right: 10 * fem, left: 10 * fem, bottom: 0),
+                                    right: 0 * fem, left: 0 * fem, bottom: 0),
                                 child: Column(
                                   children: [
                                     Text(
@@ -481,7 +479,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                   style: TextStyle(
                                     fontFamily: 'Imprima',
                                     fontSize: 20 * ffem,
-                                    fontWeight: FontWeight.w300,
+                                    fontWeight: FontWeight.w400,
                                     height: 2 * ffem / fem,
                                     color: Color(0xff000000),
                                   ),
@@ -518,7 +516,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                                 style: TextStyle(
                                   fontFamily: 'Imprima',
                                   fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w300,
+                                  fontWeight: FontWeight.w400,
                                   height: 1 * ffem / fem,
                                   color: Color(0xff000000),
                                 ),
@@ -554,7 +552,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                               style: TextStyle(
                                 fontFamily: 'Imprima',
                                 fontSize: 20 * ffem,
-                                fontWeight: FontWeight.w300,
+                                fontWeight: FontWeight.w400,
                                 height: 1 * ffem / fem,
                                 color: Color(0xff000000),
                               ),

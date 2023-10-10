@@ -78,9 +78,12 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         'Desc': _DescriptionTextController.text.trim()
       });
 
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
+        MaterialPageRoute(
+          builder: (context) => SignInScreen(),
+        ),
+        (route) => false, // Remove all previous routes
       );
       // Show success dialog here
       _showSuccessDialog();
