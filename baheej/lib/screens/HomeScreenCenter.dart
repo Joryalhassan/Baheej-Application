@@ -1,3 +1,4 @@
+import 'package:baheej/notification_manager/notification_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/SignInScreen.dart';
@@ -171,6 +172,17 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          NotificationManager().simpleNotificationShow();
+                        },
+                        child: Text('Notification'), // The text on the button
+                      )
+                    ],
+                  ),
                   Column(
                     children: services.map((service) {
                       return Card(
