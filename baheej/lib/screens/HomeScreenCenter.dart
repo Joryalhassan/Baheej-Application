@@ -17,6 +17,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   List<Service> services = [];
   String userName = ''; // Initialize userName
+  String? userRole;
+
+  // Future<void> sendNotification(String message) async {
+  //   final firestore = FirebaseFirestore.instance;
+  //   await firestore.collection('notifications').add({
+  //     'message': message,
+  //     'timestamp': FieldValue.serverTimestamp(),
+  //     'seenBy':
+  //         [] // This will be an empty list, as no one has seen the notification yet.
+  //   });
+  // }
 
   void onTabTapped(int index) {
     setState(() {
@@ -33,6 +44,58 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Fetch the user's name from Firestore when the screen initializes
     fetchUserName();
+    fetchUserRoleAndName();
+  }
+
+  // This function fetches both the user's role and name
+  Future<void> fetchUserRoleAndName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        userRole = 'center'; // Set user role to center
+        final userData = centerDoc.data() as Map<String, dynamic>;
+        final firstName = userData['username'] ?? '';
+        setState(() {
+          userName = firstName;
+        });
+      } else {
+        final guardianDoc = await FirebaseFirestore.instance
+            .collection(
+                'guardians') // Assuming 'guardians' is your collection name
+            .doc(userId)
+            .get();
+        if (guardianDoc.exists) {
+          userRole = 'guardian'; // Set user role to guardian
+        }
+      }
+    }
+  }
+
+  Future<void> sendNotification(String message) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        // Only the center should send a notification
+        final firestore = FirebaseFirestore.instance;
+        await firestore.collection('notifications').add({
+          'message': message,
+          'timestamp': FieldValue.serverTimestamp(),
+          'senderRole': 'center', // Specify sender's role as 'center'
+          'seenBy':
+              [] // This will be an empty list, as no one has seen the notification yet.
+        });
+      }
+    }
   }
 
   void fetchUserName() async {
@@ -176,8 +239,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () {
-                          NotificationManager().simpleNotificationShow();
+                        onPressed: () async {
+                          await sendNotification(
+                              "Your custom message here"); // Calling the sendNotification method
+                          // NotificationManager().simpleNotificationShow();  // Uncomment this if you want to show a local notification as well
                         },
                         child: Text('Notification'), // The text on the button
                       )
