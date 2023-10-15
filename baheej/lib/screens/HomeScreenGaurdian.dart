@@ -6,6 +6,8 @@ import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceDetailsPage.dart';
+import 'dart:async';
+import 'package:baheej/screens/LocalNotificationHandler.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -19,6 +21,12 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
+  Timer? _pollingTimer; // The timer for polling
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  LocalNotificationHandler _notificationHandler = LocalNotificationHandler();
+  final Set<String> notifiedDocumentIds = Set<String>();
+  StreamSubscription<QuerySnapshot>?
+      _subscription; // To manage the subscription
   //final String? payload;
 
   void initState() {
@@ -30,6 +38,69 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       });
     });
     fetchName(); // Call fetchName to fetch the user's first name
+
+    _pollingTimer = Timer.periodic(
+        Duration(seconds: 30), (timer) => checkForNotifications());
+  }
+
+  void checkForNotifications() {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final String currentUserId = user.uid;
+      final firestore = FirebaseFirestore.instance;
+
+      // Cancel any existing subscription before starting a new one
+      _subscription?.cancel();
+
+      _subscription = firestore
+          .collection('notifications')
+          .where('seenBy',
+              arrayContains: currentUserId) // Check if center's ID is in seenBy
+          .snapshots()
+          .listen((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          if (!notifiedDocumentIds.contains(doc.id)) {
+            final String? message = doc.data()?['message'];
+            if (message != null) {
+              _notificationHandler.showNotification(
+                'New Notification',
+                message,
+              );
+              notifiedDocumentIds.add(doc.id); // Add the document ID to our set
+            }
+          }
+        }
+      });
+    } else {
+      // Handle the scenario where the user is not logged in, if needed.
+    }
+  }
+
+  void stopListening() {
+    _subscription?.cancel();
+    _subscription = null;
+  }
+
+  void _showLocalNotification(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('New Notification'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<List<Service>> fetchDataFromFirebase() async {
@@ -86,10 +157,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             TextButton(
               child: Text('Yes'),
               onPressed: () async {
-                Navigator.of(context).pop();
+                // Assuming you have access to stopListening method in this widget
+                stopListening(); // Call the method directly
+
                 try {
                   await FirebaseAuth.instance.signOut();
                   showLogoutSuccessDialog();
+                  Navigator.of(context).pushReplacementNamed(
+                      '/login'); // Replace with your login route name
                 } catch (e) {
                   print("Error signing out: $e");
                 }
