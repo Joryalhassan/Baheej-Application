@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -15,26 +16,42 @@ class ServiceFormScreen extends StatefulWidget {
 class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-//TextField
+  // TextField Declarations
   String? serviceName;
   String? serviceCenter;
   String? centerName;
-  int? selectedTimeSlot;
+  String? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
-  int capacityValue = 0;
+  int capacityValue = 10;
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
   bool dateSelected = false;
   bool timeSlotSelected = false;
-  String? ageRange;
+  int minAge = 4;
+  int maxAge = 17;
 
-  //validation
+  // Center name validation
+  String? validateCenterName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Center name is required';
+    }
 
-//name
+    if (value.trim().isEmpty) {
+      return 'Center name should not be only spaces';
+    }
+
+    return null;
+  }
+
+  // Service name
   String? validateServiceName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Service name is required';
+    }
+
+    if (value.trim().isEmpty) {
+      return 'Service name should not be only spaces';
     }
 
     if (value.length < 5 || value.length > 20) {
@@ -44,17 +61,16 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     final RegExp serviceNamePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
 
     if (!serviceNamePattern.hasMatch(value)) {
-      return 'Service name should only contain letters, numbers, and spaces';
+      return 'Service name should only contain letters,\n numbers, and spaces';
     }
 
     return null;
   }
 
-  //capacity
-
+  // Capacity
   String? validateCapacity(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Field required';
+      return 'Field \n required';
     }
     final intValue = int.tryParse(value);
     if (intValue == null) {
@@ -72,7 +88,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-// description
+  // Description
   String? validateDescription(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
@@ -92,10 +108,15 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-//price
+  // Price
   String? validatePrice(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
+    }
+    final RegExp validPricePattern = RegExp(r'^\d+(\.\d+)?$');
+
+    if (!validPricePattern.hasMatch(value)) {
+      return 'Only numbers are allowed';
     }
     final double? doubleValue = double.tryParse(value);
     if (doubleValue == null) {
@@ -110,34 +131,89 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     return null;
   }
 
-  //age range
+  // Widget buildPriceTextField() {
+  //   return Container(
+  //     margin: EdgeInsets.only(bottom: 8),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Service Price',
+  //           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //         ),
+  //         SizedBox(height: 4),
+  //         TextFormField(
+  //           keyboardType: TextInputType.phone, // Change here
+  //           inputFormatters: <TextInputFormatter>[
+  //             FilteringTextInputFormatter.digitsOnly,
+  //             // Allow only digits and a single dot
+  //             FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+  //           ],
+  //           decoration: InputDecoration(
+  //             hintText: '',
+  //             filled: true,
+  //             fillColor: Colors.grey[300],
+  //             contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+  //             border: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(12.0),
+  //             ),
+  //             focusedBorder: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(12.0),
+  //               borderSide: BorderSide(color: Colors.transparent),
+  //             ),
+  //             enabledBorder: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(12.0),
+  //               borderSide: BorderSide(color: Colors.transparent),
+  //             ),
+  //           ),
+  //           validator: validatePrice,
+  //           onChanged: (value) {
+  //             setState(() {
+  //               selectedPrice = double.tryParse(value);
+  //             });
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  String? validateAgeRange(String? value) {
+  // Age range validation
+  String? validateMinRange(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }
 
-    final RegExp ageRangePattern = RegExp(r'^(\d+)-(\d+)$');
-
-    final match = ageRangePattern.firstMatch(value);
-
-    if (match == null) {
-      return 'Please enter a valid numeric range like "8-10".';
+    final minAge = int.tryParse(value);
+    if (minAge == null) {
+      return 'Please enter a valid age';
     }
 
-    final minAge = int.tryParse(match.group(1) ?? '');
-
-    final maxAge = int.tryParse(match.group(2) ?? '');
-
-    if (minAge == null || maxAge == null || minAge < 4 || maxAge > 17) {
-      return 'Age range must be between 4 and 17.';
+    if (minAge > maxAge) {
+      return 'Minimum age cannot \n be greater than maximum age';
     }
 
     return null;
   }
 
-//store in firebase database
+  String? validateMaxRange(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
 
+    final maxAge = int.tryParse(value);
+    if (maxAge == null) {
+      return 'Please enter a valid age';
+    }
+
+    if (maxAge < minAge) {
+      return 'max greater \n than min';
+    }
+
+    return null;
+  }
+
+  // Method to send data to Firebase
   void sendDataToFirebase() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -169,16 +245,17 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceName': serviceName,
         'servicePrice': selectedPrice,
         'serviceCapacity': capacityValue,
-        'serviceTime': selectedTimeSlot,
+        'selectedTimeSlot': selectedTimeSlot,
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
-        'ageRange': ageRange,
+        'centerName': centerName,
+        'minAge': minAge,
+        'maxAge': maxAge
       });
 
       // Data has been successfully added to Firestore.
       print('Service added to Firestore');
-      // show msg
       _showSuccessDialog();
     } catch (e) {
       print('Error adding service to Firestore: $e');
@@ -268,18 +345,184 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               setState(() {
                 if (label == 'Service Name') {
                   serviceName = value;
+                } else if (label == 'Center Name') {
+                  centerName = value; // Update centerName here
                 } else if (label == 'Service Price') {
                   selectedPrice = double.tryParse(value);
                 } else if (label == 'Service Capacity') {
                   capacityValue = int.tryParse(value) ?? 0;
                 } else if (label == 'Service Description') {
                   selectedDescription = value;
-                } else if (label == 'Age Range') {
-                  ageRange = value;
+                } else if (label == 'Min Age') {
+                  minAge = int.tryParse(value) ?? 0;
+                } else if (label == 'Max Age') {
+                  maxAge = int.tryParse(value) ?? 0;
                 }
               });
             },
             maxLength: maxLength,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildIncrementDecrementMinAgeField(
+    String label,
+    int minAge, // Change from value to minAge
+    void Function() onIncrement,
+    void Function() onDecrement,
+  ) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8, right: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    if (minAge > 4) {
+                      minAge -= 1;
+                      onDecrement();
+                    }
+                  });
+                },
+              ),
+              Container(
+                width: 60,
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  validator: validateMaxRange,
+                  onChanged: (newValue) {},
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                  ],
+                  controller: TextEditingController(
+                    text: minAge.toString(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    if (minAge < 17) {
+                      // Change from minAge < 17 to minAge <= 17
+                      minAge += 1;
+                      onIncrement();
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildIncrementDecrementMaxAgeField(
+    String label,
+    int maxAge, // Change from value to maxAge
+    void Function() onIncrement,
+    void Function() onDecrement,
+  ) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8, right: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    if (maxAge > 4) {
+                      // Change from maxAge > 4 to maxAge >= 4
+                      maxAge -= 1;
+                      onDecrement();
+                    }
+                  });
+                },
+              ),
+              Container(
+                width: 60,
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  validator: validateMaxRange,
+                  onChanged: (newValue) {},
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                  ],
+                  controller: TextEditingController(
+                    text: maxAge.toString(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    if (maxAge < 17) {
+                      maxAge += 1;
+                      onIncrement();
+                    }
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -451,7 +694,54 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     buildTextField('Center Name', validateServiceName,
                         maxLength: 20),
                     buildTextField('Service Price', validatePrice),
-                    buildTextField('Age Range', validateAgeRange),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceBetween, // Adjust this as needed
+                      children: [
+                        Expanded(
+                          child: buildIncrementDecrementMinAgeField(
+                            'Min Age',
+                            minAge,
+                            () {
+                              setState(() {
+                                minAge += 1;
+                              });
+                            },
+                            () {
+                              setState(() {
+                                if (minAge >= 4) {
+                                  minAge -= 1;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                            width:
+                                1), // Add spacing between the fields (adjust as needed)
+                        Expanded(
+                          child: buildIncrementDecrementMaxAgeField(
+                            'Max Age',
+                            maxAge,
+                            () {
+                              setState(() {
+                                maxAge += 1;
+                              });
+                            },
+                            () {
+                              setState(() {
+                                if (maxAge >= 4) {
+                                  maxAge -= 1;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+// max age
+
                     buildIncrementDecrementField(
                       'Service Capacity',
                       capacityValue,
@@ -467,10 +757,10 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                           }
                         });
                       },
-                    ),
+                    ), // capacity
                     buildTextField('Service Description', validateDescription,
                         maxLength: 225),
-                    SizedBox(height: 4.0),
+                    SizedBox(height: 2.0),
                     Row(
                       children: <Widget>[
                         Expanded(
@@ -497,13 +787,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              selectedTimeSlot = 0;
+                              selectedTimeSlot = '8-11 AM';
 
                               timeSlotSelected = true;
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: selectedTimeSlot == 0
+                            primary: selectedTimeSlot == '8-11 AM'
                                 ? Color.fromARGB(255, 0, 65, 105)
                                 : const Color.fromARGB(255, 111, 176, 234),
                             onPrimary: Colors.white,
@@ -517,13 +807,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              selectedTimeSlot = 1;
+                              selectedTimeSlot = '2-5 PM';
 
                               timeSlotSelected = true;
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: selectedTimeSlot == 1
+                            primary: selectedTimeSlot == '2-5 PM'
                                 ? Color.fromARGB(255, 0, 65, 105)
                                 : Color.fromARGB(255, 111, 176, 234),
                             onPrimary: Colors.white,
@@ -591,43 +881,4 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       });
     }
   }
-
-  // Widget buildIncrementDecrementField(
-  //   String label,
-  //   int value,
-  //   VoidCallback increment,
-  //   VoidCallback decrement,
-  // ) {
-  //   return Container(
-  //     margin: EdgeInsets.only(bottom: 8),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           label,
-  //           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-  //         ),
-  //         SizedBox(height: 4),
-  //         Row(
-  //           children: [
-  //             IconButton(
-  //               icon: Icon(Icons.remove),
-  //               onPressed: decrement,
-  //             ),
-  //             Text(
-  //               value.toString(),
-  //               style: TextStyle(
-  //                 fontSize: 16,
-  //               ),
-  //             ),
-  //             IconButton(
-  //               icon: Icon(Icons.add),
-  //               onPressed: increment,
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

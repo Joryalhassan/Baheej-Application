@@ -15,12 +15,11 @@ class HomeScreenGaurdian extends StatefulWidget {
 }
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
-  String FirstName = " ";
+  String FirstName = '';
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
 
-  @override
   void initState() {
     super.initState();
     fetchDataFromFirebase().then((services) {
@@ -29,7 +28,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         _filteredServices = services;
       });
     });
-    fetchUserName();
+    fetchName(); // Call fetchName to fetch the user's first name
   }
 
   Future<List<Service>> fetchDataFromFirebase() async {
@@ -69,23 +68,68 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     }).toList();
   }
 
-  void _handleLogout() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      print("Signed Out");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SignInScreen(),
-        ),
-      );
-    } catch (e) {
-      print("Error signing out: $e");
-    }
+  Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  showLogoutSuccessDialog();
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showLogoutSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void navigateToSignInScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+    );
   }
 
   void _handleSearch(String query) {
-    query = query.trim(); // Trim the input value
+    query = query.trim();
     setState(() {
       _filteredServices = _allServices
           .where((service) =>
@@ -106,7 +150,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 
-  void fetchUserName() async {
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Fetch the user's name from Firestore when the screen initializes
+  //   fetchName();
+  // }
+
+  void fetchName() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
@@ -118,6 +169,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         final userData = userDoc.data() as Map<String, dynamic>;
         final firstName =
             userData['fname'] ?? ''; // Get the first name from Firestore
+        print(
+            'Fetched first name: $firstName'); // Add a print statement for debugging
         setState(() {
           FirstName = firstName;
         });
@@ -132,7 +185,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Home $FirstName'),
+        title: Text('Welcome $FirstName'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -176,12 +229,12 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                           // Handle tapping on a service
                         },
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(0.2),
+                          borderRadius: BorderRadius.circular(35),
                           child: Card(
                             elevation: 3,
                             margin: EdgeInsets.symmetric(
                                 vertical: 8, horizontal: 16),
-                            color: Color.fromARGB(255, 251, 241, 241),
+                            color: Color.fromARGB(255, 239, 249, 254),
                             child: Container(
                               padding: EdgeInsets.all(16),
                               child: Column(
@@ -268,8 +321,10 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.history),
-                  color: Colors.white,
+                  icon: Icon(Icons.history), // Home Icon
+
+                  color: Colors.white, // Set icon color to white
+
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -278,13 +333,10 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(
-                    top: 8,
-                    left: 20,
-                    bottom: 10,
-                  ),
+                  padding: EdgeInsets.only(top: 5), // Add margin to the top
+
                   child: Text(
-                    'History',
+                    'Booked Service ',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -297,11 +349,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'View Kids',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      1, 50, 17, 1), // Add margin to the top
+
+                  child: Text(
+                    'View Kids',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ],
@@ -311,8 +368,10 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.person),
-                  color: Colors.white,
+                  icon: Icon(Icons.person), // Profile Icon
+
+                  color: Colors.white, // Set icon color to white
+
                   onPressed: () {
                     // _handleAddKids();
                   },
