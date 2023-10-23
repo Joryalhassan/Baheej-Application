@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'HomeScreenCenter.dart';
 import 'HomeScreenGaurdian.dart';
-//import 'GSignUpScreen.dart';
 import 'ResetPassword.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -59,15 +58,14 @@ class _SignInScreenState extends State<SignInScreen> {
               .doc(user.uid)
               .get();
 
-          //if (centerDoc.exists) {
-           // Navigator.pushReplacement(
-           //   context,
-              //MaterialPageRoute(
-               // builder: (context) => HomeScreen(),
-          //    ),
-         //   );
-         // } else
-           if (usersDoc.exists) {
+          if (centerDoc.exists) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(),
+              ),
+            );
+          } else if (usersDoc.exists) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(

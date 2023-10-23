@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 
 import 'package:baheej/screens/Service.dart';
-
+import 'package:baheej/screens/CenterProfileScreen.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -186,11 +186,22 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 IconButton(
                   icon: Icon(Icons.person), // Profile Icon
-
                   color: Colors.white, // Set icon color to white
-
                   onPressed: () {
-                    // Handle profile button tap
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CenterProfileScreen(
+                          centerName:
+                              'Your Center Name', // Pass your actual data here
+                          email: 'Your Email',
+                          phoneNumber: 'Your Phone Number',
+                          district: 'Your District',
+                          commercialRegister: 'Your Commercial Register Number',
+                          description: 'Your Description',
+                        ),
+                      ),
+                    );
                   },
                 ),
                 Text(
