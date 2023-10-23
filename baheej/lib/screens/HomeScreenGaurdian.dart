@@ -266,16 +266,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                         ),
                                       ),
                                       InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ServiceDetailsPage(
-                                                      service: service),
-                                            ),
-                                          );
-                                        },
+                                        // onTap: () {
+                                        //   Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //       builder: (context) =>
+                                        //   //         ServiceDetailsPage(
+                                        //   //             service: service),
+                                        //   //   ),
+                                        //   // );
+                                        // },
                                         child: Row(
                                           children: [
                                             Text(
