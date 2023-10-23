@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -15,11 +16,11 @@ class ServiceFormScreen extends StatefulWidget {
 
 class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
-
+String userName = '';// add this to store centername(jo)
   // TextField Declarations
   String? serviceName;
   String? serviceCenter;
-  String? centerName;
+ // String? centerName;
   String? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
@@ -30,6 +31,31 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   bool timeSlotSelected = false;
   int minAge = 4;
   int maxAge = 17;
+   @override
+  void initState() {// add this to store centername(jo)
+    super.initState();
+    // Fetch the user's name from Firestore when the screen initializes
+    fetchUserName();
+  }
+
+  void fetchUserName() async {// add this to store centername(jo)
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final CenterName =
+            userData['username'] ?? ''; // Get the first name from Firestore
+        setState(() {
+          userName = CenterName;
+        });
+      }
+    }
+  }
 
   // Center name validation
   String? validateCenterName(String? value) {
@@ -249,7 +275,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
-        'centerName': centerName,
+        'centerName': userName,// change this to store centername(jo)
         'minAge': minAge,
         'maxAge': maxAge
       });
@@ -345,9 +371,10 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               setState(() {
                 if (label == 'Service Name') {
                   serviceName = value;
-                } else if (label == 'Center Name') {
-                  centerName = value; // Update centerName here
-                } else if (label == 'Service Price') {
+                } //else if (label == 'Center Name') {
+                  //centerName = value; // Update centerName here
+                //} / commented this to store centername(jo)
+                else if (label == 'Service Price') {
                   selectedPrice = double.tryParse(value);
                 } else if (label == 'Service Capacity') {
                   capacityValue = int.tryParse(value) ?? 0;
@@ -691,8 +718,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     SizedBox(height: 20.0),
                     buildTextField('Service Name', validateServiceName,
                         maxLength: 20),
-                    buildTextField('Center Name', validateServiceName,
-                        maxLength: 20),
+                   // buildTextField('Center Name', validateServiceName,
+                     //   maxLength: 20),/ commented this to store centername(jo)
                     buildTextField('Service Price', validatePrice),
                     Row(
                       mainAxisAlignment: MainAxisAlignment

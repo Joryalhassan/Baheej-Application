@@ -2,7 +2,9 @@
     <application
         android:label="baheej"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        xmlns:tools="http://schemas.android.com/tools"
+    tools:overrideLibrary="com.flutter.stripe">
         <activity
             android:name=".MainActivity"
             android:exported="true"

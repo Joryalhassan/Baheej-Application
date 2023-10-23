@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
+
 //jory
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const SignInScreen(),
+      home: SignInScreen(),
     );
   }
 }
