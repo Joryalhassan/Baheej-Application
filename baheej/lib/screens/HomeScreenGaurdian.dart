@@ -1,3 +1,4 @@
+import 'package:baheej/screens/GProfileScreen.dart';
 import 'package:baheej/screens/HistoryScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -129,6 +130,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                 ),
               ],
             ),
+           
+           
             SizedBox(width: 25),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -138,9 +141,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
                   color: Colors.white, // Set icon color to white
 
-                  onPressed: () {
-                    // Handle profile button tap
-                  },
+                 onPressed: () {
+                String currentUserEmail = FirebaseAuth.instance.currentUser?.email ?? '';
+                Navigator.push(
+                context,
+                 MaterialPageRoute(builder: (context) => GProfileViewScreen()),
+              );
+            },
+
                 ),
                 Text(
                   'Profile',

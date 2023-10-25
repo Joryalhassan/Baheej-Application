@@ -34,6 +34,7 @@ class HistoryScreen extends StatelessWidget {
       );
     } else {
       final bookedServices = snapshot.data!.docs;
+     
       return ListView.builder(
         itemCount: bookedServices.length,
         itemBuilder: (context, index) {
