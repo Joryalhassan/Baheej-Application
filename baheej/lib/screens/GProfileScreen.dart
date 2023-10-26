@@ -38,7 +38,7 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
           lastName: data['lname'] ?? '',
           email: data['email'] ?? '',
           phoneNumber: data['phonenumber'] ?? '',
-          selectedGender: data['selectedGender'] ?? '', // Retrieve selectedGender
+          selectedGender: data['selectedGender'] ?? '',
         );
       }
     }
@@ -49,7 +49,15 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
       lastName: '',
       email: '',
       phoneNumber: '',
-      selectedGender: '', // Set selectedGender to an empty string
+      selectedGender: '',
+    );
+  }
+
+  void _editProfile() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) {
+        return GProfileEditScreen(_guardianProfile);
+      }),
     );
   }
 
@@ -58,6 +66,12 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Guardian Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: _editProfile,
+          ),
+        ],
       ),
       body: Center(
         child: _guardianProfile != null
@@ -93,3 +107,93 @@ class GuardianProfile {
     required this.selectedGender,
   });
 }
+
+class GProfileEditScreen extends StatefulWidget {
+  final GuardianProfile? initialProfile;
+
+  GProfileEditScreen(this.initialProfile);
+
+  @override
+  _GProfileEditScreenState createState() => _GProfileEditScreenState();
+}
+
+class _GProfileEditScreenState extends State<GProfileEditScreen> {
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _phoneNumberController;
+  late TextEditingController _selectedGenderController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _firstNameController = TextEditingController(text: widget.initialProfile?.firstName);
+    _lastNameController = TextEditingController(text: widget.initialProfile?.lastName);
+    _phoneNumberController = TextEditingController(text: widget.initialProfile?.phoneNumber);
+    _selectedGenderController = TextEditingController(text: widget.initialProfile?.selectedGender);
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneNumberController.dispose();
+    _selectedGenderController.dispose();
+    super.dispose();
+  }
+
+  void _saveChanges() {
+    // Save changes to Firestore
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+        'fname': _firstNameController.text.trim(),
+        'lname': _lastNameController.text.trim(),
+        'phonenumber': _phoneNumberController.text.trim(),
+        'selectedGender': _selectedGenderController.text.trim(),
+      });
+
+      // Pop the edit screen and return to the profile view
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Edit Profile'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _firstNameController,
+              decoration: InputDecoration(labelText: 'First Name'),
+            ),
+            TextField(
+              controller: _lastNameController,
+              decoration: InputDecoration(labelText: 'Last Name'),
+            ),
+            TextField(
+              controller: _phoneNumberController,
+              decoration: InputDecoration(labelText: 'Phone Number'),
+            ),
+            TextField(
+              controller: _selectedGenderController,
+              decoration: InputDecoration(labelText: 'Selected Gender'),
+            ),
+            ElevatedButton(
+              onPressed: _saveChanges,
+              child: Text('Save Changes'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
