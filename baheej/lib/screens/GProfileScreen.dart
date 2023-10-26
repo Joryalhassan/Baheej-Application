@@ -1,47 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class GProfileViewScreen extends StatefulWidget {
   @override
   _GProfileViewScreenState createState() => _GProfileViewScreenState();
 }
 
-
-
-
 class _GProfileViewScreenState extends State<GProfileViewScreen> {
-  late String currentUserEmail;
-  String? firstName;
-  String? lastName;
-  String? phoneNumber;
+  GuardianProfile? _guardianProfile;
 
   @override
   void initState() {
     super.initState();
-    // Get the current user's email from Firebase Authentication
-    currentUserEmail = FirebaseAuth.instance.currentUser?.email ?? '';
-    fetchGuardianProfileData();
+    fetchGuardianData().then((guardianData) {
+      setState(() {
+        _guardianProfile = guardianData;
+      });
+    });
   }
 
-  Future<void> fetchGuardianProfileData() async {
-    // Fetch guardian's information from Firestore based on email
-    try {
-      final userDoc = await FirebaseFirestore.instance
+  Future<GuardianProfile> fetchGuardianData() async {
+    final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+
+    if (currentUserEmail != null) {
+      final querySnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUserEmail)
+          .where('email', isEqualTo: currentUserEmail)
           .get();
 
-      if (userDoc.exists) {
-        setState(() {
-          firstName = userDoc['fname'];
-          lastName = userDoc['lname'];
-          phoneNumber = userDoc['phonenumber'];
-        });
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs[0];
+        final data = doc.data() as Map<String, dynamic>;
+
+        return GuardianProfile(
+          firstName: data['fname'] ?? '',
+          lastName: data['lname'] ?? '',
+          email: data['email'] ?? '',
+          phoneNumber: data['phonenumber'] ?? '',
+          selectedGender: data['selectedGender'] ?? '', // Retrieve selectedGender
+        );
       }
-    } catch (e) {
-      print('Error fetching data: $e');
     }
+
+    // Handle the case where the guardian's data doesn't exist or the user is not authenticated.
+    return GuardianProfile(
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      selectedGender: '', // Set selectedGender to an empty string
+    );
   }
 
   @override
@@ -50,161 +59,37 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
       appBar: AppBar(
         title: Text('Guardian Profile'),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(height: 20),
-            Text(
-              'Email',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(currentUserEmail),
-            SizedBox(height: 20),
-            Text(
-              'First Name',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(firstName ?? 'Not available'),
-            SizedBox(height: 20),
-            Text(
-              'Last Name',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(lastName ?? 'Not available'),
-            SizedBox(height: 20),
-            Text(
-              'Phone Number',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(phoneNumber ?? 'Not available'),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GProfileEditScreen(
-                      email: currentUserEmail,
-                      firstName: firstName ?? '',
-                      lastName: lastName ?? '',
-                      phoneNumber: phoneNumber ?? '',
-                    ),
-                  ),
-                );
-              },
-              child: Text('Edit Profile'),
-            ),
-          ],
-        ),
+      body: Center(
+        child: _guardianProfile != null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('First Name: ${_guardianProfile?.firstName}'),
+                  Text('Last Name: ${_guardianProfile?.lastName}'),
+                  Text('Email: ${_guardianProfile?.email}'),
+                  Text('Phone Number: ${_guardianProfile?.phoneNumber}'),
+                  Text('Gender: ${_guardianProfile?.selectedGender}'),
+                  // Add more widgets to display other guardian data as needed
+                ],
+              )
+            : CircularProgressIndicator(), // You can use a loading indicator while data is being fetched.
       ),
     );
   }
 }
 
-
-
-
-class GProfileEditScreen extends StatefulWidget {
-  final String email;
+class GuardianProfile {
   final String firstName;
   final String lastName;
+  final String email;
   final String phoneNumber;
+  final String selectedGender;
 
-  GProfileEditScreen({
-    required this.email,
+  GuardianProfile({
     required this.firstName,
     required this.lastName,
+    required this.email,
     required this.phoneNumber,
+    required this.selectedGender,
   });
-
-  @override
-  _GProfileEditScreenState createState() => _GProfileEditScreenState();
 }
-
-class _GProfileEditScreenState extends State<GProfileEditScreen> {
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize controllers with the existing data
-    firstNameController.text = widget.firstName;
-    lastNameController.text = widget.lastName;
-    phoneNumberController.text = widget.phoneNumber;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Profile'),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(height: 20),
-            Text(
-              'Email',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(widget.email),
-            SizedBox(height: 20),
-            Text(
-              'First Name',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            TextField(controller: firstNameController),
-            SizedBox(height: 20),
-            Text(
-              'Last Name',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            TextField(controller: lastNameController),
-            SizedBox(height: 20),
-            Text(
-              'Phone Number',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            TextField(controller: phoneNumberController),
-            ElevatedButton(
-              onPressed: () {
-                // Save the edited information back to Firestore
-                updateGuardianProfileData();
-                Navigator.pop(context); // Go back to the view profile screen
-              },
-              child: Text('Save Changes'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> updateGuardianProfileData() async {
-    try {
-      await FirebaseFirestore.instance.collection('users').doc(widget.email).update({
-        'fname': firstNameController.text,
-        'lname': lastNameController.text,
-        'phonenumber': phoneNumberController.text,
-      });
-    } catch (e) {
-      print('Error updating data: $e');
-    }
-  }
-
-  @override
-  void dispose() {
-    // Dispose of controllers
-    firstNameController.dispose();
-    lastNameController.dispose();
-    phoneNumberController.dispose();
-    super.dispose();
-  }
-}
-
-
