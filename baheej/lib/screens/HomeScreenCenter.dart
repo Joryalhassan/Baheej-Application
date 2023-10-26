@@ -186,21 +186,16 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 IconButton(
                   icon: Icon(Icons.person), // Profile Icon
+
                   color: Colors.white, // Set icon color to white
+
                   onPressed: () {
+                    String currentUserEmail =
+                        FirebaseAuth.instance.currentUser?.email ?? '';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CenterProfileScreen(
-                          centerName:
-                              'Your Center Name', // Pass your actual data here
-                          email: 'Your Email',
-                          phoneNumber: 'Your Phone Number',
-                          district: 'Your District',
-                          commercialRegister: 'Your Commercial Register Number',
-                          description: 'Your Description',
-                        ),
-                      ),
+                          builder: (context) => CenterProfileViewScreen()),
                     );
                   },
                 ),
