@@ -35,8 +35,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   Future<List<Service>> fetchDataFromFirebase() async {
     final firestore = FirebaseFirestore.instance;
     final collection = firestore.collection('center-service');
+    fetchUserName();// Call fetchName to fetch the user's first name
     final querySnapshot = await collection.where('centerName', isEqualTo: userName).get();
-      fetchUserName();// Call fetchName to fetch the user's first name
+      
 
     return querySnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
