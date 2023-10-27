@@ -25,7 +25,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         
     fetchDataFromFirebase().then((services) {
       setState(() {
-        _allServices = services;
+        _allServices = services.where((service) => service.centerName == userName).toList();
         _filteredServices = services; // Filter services by center name;
       });
     });
@@ -36,7 +36,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     final firestore = FirebaseFirestore.instance;
     final collection = firestore.collection('center-service');
     fetchUserName();// Call fetchName to fetch the user's first name
-    final querySnapshot = await collection.where('centerName', isEqualTo: userName).get();
+    final querySnapshot = await collection.get();
       
 
     return querySnapshot.docs.map((doc) {
@@ -369,7 +369,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 // After deletion, you may want to refresh the service list
                 fetchDataFromFirebase().then((services) {
                   setState(() {
-                    _allServices = services;
+                    _allServices = services.where((service) => service.centerName == userName).toList();;
                     _filteredServices = services;
                   });
                 });
