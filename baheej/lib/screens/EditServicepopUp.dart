@@ -57,7 +57,7 @@ class _EditServicePopupState extends State<EditServicePopup> {
 
   void updateServiceInFirebase() async {
     try {
-      final serviceRef = FirebaseFirestore.instance.collection('center-service').doc(widget.service.documentId);
+      final serviceRef = FirebaseFirestore.instance.collection('center-service').doc(widget.service.serviceName);//changed name to id here 
 
       await serviceRef.update({
         'serviceName': editedServiceName,

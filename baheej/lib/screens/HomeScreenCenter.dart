@@ -26,9 +26,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     fetchDataFromFirebase().then((services) {
       setState(() {
         _allServices = services;
-        _filteredServices = services
-          .where((service) => service.centerName == userName)
-          .toList(); // Filter services by center name;
+        _filteredServices = services;
+          //.where((service) => service.centerName == userName)
+          //.toList(); // Filter services by center name;
       });
     });
  
@@ -68,7 +68,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         selectedEndDate: endDate,
         minAge: minAge,
         maxAge: maxAge,
-        documentId:doc.id,
+        //documentId:doc.id,
       );
     }).toList();
   }
@@ -147,17 +147,17 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     });
   }
 
-  Future<void> deleteService(Service service) async {
-  try {
-    final firestore = FirebaseFirestore.instance;
-    final collection = firestore.collection('center-service');
-    await collection.doc(service.documentId).delete();
-    print('Service deleted successfully.');
-  } catch (e) {
-    print('Error deleting service: $e');
+ //Future<void> deleteService(Service service) async {
+ // try {
+  //  final firestore = FirebaseFirestore.instance;
+  //  final collection = firestore.collection('center-service');
+  //  await collection.service.delete();
+  //  print('Service deleted successfully.');
+ // } catch (e) {
+  //  print('Error deleting service: $e');
     // Handle any error or display an error message to the user
-  }
-}
+ // }
+//}
 
 
   // @override
@@ -364,7 +364,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
               child: Text('Delete'),
               onPressed: () async {
                 // Perform the deletion here
-                await deleteService(service); // You need to implement this function
+               // await deleteService(service); // You need to implement this function
                 Navigator.of(context).pop(); // Close the dialog
                 // After deletion, you may want to refresh the service list
                 fetchDataFromFirebase().then((services) {
