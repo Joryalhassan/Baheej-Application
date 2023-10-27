@@ -52,6 +52,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       final servicePrice = data['servicePrice'] ?? 0.0;
       final minAge = data['minAge'] ?? 4;
       final maxAge = data['maxAge'] ?? 17;
+      
 
       return Service(
         serviceName: serviceName,
@@ -64,6 +65,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         selectedEndDate: endDate,
         minAge: minAge,
         maxAge: maxAge,
+        documentId:doc.id,
       );
     }).toList();
   }
