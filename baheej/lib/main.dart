@@ -29,8 +29,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:
-          CenterServices(centerName: 'Ibnkhldon'), // Pass the center name here
+      home: CenterServices(centerName: 'ibnkldon'), // Pass the center name here
 // Pass the center name here
     );
   }
