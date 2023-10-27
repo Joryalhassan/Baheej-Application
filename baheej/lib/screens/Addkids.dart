@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:baheej/screens/HomeScreenGaurdian.dart';
+//import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:baheej/screens/HistoryScreen.dart';
 
 class KidCard extends StatelessWidget {
@@ -355,10 +355,10 @@ class _AddKidsPageState extends State<AddKidsPage> {
                   icon: Icon(Icons.home),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreenGaurdian()),
-                    );
+                   // Navigator.push(
+                    //  context,
+                    //  MaterialPageRoute(builder: (context) => HomeScreenGaurdian()),
+                   // );
                   },
                 ),
                 Padding(

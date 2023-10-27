@@ -15,22 +15,23 @@ class HomeScreenCenter extends StatefulWidget {
 }
 
 class _HomeScreenCenterState extends State<HomeScreenCenter> {
-  String FirstName = '';
+  String userName = ''; // Initialize userName
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
 
   void initState() {
     super.initState();
+          fetchUserName();// Call fetchName to fetch the user's first name
     fetchDataFromFirebase().then((services) {
       setState(() {
         _allServices = services;
         _filteredServices = services
-          .where((service) => service.centerName == FirstName)
+          .where((service) => service.centerName == userName)
           .toList(); // Filter services by center name;
       });
     });
-    fetchName(); // Call fetchName to fetch the user's first name
+ 
   }
 
   Future<List<Service>> fetchDataFromFirebase() async {
@@ -166,22 +167,20 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   //   fetchName();
   // }
 
-  void fetchName() async {
+   void fetchUserName() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('center')
           .doc(userId)
           .get();
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
         final firstName =
-            userData['fname'] ?? ''; // Get the first name from Firestore
-        print(
-            'Fetched first name: $firstName'); // Add a print statement for debugging
+            userData['username'] ?? ''; // Get the first name from Firestore
         setState(() {
-          FirstName = firstName;
+          userName = firstName;
         });
       }
     }
@@ -195,7 +194,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Welcome $FirstName'),
+        title: Text('Welcome $userName'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -372,7 +371,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   setState(() {
                     _allServices = services;
                     _filteredServices = services
-                      .where((service) => service.centerName == FirstName)
+                      .where((service) => service.centerName == userName)
                       .toList();
                   });
                 });
@@ -498,10 +497,12 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          onPressed:
-          ServiceFormScreen();
-        },
+         onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ServiceFormScreen()),
+                    );
+                  },
         child: Icon(
           Icons.add,
           color: Colors.white,
