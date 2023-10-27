@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 class CenterProfileViewScreen extends StatefulWidget {
   @override
@@ -83,10 +84,10 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Username: ${_centerProfile?.username}'),
+                  Text('Center Name: ${_centerProfile?.username}'),
                   Text('Address: ${_centerProfile?.address}'),
                   Text('Email: ${_centerProfile?.email}'),
-                  Text('ComReg: ${_centerProfile?.comReg}'),
+                  Text('Commercial Register: ${_centerProfile?.comReg}'),
                   Text('Phone Number: ${_centerProfile?.phoneNumber}'),
                   Text('Description: ${_centerProfile?.description}'),
                 ],
@@ -183,24 +184,48 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
         return;
       }
 
-      // Save changes to Firestore
-      final currentUser = FirebaseAuth.instance.currentUser;
+      // Show confirmation dialog before saving changes
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirm Changes'),
+            content: Text('Are you sure you want to save these changes?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Save changes to Firestore
+                  final currentUser = FirebaseAuth.instance.currentUser;
 
-      if (currentUser != null) {
-        FirebaseFirestore.instance
-            .collection('center')
-            .doc(currentUser.uid)
-            .update({
-          'username': _usernameController.text.trim(),
-          'addres': _addressController.text.trim(),
-          'comReg': _comRegController.text.trim(),
-          'phonenumber': _phoneNumberController.text.trim(),
-          'Desc': _descriptionController.text.trim(),
-        });
+                  if (currentUser != null) {
+                    FirebaseFirestore.instance
+                        .collection('center')
+                        .doc(currentUser.uid)
+                        .update({
+                      'username': _usernameController.text.trim(),
+                      'addres': _addressController.text.trim(),
+                      'comReg': _comRegController.text.trim(),
+                      'phonenumber': _phoneNumberController.text.trim(),
+                      'Desc': _descriptionController.text.trim(),
+                    });
 
-        // Pop the edit screen and return to the profile view
-        Navigator.of(context).pop();
-      }
+                    // Pop the edit screen and return to the profile view
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
     } else {
       // No edits were made, so simply return to the profile view
       Navigator.of(context).pop();
@@ -327,19 +352,26 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Profile'),
+        automaticallyImplyLeading: false, // Remove back navigation arrow
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            //1
+
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(
-                labelText: 'Username',
-                errorText: _nameError, // Display error message
+                labelText: 'Center Name',
+                errorText: _nameError,
               ),
+              maxLength: 25, // Set the maximum length
             ),
+
+            //2
+
             TextField(
               controller: _addressController,
               decoration: InputDecoration(
@@ -347,26 +379,46 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                 errorText: _addressError, // Display error message
               ),
             ),
+
+            //3
+
             TextField(
               controller: _comRegController,
               decoration: InputDecoration(
-                labelText: 'ComReg',
+                labelText: 'Commercial Register',
                 errorText: _comRegError, // Display error message
               ),
+              maxLength: 10,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                LengthLimitingTextInputFormatter(10), // Limit to 10 characters
+              ],
             ),
+
+            //4
+
             TextField(
               controller: _phoneNumberController,
               decoration: InputDecoration(
                 labelText: 'Phone Number',
                 errorText: _phoneNumberError, // Display error message
               ),
+              maxLength: 10,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                LengthLimitingTextInputFormatter(10), // Limit to 10 characters
+              ],
             ),
+
+            //5
+
             TextField(
               controller: _descriptionController,
               decoration: InputDecoration(
                 labelText: 'Description',
                 errorText: _descriptionError, // Display error message
               ),
+              maxLength: 225,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
