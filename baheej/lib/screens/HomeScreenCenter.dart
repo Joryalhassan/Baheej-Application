@@ -26,7 +26,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     fetchDataFromFirebase().then((services) {
       setState(() {
         _allServices = services.where((service) => service.centerName == userName).toList();
-        _filteredServices = services; // Filter services by center name;
+        _filteredServices = _allServices; // Filter services by center name;
       });
     });
  
@@ -370,7 +370,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 fetchDataFromFirebase().then((services) {
                   setState(() {
                     _allServices = services.where((service) => service.centerName == userName).toList();;
-                    _filteredServices = services;
+                    _filteredServices = _allServices;
                   });
                 });
               },
