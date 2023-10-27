@@ -24,11 +24,10 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _userNameTextController = TextEditingController();
   TextEditingController _PhoneNumTextController = TextEditingController();
-  TextEditingController _DistrictTextController = TextEditingController();
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
-  String type = "center";
   String? _selectedDistrict;
+  String type = "center";
 
   UserCredential? resultaccount;
   Future<void> signUp() async {
@@ -70,7 +69,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           .doc(resultaccount!.user!.uid)
           .set({
         'username': _userNameTextController.text.trim(),
-        'addres': _DistrictTextController.text.trim(),
+        'addres': _selectedDistrict,
         'email': _emailTextController.text.trim(),
         'comReg': _ComRegTextController.text.trim(),
         'type': 'center',
