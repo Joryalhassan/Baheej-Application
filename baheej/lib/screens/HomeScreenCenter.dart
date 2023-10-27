@@ -26,9 +26,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     fetchDataFromFirebase().then((services) {
       setState(() {
         _allServices = services;
-        _filteredServices = services;
-          //.where((service) => service.centerName == userName)
-          //.toList(); // Filter services by center name;
+        _filteredServices = services
+          .where((service) => service.centerName == userName)
+          .toList(); // Filter services by center name;
       });
     });
  
