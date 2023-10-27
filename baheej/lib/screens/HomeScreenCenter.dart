@@ -22,13 +22,11 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
 
   void initState() {
     super.initState();
-          fetchUserName();// Call fetchName to fetch the user's first name
+        
     fetchDataFromFirebase().then((services) {
       setState(() {
         _allServices = services;
-        _filteredServices = services
-          .where((service) => service.centerName == userName)
-          .toList(); // Filter services by center name;
+        _filteredServices = services; // Filter services by center name;
       });
     });
  
@@ -37,7 +35,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   Future<List<Service>> fetchDataFromFirebase() async {
     final firestore = FirebaseFirestore.instance;
     final collection = firestore.collection('center-service');
-    final querySnapshot = await collection.get();
+    final querySnapshot = await collection.where('centerName', isEqualTo: userName).get();
+      fetchUserName();// Call fetchName to fetch the user's first name
 
     return querySnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
@@ -370,9 +369,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 fetchDataFromFirebase().then((services) {
                   setState(() {
                     _allServices = services;
-                    _filteredServices = services
-                      .where((service) => service.centerName == userName)
-                      .toList();
+                    _filteredServices = services;
                   });
                 });
               },
