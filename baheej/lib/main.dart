@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: CenterServices(centerName: 'ibnkldon'), // Pass the center name here
+      home: SignInScreen(), // Pass the center name here
 // Pass the center name here
     );
   }

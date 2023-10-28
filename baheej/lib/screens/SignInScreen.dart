@@ -1,3 +1,4 @@
+import 'package:baheej/screens/CenterServices.dart';
 import 'package:baheej/screens/RegisterPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,6 +6,7 @@ import " HomeScreenCenter.dart";
 import 'HomeScreenGaurdian.dart';
 import 'ResetPassword.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baheej/screens/Service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
@@ -62,7 +64,8 @@ class _SignInScreenState extends State<SignInScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HomeScreen(),
+                builder: (context) =>
+                    CenterServices(centerName: centerDoc.data()!['username']),
               ),
             );
           } else if (usersDoc.exists) {
