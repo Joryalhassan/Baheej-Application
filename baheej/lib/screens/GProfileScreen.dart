@@ -7,7 +7,6 @@ class GProfileViewScreen extends StatefulWidget {
   @override
   _GProfileViewScreenState createState() => _GProfileViewScreenState();
 }
-
 class _GProfileViewScreenState extends State<GProfileViewScreen> {
   GuardianProfile? _guardianProfile;
 
@@ -116,35 +115,60 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Guardian Profile'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileData('First Name', _guardianProfile?.firstName),
+            _buildProfileData('Last Name', _guardianProfile?.lastName),
+            _buildProfileData('Email', _guardianProfile?.email),
+            _buildProfileData('Phone Number', _guardianProfile?.phoneNumber),
+            _buildProfileData('Gender', _guardianProfile?.selectedGender),
+          ],
+        ),
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton.extended(
             onPressed: _editProfile,
+            label: Text('Edit Profile'),
+            icon: Icon(Icons.edit),
           ),
-          TextButton(
+          SizedBox(width: 16), // Add spacing between buttons
+          FloatingActionButton.extended(
             onPressed: _deleteAccount,
-            child: Text('Delete Account', style: TextStyle(color: Colors.red)),
+            label: Text('Delete Account'),
+            icon: Icon(Icons.delete),
+            backgroundColor: Theme.of(context).primaryColor, // Use the primary color
           ),
         ],
       ),
-      body: Center(
-        child: _guardianProfile != null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('First Name: ${_guardianProfile?.firstName}'),
-                  Text('Last Name: ${_guardianProfile?.lastName}'),
-                  Text('Email: ${_guardianProfile?.email}'),
-                  Text('Phone Number: ${_guardianProfile?.phoneNumber}'),
-                  Text('Gender: ${_guardianProfile?.selectedGender}'),
-                  // Add more widgets to display other guardian data as needed
-                ],
-              )
-            : CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildProfileData(String label, String? value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16), // Add spacing between items
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label:',
+            style: TextStyle(fontSize: 20),
+          ),
+          Text(
+            value ?? '', // Use an empty string if the value is null
+            style: TextStyle(fontSize: 20),
+          ),
+        ],
       ),
     );
   }
 }
+
 
 class GuardianProfile {
   final String firstName;

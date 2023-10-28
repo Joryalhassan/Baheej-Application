@@ -19,9 +19,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
   final TextEditingController _FnameTextController = TextEditingController();
   final TextEditingController _LnameTextController = TextEditingController();
   final TextEditingController _PhoneNumTextController = TextEditingController();
-  final TextEditingController _confirmPasswordTextController =
-      TextEditingController();
-
+  final TextEditingController _confirmPasswordTextController =TextEditingController();
   String? selectedGender;
   String type = "guardian";
 
@@ -69,6 +67,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         'email': _emailTextController.text.trim(),
         'type': 'guardian',
         'phonenumber': _PhoneNumTextController.text.trim(),
+        'selectedGender': selectedGender,
       });
 
       Navigator.pushAndRemoveUntil(
