@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 
 import 'package:baheej/screens/Service.dart';
-
+import 'package:baheej/screens/CenterProfileScreen.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -190,7 +190,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white, // Set icon color to white
 
                   onPressed: () {
-                    // Handle profile button tap
+                    String currentUserEmail =
+                        FirebaseAuth.instance.currentUser?.email ?? '';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CenterProfileViewScreen()),
+                    );
                   },
                 ),
                 Text(

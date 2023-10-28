@@ -69,7 +69,6 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         'email': _emailTextController.text.trim(),
         'type': 'guardian',
         'phonenumber': _PhoneNumTextController.text.trim(),
-        'selectedGender': selectedGender,
       });
 
       Navigator.pushAndRemoveUntil(
@@ -505,6 +504,8 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       ),
                     ],
                   ),
+
+                  
                   SizedBox(
                     height: 20,
                   ),

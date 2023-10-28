@@ -59,14 +59,14 @@ class _SignInScreenState extends State<SignInScreen> {
               .doc(user.uid)
               .get();
 
-          //if (centerDoc.exists) {
-           // Navigator.pushReplacement(
-           //   context,
-              //MaterialPageRoute(
-               // builder: (context) => HomeScreen(),
-          //    ),
-         //   );
-         // } else
+          if (centerDoc.exists) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(),
+              ),
+          );
+         } else
            if (usersDoc.exists) {
             Navigator.pushReplacement(
               context,
