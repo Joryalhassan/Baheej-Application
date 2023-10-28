@@ -54,6 +54,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       final maxAge = data['maxAge'] ?? 17;
 
       return Service(
+        id: doc.id,
         serviceName: serviceName,
         description: description,
         centerName: centerName,

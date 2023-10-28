@@ -563,6 +563,7 @@ class _CenterServicesState extends State<CenterServices> {
         }
 
         return Service(
+          id: doc.id,
           serviceName: data['serviceName'] as String? ?? 'Service Name Missing',
           description: data['serviceDesc'] as String? ?? 'Description Missing',
           centerName: data['centerName'] as String? ?? 'Center Name Missing',
@@ -686,23 +687,25 @@ class _CenterServicesState extends State<CenterServices> {
   }
 
   Future<void> deleteService(Service service) async {
-    final String serviceId = service.serviceName;
-    print('Deleting service with ID: $serviceId');
-    bool? confirmed = await showDeleteConfirmationDialog();
-    if (confirmed == true) {
+    // Show a confirmation dialog to confirm the deletion
+    bool? confirmDelete =
+        await showDeleteConfirmationDialog(); // Removed the default value
+
+    if (confirmDelete == true) {
       try {
-        DocumentReference serviceRef = FirebaseFirestore.instance
+        // Get the reference to the document you want to delete
+        final DocumentReference serviceRef = FirebaseFirestore.instance
             .collection('center-service')
-            .doc(serviceId);
+            .doc(service.id);
 
-        // Delete the service document from Firestore
+        // Delete the document from Firestore
         await serviceRef.delete();
-        print('Service deleted successfully');
 
-        // Remove the service from the UI (you should implement this function)
+        // Remove the service from the UI
         removeServiceFromUI(service);
       } catch (e) {
         print('Error deleting service: $e');
+        // Handle the error, e.g., show an error dialog
       }
     }
   }
