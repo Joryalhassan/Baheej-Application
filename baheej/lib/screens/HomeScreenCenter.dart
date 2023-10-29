@@ -1,4 +1,4 @@
-  import 'package:baheej/screens/EditService.dart';
+import 'package:baheej/screens/EditService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,64 +30,73 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   }
 
   Future<void> loadServices() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-          final now = DateTime.now(); // Get the current date and time
-      final snapshot = await FirebaseFirestore.instance
-          .collection('center-service')
-          .where('centerName', isEqualTo: widget.centerName)
-          .where('startDate', isGreaterThan: Timestamp.fromDate(now)) // Filter by start date greater than current date
-          .get();
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    final userId = user.uid;
 
-      final List<Service> loadedServices = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        DateTime selectedStartDate;
-        DateTime selectedEndDate;
+    final snapshot = await FirebaseFirestore.instance
+        .collection('center-service')
+        .where('centerName', isEqualTo: widget.centerName)
+        .get();
+    final currentDate = DateTime.now(); // Get the current date
+    final List<Service> loadedServices = snapshot.docs
+        .map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          DateTime selectedStartDate;
+          DateTime selectedEndDate;
 
-        // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
-        if (data['startDate'] is String) {
-          selectedStartDate = DateTime.parse(data['startDate'] as String);
-        } else if (data['startDate'] is Timestamp) {
-          selectedStartDate = (data['startDate'] as Timestamp).toDate();
-        } else {
-          selectedStartDate = DateTime.now();
-        }
+          // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
+          if (data['startDate'] is String) {
+            selectedStartDate = DateTime.parse(data['startDate'] as String);
+          } else if (data['startDate'] is Timestamp) {
+            selectedStartDate = (data['startDate'] as Timestamp).toDate();
+          } else {
+            selectedStartDate = DateTime.now();
+          }
 
-        if (data['endDate'] is String) {
-          selectedEndDate = DateTime.parse(data['endDate'] as String);
-        } else if (data['endDate'] is Timestamp) {
-          selectedEndDate = (data['endDate'] as Timestamp).toDate();
-        } else {
-          selectedEndDate = DateTime.now();
-        }
+          if (data['endDate'] is String) {
+            selectedEndDate = DateTime.parse(data['endDate'] as String);
+          } else if (data['endDate'] is Timestamp) {
+            selectedEndDate = (data['endDate'] as Timestamp).toDate();
+          } else {
+            selectedEndDate = DateTime.now();
+          }
 
-        return Service(
-          id: doc.id,
-          serviceName: data['serviceName'] as String? ?? 'Service Name Missing',
-          description: data['serviceDesc'] as String? ?? 'Description Missing',
-          centerName: data['centerName'] as String? ?? 'Center Name Missing',
-          selectedStartDate: selectedStartDate,
-          selectedEndDate: selectedEndDate,
-          minAge: data['minAge'] as int? ?? 0,
-          maxAge: data['maxAge'] as int? ?? 0,
-          capacityValue: data['serviceCapacity'] as int? ?? 0,
-          servicePrice: data['servicePrice'] is double
-              ? data['servicePrice']
-              : (data['servicePrice'] is int
-                  ? (data['servicePrice'] as int).toDouble()
-                  : 0.0),
-          selectedTimeSlot:
-              data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-        );
-      }).toList();
+          // Check if the start date is today or earlier
+          if (!selectedStartDate.isBefore(currentDate)) {
+            return Service(
+              id: doc.id,
+              serviceName: data['serviceName'] as String? ?? 'Service Name Missing',
+              description: data['serviceDesc'] as String? ?? 'Description Missing',
+              centerName: data['centerName'] as String? ?? 'Center Name Missing',
+              selectedStartDate: selectedStartDate,
+              selectedEndDate: selectedEndDate,
+              minAge: data['minAge'] as int? ?? 0,
+              maxAge: data['maxAge'] as int? ?? 0,
+              capacityValue: data['serviceCapacity'] as int? ?? 0,
+              servicePrice: data['servicePrice'] is double
+                  ? data['servicePrice']
+                  : (data['servicePrice'] is int
+                      ? (data['servicePrice'] as int).toDouble()
+                      : 0.0),
+              selectedTimeSlot:
+                  data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
+            );
+          } else {
+            // Return null for services with start dates in the past or today
+            return null;
+          }
+        })
+        .where((service) => service != null) // Filter out null values
+        .cast<Service>() // Cast the list to Service
+        .toList();
 
-      setState(() {
-        services = loadedServices;
-        filteredServices = loadedServices;
-      });
-    }
+    setState(() {
+      services = loadedServices;
+      filteredServices = loadedServices;
+    });
   }
+}
 
 
 
@@ -167,12 +176,11 @@ void updateService(Service updatedService) {
     query = query.trim();
      final now = DateTime.now();
     setState(() {
-      filteredServices = services.where((service) {
-      // Check if the service's start date is greater than today's date
-      return service.selectedStartDate.isAfter(now) &&
-          (service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
-              service.description.toLowerCase().contains(query.toLowerCase()));
-    }).toList();
+      filteredServices = services
+          .where((service) =>
+              service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
+            service.description.toLowerCase().contains(query.toLowerCase()))
+        .toList();
     });
   }
 
@@ -437,7 +445,7 @@ void updateService(Service updatedService) {
                                         ),
                                       ),
                                       Text(
-                                        '\$${service.servicePrice.toStringAsFixed(2)}',
+                                        '${service.servicePrice.toStringAsFixed(2)}',
                                         style: TextStyle(
                                           fontSize: 16,
                                         ),
