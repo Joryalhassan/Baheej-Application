@@ -425,8 +425,8 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
       appBar: AppBar(
         title: Text('Edit Profile'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -471,33 +471,31 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
                 labelText: 'Selected Gender',
                 errorText: _selectedGenderError,
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FloatingActionButton.extended(
-                  onPressed: _cancel,
-                  label: Text('Cancel'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                SizedBox(width: 16),
-                FloatingActionButton.extended(
-                  onPressed: _hasEdits ? _saveChanges : null,
-                  label: Text('Save Changes'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ],
-            ),
+            ),  
           ],
         ),
       ),
+
+      floatingActionButton: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FloatingActionButton.extended(
+                    onPressed: _cancel,
+                    label: Text('Cancel'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  FloatingActionButton.extended(
+                    onPressed: _hasEdits ? _saveChanges : null,
+                    label: Text('Save Changes'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 }
-
-
-
