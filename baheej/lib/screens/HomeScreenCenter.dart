@@ -33,9 +33,11 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
+          final now = DateTime.now(); // Get the current date and time
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
           .where('centerName', isEqualTo: widget.centerName)
+          .where('startDate', isGreaterThan: Timestamp.fromDate(now)) // Filter by start date greater than current date
           .get();
 
       final List<Service> loadedServices = snapshot.docs.map((doc) {
@@ -163,14 +165,14 @@ void updateService(Service updatedService) {
 
   void _handleSearch(String query) {
     query = query.trim();
-    final DateTime today = DateTime.now();
+     final now = DateTime.now();
     setState(() {
-      filteredServices = services
-          .where((service) =>
-              service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
-            service.description.toLowerCase().contains(query.toLowerCase()))
-        .where((service) => service.selectedStartDate.isAfter(today)) // Filter by start date
-        .toList();
+      filteredServices = services.where((service) {
+      // Check if the service's start date is greater than today's date
+      return service.selectedStartDate.isAfter(now) &&
+          (service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
+              service.description.toLowerCase().contains(query.toLowerCase()));
+    }).toList();
     });
   }
 
@@ -271,237 +273,234 @@ void updateService(Service updatedService) {
                   toolbarOptions: null,
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(top: 30),
-                    itemCount: filteredServices.length,
-                    itemBuilder: (context, index) {
-                      final service = filteredServices[index];
-                      return GestureDetector(
-                        onTap: () {
-                          // Handle tapping on a service
-                        },
-                        child: Card(
-                          elevation: 3,
-                          margin: EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 16,
-                          ),
-                          color: Color.fromARGB(255, 239, 249, 254),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Service Name: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                  child: SingleChildScrollView(
+                    // Wrap the ListView.builder with SingleChildScrollView
+                    child: Column(
+                      children: filteredServices.map((service) {
+                        return GestureDetector(
+                          onTap: () {
+                            // Handle tapping on a service
+                          },
+                          child: Card(
+                            elevation: 3,
+                            margin: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 16,
+                            ),
+                            color: Color.fromARGB(255, 239, 249, 254),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Service Name: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      service.serviceName,
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      Text(
+                                        service.serviceName,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Start Date: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      DateFormat('MM/dd/yyyy')
-                                          .format(service.selectedStartDate),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'End Date: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      DateFormat('MM/dd/yyyy')
-                                          .format(service.selectedEndDate),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Service Time: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      service.selectedTimeSlot,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  'Description: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                    ],
                                   ),
-                                ),
-                                Text(
-                                  service.description,
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Start Date: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        DateFormat('MM/dd/yyyy')
+                                            .format(service.selectedStartDate),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Minimum Age: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'End Date: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      service.minAge.toString(),
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      Text(
+                                        DateFormat('MM/dd/yyyy')
+                                            .format(service.selectedEndDate),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Maximum Age: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Service Time: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      service.maxAge.toString(),
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      Text(
+                                        service.selectedTimeSlot,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                  Text(
+                                    'Description: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Capacity : ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                  ),
+                                  Text(
+                                    service.description,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Minimum Age: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      service.capacityValue.toString(),
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      Text(
+                                        service.minAge.toString(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Service Price: ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Maximum Age: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      '${service.servicePrice.toStringAsFixed(1)}',
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      Text(
+                                        service.maxAge.toString(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                EditService(
-                                              service: service,onUpdateService: updateService,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Capacity : ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        service.capacityValue.toString(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Service Price: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '\$${service.servicePrice.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  EditService(
+                                                 service: service,onUpdateService: updateService,
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'Edit Service',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color.fromARGB(
-                                                  255, 158, 158, 158),
+                                          );
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'Edit Service',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: const Color.fromARGB(
+                                                    255, 158, 158, 158),
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        deleteService(service);
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'Delete Service',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.red,
+                                      GestureDetector(
+                                        onTap: () {
+                                          deleteService(service);
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'Delete Service',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.red,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ],
