@@ -52,6 +52,15 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     );
   }
 
+ButtonStyle customButtonStyle(BuildContext context) {
+  return ElevatedButton.styleFrom(
+    primary: Theme.of(context).primaryColor, // Use the primary color
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20), // Customize the button shape
+    ),
+  );
+}
+
   void _editProfile() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) {
@@ -136,16 +145,22 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
             onPressed: _editProfile,
             label: Text('Edit Profile'),
             icon: Icon(Icons.edit),
+            shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Customize the button shape
+            )
           ),
           SizedBox(width: 16), // Add spacing between buttons
           FloatingActionButton.extended(
             onPressed: _deleteAccount,
             label: Text('Delete Account'),
             icon: Icon(Icons.delete),
-            backgroundColor: Theme.of(context).primaryColor, // Use the primary color
+            shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Customize the button shape
+            )
           ),
         ],
       ),
+
     );
   }
 
@@ -185,9 +200,6 @@ class GuardianProfile {
     required this.selectedGender,
   });
 }
-
-
-
 
 
 
@@ -268,108 +280,103 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
     super.dispose();
   }
 
- void _saveChanges() {
-  if (_hasEdits) {
-    // Check for validation errors
-    if (_firstNameError != null ||
-        _lastNameError != null ||
-        _phoneNumberError != null ||
-        _selectedGenderError != null) {
-      // Display error messages for each field
-      setState(() {});
-      return;
-    }
+  void _saveChanges() {
+    if (_hasEdits) {
+      // Check for validation errors
+      if (_firstNameError != null ||
+          _lastNameError != null ||
+          _phoneNumberError != null ||
+          _selectedGenderError != null) {
+        // Display error messages for each field
+        setState(() {});
+        return;
+      }
 
-    // Show a confirmation dialog before saving changes
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Save Changes?'),
-          content: Text('Are you sure you want to save changes?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Save changes to Firestore
-                final currentUser = FirebaseAuth.instance.currentUser;
-
-                if (currentUser != null) {
-                  FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(currentUser.uid)
-                      .update({
-                    'fname': _firstNameController.text.trim(),
-                    'lname': _lastNameController.text.trim(),
-                    'phonenumber': _phoneNumberController.text.trim(),
-                    'selectedGender': _selectedGenderController.text.trim(),
-                  });
-
-                  // Pop the edit screen and return to the profile view
+      // Show a confirmation dialog before saving changes
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Save Changes?'),
+            content: Text('Are you sure you want to save changes?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
-                  Navigator.of(context).pop(); // Close the edit screen
-                }
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  } else {
-    // No edits were made, so simply return to the profile view
-    Navigator.of(context).pop();
-  }
-}
+                },
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Save changes to Firestore
+                  final currentUser = FirebaseAuth.instance.currentUser;
 
+                  if (currentUser != null) {
+                    FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(currentUser.uid)
+                        .update({
+                          'fname': _firstNameController.text.trim(),
+                          'lname': _lastNameController.text.trim(),
+                          'phonenumber': _phoneNumberController.text.trim(),
+                          'selectedGender': _selectedGenderController.text.trim(),
+                        });
+
+                    // Pop the edit screen and return to the profile view
+                    Navigator.of(context).pop(); // Close the dialog
+                  }
+                },
+                child: Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // No edits were made, so simply return to the profile view
+      Navigator.of(context).pop();
+    }
+  }
 
   String? _validateFirstName(String? value) {
-         if (value == null || value.isEmpty) {
-           return 'First Name is required';
-          }
-         if (value.length < 2 || value.length > 12) {
-            return 'First Name must be between 2 and 12 letters';
-          }
-          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-             return 'First Name can only contain letters';
-         }
-       return null;
-      }
+    if (value == null || value.isEmpty) {
+      return 'First Name is required';
+    }
+    if (value.length < 2 || value.length > 12) {
+      return 'First Name must be between 2 and 12 letters';
+    }
+    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+      return 'First Name can only contain letters';
+    }
+    return null;
+  }
 
   String? _validateLastName(String? value) {
-        if (value == null || value.isEmpty) {
-            return 'Last Name is required';
-           }
-         if (value.length < 2 || value.length > 12) {
-           return 'Last Name must be between 2 and 12 letters';
-         }
-          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-         return 'Last Name can only contain letters';
-       }
-       return null;
-      }
-
-
+    if (value == null || value.isEmpty) {
+      return 'Last Name is required';
+    }
+    if (value.length < 2 || value.length > 12) {
+      return 'Last Name must be between 2 and 12 letters';
+    }
+    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+      return 'Last Name can only contain letters';
+    }
+    return null;
+  }
 
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Phone Number is required';
-      }
+    }
     if (value.length != 10) {
-       return 'Phone Number must be exactly 10 digits';
-       }
-   final phoneRegex = RegExp(r'^05[0-9]{8}$');
-       if (!phoneRegex.hasMatch(value)) {
-          return 'Invalid Phone Number';
-       }
-      return null;
-   }
-
+      return 'Phone Number must be exactly 10 digits';
+    }
+    final phoneRegex = RegExp(r'^05[0-9]{8}$');
+    if (!phoneRegex.hasMatch(value)) {
+      return 'Invalid Phone Number';
+    }
+    return null;
+  }
 
   String? _validateSelectedGender(String? value) {
     if (value == null || value.isEmpty) {
@@ -399,7 +406,6 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
                 onPressed: () {
                   // Discard changes and return to the profile view
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
                 },
                 child: Text('Discard'),
               ),
@@ -418,7 +424,6 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Profile'),
-        automaticallyImplyLeading: false  //////////////////////////////////////added this to remove back navigation
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -427,64 +432,63 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
           children: [
             TextField(
               controller: _firstNameController,
-              maxLength: 12, ///////////////////////////// Limit the input to 12 characters
+              maxLength: 12,
               decoration: InputDecoration(
                 labelText: 'First Name',
-                errorText: _firstNameError, // Display error message
+                errorText: _firstNameError,
               ),
             ),
             TextField(
               controller: _lastNameController,
-                maxLength: 12, // ///////////////////////Limit the input to 12 characters
+              maxLength: 12,
               decoration: InputDecoration(
                 labelText: 'Last Name',
-                errorText: _lastNameError, // Display error message
+                errorText: _lastNameError,
               ),
             ),
             TextField(
               controller: _phoneNumberController,
-              maxLength: 10, //////////////////////////// Limit the input to exactly 10 digits
+              maxLength: 10,
               decoration: InputDecoration(
                 labelText: 'Phone Number',
-                errorText: _phoneNumberError, // Display error message
+                errorText: _phoneNumberError,
               ),
             ),
-          
-          
             DropdownButtonFormField<String>(
-            value: _selectedGenderController.text,
-            items: ["Male", "Female"]
-               .map((String value) => DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          ))
-            .toList(),
-           onChanged: (value) {
-           setState(() {
-            _selectedGenderController.text = value ?? "";
-           });
-           },
-         decoration: InputDecoration(
-         labelText: 'Selected Gender',
-          errorText: _selectedGenderError, // Display error message
-        ),
-        ),
-
-           
-           
+              value: _selectedGenderController.text,
+              items: ["Male", "Female"]
+                  .map((String value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedGenderController.text = value ?? "";
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Selected Gender',
+                errorText: _selectedGenderError,
+              ),
+            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
+                FloatingActionButton.extended(
                   onPressed: _cancel,
-                  child: Text('Cancel'),
+                  label: Text('Cancel'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
                 SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _hasEdits
-                      ? _saveChanges
-                      : null, // Enable only if there are edits
-                  child: Text('Save Changes'),
+                FloatingActionButton.extended(
+                  onPressed: _hasEdits ? _saveChanges : null,
+                  label: Text('Save Changes'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ],
             ),
@@ -494,3 +498,6 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
     );
   }
 }
+
+
+
