@@ -18,6 +18,7 @@ class HomeScreenGaurdian extends StatefulWidget {
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   String FirstName = '';
+  String? type;
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
@@ -54,19 +55,22 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
       _subscription = firestore
           .collection('notifications')
-          .where('seenBy',
-              arrayContains: currentUserId) // Check if center's ID is in seenBy
+          .where('seenBy', isNotEqualTo: currentUserId)
           .snapshots()
           .listen((querySnapshot) {
         for (var doc in querySnapshot.docs) {
+          // Check if the notification has already been sent to avoid duplicate notifications
           if (!notifiedDocumentIds.contains(doc.id)) {
             final String? message = doc.data()?['message'];
             if (message != null) {
               _notificationHandler.showNotification(
-                'New Notification',
-                message,
-              );
+                  'New Notification', message);
               notifiedDocumentIds.add(doc.id); // Add the document ID to our set
+
+              // Immediately update the notification to mark it as seen
+              doc.reference.update({
+                'seenBy': FieldValue.arrayUnion([currentUserId])
+              });
             }
           }
         }
@@ -243,12 +247,13 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           .get();
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
-        final firstName =
-            userData['fname'] ?? ''; // Get the first name from Firestore
-        print(
-            'Fetched first name: $firstName'); // Add a print statement for debugging
+        final firstName = userData['fname'] ?? '';
+        final userRole = userData[
+            'userType']; // Assuming userType is a field in the Firestore document
+        print('Fetched first name: $firstName');
         setState(() {
           FirstName = firstName;
+          type = userRole;
         });
       }
     }

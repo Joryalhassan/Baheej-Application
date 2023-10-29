@@ -18,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Service> services = [];
   String userName = ''; // Initialize userName
   String? userRole;
+  TextEditingController notificationMessageController = TextEditingController();
 
   // Future<void> sendNotification(String message) async {
   //   final firestore = FirebaseFirestore.instance;
@@ -65,8 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       } else {
         final guardianDoc = await FirebaseFirestore.instance
-            .collection(
-                'guardians') // Assuming 'guardians' is your collection name
+            .collection('users')
             .doc(userId)
             .get();
         if (guardianDoc.exists) {
@@ -81,19 +81,19 @@ class _HomeScreenState extends State<HomeScreen> {
     if (user != null) {
       final userId = user.uid;
       final userDoc = await FirebaseFirestore.instance
-          .collection('center')
+          .collection('users')
           .doc(userId)
           .get();
       if (userDoc.exists) {
-        // Only the center should send a notification
-        final firestore = FirebaseFirestore.instance;
-        await firestore.collection('notifications').add({
-          'message': message,
-          'timestamp': FieldValue.serverTimestamp(),
-          'senderRole': 'center', // Specify sender's role as 'center'
-          'seenBy':
-              [] // This will be an empty list, as no one has seen the notification yet.
-        });
+        final userRole = userDoc['userType'];
+        if (userRole == 'center') {
+          final firestore = FirebaseFirestore.instance;
+          await firestore.collection('notifications').add({
+            'message': message, // Use the custom message
+            'timestamp': FieldValue.serverTimestamp(),
+            'seenBy': []
+          });
+        }
       }
     }
   }
@@ -239,12 +239,44 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () async {
-                          await sendNotification(
-                              "Your custom message here"); // Calling the sendNotification method
-                          // NotificationManager().simpleNotificationShow();  // Uncomment this if you want to show a local notification as well
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text('Send Notification'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    TextField(
+                                      controller: notificationMessageController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Notification Message',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text('Done'),
+                                    onPressed: () {
+                                      sendNotification(
+                                          notificationMessageController.text);
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
-                        child: Text('Notification'), // The text on the button
+                        child: Text('Send Notification'),
                       )
                     ],
                   ),

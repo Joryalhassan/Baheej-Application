@@ -1,5 +1,3 @@
-//import 'package:baheej/screens/firebase_service.dart';
-
 class Service {
   final String serviceName;
   final String description;
