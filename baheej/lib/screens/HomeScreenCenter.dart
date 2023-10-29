@@ -163,12 +163,14 @@ void updateService(Service updatedService) {
 
   void _handleSearch(String query) {
     query = query.trim();
+    final DateTime today = DateTime.now();
     setState(() {
       filteredServices = services
           .where((service) =>
               service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
-              service.description.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+            service.description.toLowerCase().contains(query.toLowerCase()))
+        .where((service) => service.selectedStartDate.isAfter(today)) // Filter by start date
+        .toList();
     });
   }
 
