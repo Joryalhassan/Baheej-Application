@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/ServiceFormScreen.dart';
 class EditService extends StatefulWidget {
   final Service service;
   final Function(Service) onUpdateService;
@@ -96,60 +97,62 @@ void navigateToSignInScreen() {
    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-        appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              _handleLogout();
-            },
-          ),
-        ],
-        title: Text('Edit Service'), // You can set the title here
+  extendBodyBehindAppBar: true,
+  appBar: AppBar(
+    title: null,
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    actions: [
+      IconButton(
+        icon: Icon(Icons.logout),
+        onPressed: () {
+          _handleLogout();
+        },
       ),
-      body: Stack(
-        children: [
-          Image.asset(
-            'assets/images/backasf.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          SingleChildScrollView(
-            child: Container(
-              margin: EdgeInsets.only(top: 40),
-              padding: EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
+    ],
+  ),
+  body: Stack(
+    children: [
+      Positioned.fill(
+        child: Image.asset(
+          'assets/images/backG.png',
+          fit: BoxFit.cover,
+        ),
+      ),
+      SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.only(top: 40),
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                   // IconButton(
+                     // icon: Icon(
+                       // Icons.arrow_back_ios,
+                       // color: Colors.white,
+                     // ),
+                    //  onPressed: () {
+                     //   Navigator.of(context).pop();
+                    //  },
+                   // ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 130.0),
+                      child: Text(
+                        'Edit Service',
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w700,
+                          color: Color.fromARGB(255, 255, 255, 255),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 130.0),
-                          child: Text(
-                            'Edit Service',
-                            style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              color: Color.fromARGB(255, 255, 255, 255),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
+                  ],
+                ),
           SizedBox(height: 20.0),
             _buildEditableField(
               label: 'Service Name',
@@ -243,7 +246,90 @@ void navigateToSignInScreen() {
         ),
       ],
       ),
-    );
+      bottomNavigationBar: BottomAppBar(
+      shape: CircularNotchedRectangle(),
+      color: Color.fromARGB(255, 245, 198, 239),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(width: 24),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.history),
+                color: Colors.white,
+                onPressed: () {
+                  // Handle booking history button tap
+                },
+              ),
+              Text(
+                'Booking Service',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(top: 50),
+                child: Text(
+                  'Add Service',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 25),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.person),
+                color: Colors.white,
+                onPressed: () {
+                  // Handle profile button tap
+                },
+              ),
+              Text(
+                'Profile',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 32),
+        ],
+      ),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    floatingActionButton: FloatingActionButton(
+      backgroundColor: Color.fromARGB(255, 174, 207, 250),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ServiceFormScreen(),
+          ),
+        );
+      },
+      child: Icon(
+        Icons.add,
+        color: Colors.white,
+      ),
+    ),
+  );
+    
   }
 
   Widget _buildEditableField({
