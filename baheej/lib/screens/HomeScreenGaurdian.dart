@@ -8,6 +8,7 @@ import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'dart:async';
 import 'package:baheej/screens/LocalNotificationHandler.dart';
+import 'package:baheej/screens/NotificationsPage.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -29,6 +30,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   StreamSubscription<QuerySnapshot>?
       _subscription; // To manage the subscription
   //final String? payload;
+
+  bool hasNewNotification = false;
 
   void initState() {
     super.initState();
@@ -55,21 +58,23 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
       _subscription = firestore
           .collection('notifications')
-          .where('seenBy', isNotEqualTo: currentUserId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
           .snapshots()
           .listen((querySnapshot) {
         for (var doc in querySnapshot.docs) {
-          // Check if the notification has already been sent to avoid duplicate notifications
           if (!notifiedDocumentIds.contains(doc.id)) {
             final String? message = doc.data()?['message'];
             if (message != null) {
-              _notificationHandler.showNotification(
-                  'New Notification', message);
-              notifiedDocumentIds.add(doc.id); // Add the document ID to our set
-
-              // Immediately update the notification to mark it as seen
+              _notificationHandler.showNotification('Baheej App', message);
+              notifiedDocumentIds.add(doc.id);
               doc.reference.update({
                 'seenBy': FieldValue.arrayUnion([currentUserId])
+              });
+
+              // Set hasNewNotification to true when a new notification is received
+              setState(() {
+                hasNewNotification = true;
               });
             }
           }
@@ -89,7 +94,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('New Notification'),
+        title: Text('Bheej App'),
         content: Text(message),
         actions: [
           TextButton(
@@ -111,37 +116,49 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     final firestore = FirebaseFirestore.instance;
     final collection = firestore.collection('center-service');
     final querySnapshot = await collection.get();
+    final currentDate = DateTime.now(); // Get the current date
 
-    return querySnapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      final serviceName = data['serviceName'] ?? 'Title';
-      final description = data['serviceDesc'] ?? 'Description';
-      final startDate = data['startDate'] != null
-          ? DateTime.parse(data['startDate'])
-          : DateTime.now();
-      final endDate = data['endDate'] != null
-          ? DateTime.parse(data['endDate'])
-          : DateTime.now();
-      final centerName = data['centerName'] ?? 'Center Name';
-      final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
-      final capacityValue = data['capacityValue'] ?? 0;
-      final servicePrice = data['servicePrice'] ?? 0.0;
-      final minAge = data['minAge'] ?? 4;
-      final maxAge = data['maxAge'] ?? 17;
+    final services = querySnapshot.docs
+        .map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final serviceName = data['serviceName'] ?? 'Title';
+          final description = data['serviceDesc'] ?? 'Description';
+          final startDate = data['startDate'] != null
+              ? DateTime.parse(data['startDate'])
+              : DateTime.now();
+          final endDate = data['endDate'] != null
+              ? DateTime.parse(data['endDate'])
+              : DateTime.now();
+          final centerName = data['centerName'] ?? 'Center Name';
+          final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
+          final capacityValue = data['capacityValue'] ?? 0;
+          final servicePrice = data['servicePrice'] ?? 0.0;
+          final minAge = data['minAge'] ?? 4;
+          final maxAge = data['maxAge'] ?? 17;
+          final id = data['id'] ?? 'id';
 
-      return Service(
-        serviceName: serviceName,
-        description: description,
-        centerName: centerName,
-        selectedTimeSlot: selectedTimeSlot,
-        capacityValue: capacityValue,
-        servicePrice: servicePrice,
-        selectedStartDate: startDate,
-        selectedEndDate: endDate,
-        minAge: minAge,
-        maxAge: maxAge,
-      );
-    }).toList();
+          if (!startDate.isBefore(currentDate)) {
+            return Service(
+              serviceName: serviceName,
+              description: description,
+              centerName: centerName,
+              selectedTimeSlot: selectedTimeSlot,
+              capacityValue: capacityValue,
+              servicePrice: servicePrice,
+              selectedStartDate: startDate,
+              selectedEndDate: endDate,
+              minAge: minAge,
+              maxAge: maxAge,
+              id: id,
+            );
+          } else {
+            return null;
+          }
+        })
+        .where((service) => service != null)
+        .toList();
+
+    return List<Service>.from(services);
   }
 
   Future<void> _handleLogout() async {
@@ -161,14 +178,10 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             TextButton(
               child: Text('Yes'),
               onPressed: () async {
-                // Assuming you have access to stopListening method in this widget
-                stopListening(); // Call the method directly
-
+                Navigator.of(context).pop();
                 try {
                   await FirebaseAuth.instance.signOut();
                   showLogoutSuccessDialog();
-                  Navigator.of(context).pushReplacementNamed(
-                      '/login'); // Replace with your login route name
                 } catch (e) {
                   print("Error signing out: $e");
                 }
@@ -259,6 +272,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     }
   }
 
+  // view the notification
+  void navigateToNotificationsPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NotificationsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -270,9 +293,43 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _handleLogout,
+          Row(
+            children: [
+              IconButton(
+                icon: Stack(
+                  children: [
+                    Icon(
+                      Icons.notifications, // Bell icon
+                      color: Colors.yellow, // Set icon color to yellow
+                    ),
+                    if (hasNewNotification) // Only show the indicator if there are new notifications
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.red, // Indicator color
+                          ),
+                          child: Text(
+                            '1',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                onPressed:
+                    navigateToNotificationsPage, // Navigate to notifications page
+              ),
+              IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: _handleLogout,
+              ),
+            ],
           ),
         ],
       ),
