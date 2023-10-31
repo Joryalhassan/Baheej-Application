@@ -62,7 +62,9 @@ class _SignInScreenState extends State<SignInScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HomeScreen(),
+                builder: (context) => CenterServices(
+                  centerName: centerDoc.data()!['username'],
+                ),
               ),
             );
           } else if (usersDoc.exists) {
