@@ -199,6 +199,8 @@ ButtonStyle customButtonStyle(BuildContext context) {
       ),
     );
   }
+
+  
 }
 
 
@@ -297,66 +299,80 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
     super.dispose();
   }
 
-  void _saveChanges() {
-  if (_hasEdits) {
-    // Check for validation errors
-    if (_firstNameError != null ||
-        _lastNameError != null ||
-        _phoneNumberError != null ||
-        _selectedGenderError != null) {
-      // Display error messages for each field
-      setState(() {});
-      return;
-    }
+    void _saveChanges() {
+        if (_hasEdits) {
+          // Check for validation errors
+          if (_firstNameError != null ||
+              _lastNameError != null ||
+              _phoneNumberError != null ||
+              _selectedGenderError != null) {
+            // Display error messages for each field
+            setState(() {});
+            return;
+          }
 
-    // Show a confirmation dialog before saving changes
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Changes'),
-          content: Text('Are you sure you want to save changes?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Save changes to Firestore
-                final currentUser = FirebaseAuth.instance.currentUser;
+          // Show a confirmation dialog before saving changes
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                backgroundColor: Colors.white, // Set background color to white
+                title: Text('Confirm Changes'),
+                content: Text('Are you sure you want to save changes?'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Save changes to Firestore
+                      final currentUser = FirebaseAuth.instance.currentUser;
 
-                if (currentUser != null) {
-                  FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(currentUser.uid)
-                      .update({
-                        'fname': _firstNameController.text.trim(),
-                        'lname': _lastNameController.text.trim(),
-                        'phonenumber': _phoneNumberController.text.trim(),
-                        'selectedGender': _selectedGenderController.text.trim(),
-                      });
+                      if (currentUser != null) {
+                        FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(currentUser.uid)
+                            .update({
+                              'fname': _firstNameController.text.trim(),
+                              'lname': _lastNameController.text.trim(),
+                              'phonenumber': _phoneNumberController.text.trim(),
+                              'selectedGender': _selectedGenderController.text.trim(),
+                            });
 
-                  // Pop the edit screen and return to the profile view
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                    return GProfileViewScreen();
-                  }));
-                }
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  } else {
-    // No edits were made, so simply return to the profile view
-    Navigator.of(context).pop();
-  }
-}
+                        // Pop the edit screen and return to the profile view
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
+                          return GProfileViewScreen();
+                        }));
+                      }
+                    },
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          // No edits were made, so simply return to the profile view
+          Navigator.of(context).pop();
+        }
+   }
+
 
 
   String? _validateFirstName(String? value) {
@@ -408,41 +424,55 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
   }
 
  
- void _cancel() {
-  if (_hasEdits) {
-    // Show a confirmation dialog before discarding changes
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Discard Changes'),
-          content: Text('Are you sure you want to discard changes?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-              TextButton(
-              onPressed: () {
-                // Discard changes and return to the profile view
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                  return GProfileViewScreen();
-                }));
-              },
-              child: Text('Discard'),
-            ),
-          ],
+  void _cancel() {
+      if (_hasEdits) {
+        // Show a confirmation dialog before discarding changes
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Colors.white, // Set background color to white
+              title: Text('Discard Changes'),
+              content: Text('Are you sure you want to discard changes?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Discard changes and return to the profile view
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
+                      return GProfileViewScreen();
+                    }));
+                  },
+                  child: Text(
+                    'Discard',
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
-      },
-    );
-  } else {
-    // No edits were made, so simply return to the profile view
-    Navigator.of(context).pop();
-  }
+      } else {
+        // No edits were made, so simply return to the profile view
+        Navigator.of(context).pop();
+      }
 }
+
 
 
   @override
@@ -457,13 +487,14 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
+           TextField(
               controller: _firstNameController,
               maxLength: 12,
               decoration: InputDecoration(
                 labelText: 'First Name',
                 errorText: _firstNameError,
               ),
+              style: TextStyle(fontSize: 18), // Adjust the font size as needed
             ),
             TextField(
               controller: _lastNameController,
@@ -472,6 +503,7 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
                 labelText: 'Last Name',
                 errorText: _lastNameError,
               ),
+              style: TextStyle(fontSize: 18), // Adjust the font size as needed
             ),
             TextField(
               controller: _phoneNumberController,
@@ -480,15 +512,16 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
                 labelText: 'Phone Number',
                 errorText: _phoneNumberError,
               ),
+              style: TextStyle(fontSize: 18), // Adjust the font size as needed
             ),
             DropdownButtonFormField<String>(
               value: _selectedGenderController.text,
               items: ["Male", "Female"]
-                  .map((String value) => DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      ))
-                  .toList(),
+                .map((String value) => DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: TextStyle(fontSize: 18)), // Adjust the font size as needed
+                    ))
+                .toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedGenderController.text = value ?? "";
@@ -498,7 +531,9 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
                 labelText: 'Selected Gender',
                 errorText: _selectedGenderError,
               ),
-            ),  
+              style: TextStyle(fontSize: 18), // Adjust the font size as needed
+            ),
+  
           ],
         ),
       ),
