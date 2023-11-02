@@ -24,6 +24,10 @@ class _EditServiceState extends State<EditService> {
   DateTime? _selectedEndDate;
   int _minAge = 4;
   int _maxAge = 17;
+ String _selectedTimeSlot = ''; // Store the selected time slot
+  bool _isEditingTimeSlot = false;
+
+
 
   @override
   void initState() {
@@ -36,6 +40,7 @@ class _EditServiceState extends State<EditService> {
     _selectedEndDate = widget.service.selectedEndDate;
     _minAge = widget.service.minAge;
     _maxAge = widget.service.maxAge;
+   _selectedTimeSlot = widget.service.selectedTimeSlot;
   }
   Future<void> _handleLogout() async {
     showDialog(
@@ -219,7 +224,8 @@ void navigateToSignInScreen() {
                 });
               },
             ),
-            // Add the Save button at the bottom
+             _buildTimeSlotField(),
+
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Center(
@@ -332,18 +338,25 @@ void navigateToSignInScreen() {
     
   }
 
-  Widget _buildEditableField({
+ Widget _buildEditableField({
     required String label,
     required TextEditingController controller,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        decoration: InputDecoration(labelText: label),
-        controller: controller,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label),
+          TextFormField(
+            decoration: InputDecoration(labelText: label),
+            controller: controller,
+          ),
+        ],
       ),
     );
   }
+
 
   Widget _buildCapacityValueField({
     required String label,
@@ -449,6 +462,54 @@ void navigateToSignInScreen() {
       ),
     );
   }
+  Widget _buildTimeSlotField() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Period Time'),
+        Row(
+          children: [
+            Text(_selectedTimeSlot), // Display selected time slot
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _isEditingTimeSlot = true;
+                });
+              },
+              child: Text('Edit'),
+            ),
+          ],
+        ),
+        if (_isEditingTimeSlot)
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedTimeSlot = '8-11 AM';
+                  });
+                },
+                child: Text('8-11 AM'),
+              ),
+              SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedTimeSlot = '2-5 PM';
+                  });
+                },
+                child: Text('2-5 PM'),
+              ),
+            ],
+          ),
+      ],
+    ),
+  );
+}
+
 
   void _saveChangesToFirestore() {
     // Get updated values from controllers and selected dates
@@ -462,6 +523,7 @@ void navigateToSignInScreen() {
         _selectedStartDate != null ? _selectedStartDate!.toIso8601String() : '';
     final String updatedEndDate =
         _selectedEndDate != null ? _selectedEndDate!.toIso8601String() : '';
+        
 
     // Create an updated Service object with the new values
     final updatedService = Service(
@@ -475,7 +537,7 @@ void navigateToSignInScreen() {
       maxAge: _maxAge,
       capacityValue: updatedCapacityValue,
       servicePrice: updatedServicePrice,
-      selectedTimeSlot: widget.service.selectedTimeSlot, // Keep the same selectedTimeSlot
+      selectedTimeSlot: _selectedTimeSlot, // Add this line to include selectedTimeSlot  
     );
 
     // Update the service in Firestore using the provided Service object's ID
@@ -492,6 +554,7 @@ void navigateToSignInScreen() {
       'selectedEndDate': updatedEndDate,
       'minAge': _minAge,
       'maxAge': _maxAge,
+      'selectedTimeSlot': _selectedTimeSlot, // Update the selected time slot
     }).then((_) {
       // Success
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
