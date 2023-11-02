@@ -146,7 +146,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProfileData('Center Name', _centerProfile?.username),
-            _buildProfileData('Address', _centerProfile?.address),
+            _buildProfileData('District', _centerProfile?.address),
             _buildProfileData('Email', _centerProfile?.email),
             _buildProfileData('Commercial Register', _centerProfile?.comReg),
             _buildProfileData('Phone Number', _centerProfile?.phoneNumber),
@@ -316,6 +316,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop(); // Close the dialog
                 },
                 child: Text('Cancel'),
@@ -331,12 +332,12 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                         .doc(currentUser.uid)
                         .update({
                       'username': _usernameController.text.trim(),
-                      'addres': _addressController.text.trim(),
+                      'addres':
+                          _selectedAddress ?? '', // Save the selected address
                       'comReg': _comRegController.text.trim(),
                       'phonenumber': _phoneNumberController.text.trim(),
                       'Desc': _descriptionController.text.trim(),
                     });
-
                     // Pop the edit screen and return to the profile view
                     Navigator.of(context).pop(); // Close the dialog
                   }
@@ -395,7 +396,13 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
 
   String? _validateAddress(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Address is required';
+      return 'District is required';
+    }
+    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+      return 'District can only contain letters and spaces';
+    }
+    if (value.trimLeft() != value) {
+      return 'District cannot start with a space';
     }
     return null;
   }
@@ -454,6 +461,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                 onPressed: () {
                   // Discard changes and return to the profile view
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
                 child: Text('Discard'),
               ),
@@ -468,40 +476,40 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
   }
 
   //district drop down menu
-  List<String> centerAddresses = [
-    'Ad Diriyah',
-    'Al Batha',
-    'Al Dhahraniyah',
-    'Al Malaz',
-    'Al Manar',
-    'Al Maizilah',
-    'Al Muruj',
-    'Al Olaya',
-    'Al Rawdah',
-    'Al Sulimaniyah',
-    'Al Wadi',
-    'Al Wizarat',
-    'Al Worood',
-    'An Nakheel',
-    'As Safarat',
-    'Diplomatic Quarter',
-    'King Abdullah Financial District',
-    'King Fahd District',
-    'King Faisal District',
-    'King Salman District',
-    'King Saud University',
-    'Kingdom Centre',
-    'Masjid an Nabawi',
-    'Medinah District',
-    'Murabba',
-    'Nemar',
-    'Olaya',
-    'Qurtubah',
-    'Sulaymaniyah',
-    'Takhasusi',
-    'Umm Al Hamam',
-    'Yasmeen',
-  ];
+  // List<String> centerAddresses = [
+  //   'Ad Diriyah',
+  //   'Al Batha',
+  //   'Al Dhahraniyah',
+  //   'Al Malaz',
+  //   'Al Manar',
+  //   'Al Maizilah',
+  //   'Al Muruj',
+  //   'Al Olaya',
+  //   'Al Rawdah',
+  //   'Al Sulimaniyah',
+  //   'Al Wadi',
+  //   'Al Wizarat',
+  //   'Al Worood',
+  //   'An Nakheel',
+  //   'As Safarat',
+  //   'Diplomatic Quarter',
+  //   'King Abdullah Financial District',
+  //   'King Fahd District',
+  //   'King Faisal District',
+  //   'King Salman District',
+  //   'King Saud University',
+  //   'Kingdom Centre',
+  //   'Masjid an Nabawi',
+  //   'Medinah District',
+  //   'Murabba',
+  //   'Nemar',
+  //   'Olaya',
+  //   'Qurtubah',
+  //   'Sulaymaniyah',
+  //   'Takhasusi',
+  //   'Umm Al Hamam',
+  //   'Yasmeen',
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -526,28 +534,36 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             ),
 
             //2
-
-            DropdownButtonFormField<String>(
-              value: _selectedAddress ??
-                  centerAddresses[0], // Set an initial value here
-              items: [
-                DropdownMenuItem<String>(
-                  value: '', // Add an empty value as an option
-                  child: Text('Select a District'),
-                ),
-                ...centerAddresses.map((address) {
-                  return DropdownMenuItem<String>(
-                    value: address,
-                    child: Text(address),
-                  );
-                }).toList(),
-              ],
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedAddress = newValue;
-                });
-              },
+            TextField(
+              controller: _addressController,
+              maxLength: 15,
+              decoration: InputDecoration(
+                labelText: 'District',
+                errorText: _addressError, // Display error message
+              ),
             ),
+
+            // DropdownButtonFormField<String>(
+            //   value: _selectedAddress ??
+            //       centerAddresses[0], // Set an initial value here
+            //   items: [
+            //     DropdownMenuItem<String>(
+            //       value: '', // Add an empty value as an option
+            //       child: Text('Select a District'),
+            //     ),
+            //     ...centerAddresses.map((address) {
+            //       return DropdownMenuItem<String>(
+            //         value: address,
+            //         child: Text(address),
+            //       );
+            //     }).toList(),
+            //   ],
+            //   onChanged: (String? newValue) {
+            //     setState(() {
+            //       _selectedAddress = newValue;
+            //     });
+            //   },
+            // ),
 
             //3
 
