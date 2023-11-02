@@ -211,7 +211,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       return 'Center Name is required';
     }
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name must be between 4 and 25 characters';
+      return 'Center Name must be between 4 and 25 letters';
     }
     if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
       return 'Center Name can only contain letters and spaces';
@@ -502,7 +502,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     ],
                   ),
 
-                  //4
                   //4
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

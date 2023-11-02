@@ -1,3 +1,4 @@
+import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,6 +60,16 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     );
   }
 
+  //new in code for button ui
+  ButtonStyle customButtonStyle(BuildContext context) {
+    return ElevatedButton.styleFrom(
+      primary: Theme.of(context).primaryColor, // Use the primary color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // Customize the button shape
+      ),
+    );
+  }
+
   void _editProfile() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) {
@@ -67,35 +78,145 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     );
   }
 
+  //delete account code
+  void _deleteAccount() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Account?'),
+          content: Text(
+              'Are you sure you want to delete your account? This action is irreversible.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Call a function to delete the user and their data
+                _deleteUserAndNavigateToSignIn();
+              },
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Function to delete the user and navigate to SignInScreen
+  void _deleteUserAndNavigateToSignIn() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      try {
+        // Delete user data from Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .delete();
+
+        // Delete the user's account
+        await currentUser.delete();
+
+        // Navigate to SignInScreen
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return SignInScreen();
+        }));
+      } catch (e) {
+        // Handle errors, e.g., user not found or deletion failed
+        print('Error while deleting user: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Center Profile'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: _editProfile,
-          ),
-        ],
       ),
-      body: Center(
-        child: _centerProfile != null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Center Name: ${_centerProfile?.username}'),
-                  Text('Address: ${_centerProfile?.address}'),
-                  Text('Email: ${_centerProfile?.email}'),
-                  Text('Commercial Register: ${_centerProfile?.comReg}'),
-                  Text('Phone Number: ${_centerProfile?.phoneNumber}'),
-                  Text('Description: ${_centerProfile?.description}'),
-                ],
-              )
-            : CircularProgressIndicator(), // You can use a loading indicator while data is being fetched.
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileData('Center Name', _centerProfile?.username),
+            _buildProfileData('Address', _centerProfile?.address),
+            _buildProfileData('Email', _centerProfile?.email),
+            _buildProfileData('Commercial Register', _centerProfile?.comReg),
+            _buildProfileData('Phone Number', _centerProfile?.phoneNumber),
+            _buildProfileData('Description', _centerProfile?.description),
+          ],
+        ),
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton.extended(
+              onPressed: _editProfile,
+              label: Text('Edit Profile'),
+              icon: Icon(Icons.edit),
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(20), // Customize the button shape
+              )),
+          SizedBox(width: 16), // Add spacing between buttons
+          FloatingActionButton.extended(
+              onPressed: _deleteAccount,
+              label: Text('Delete Account'),
+              icon: Icon(Icons.delete),
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(20), // Customize the button shape
+              )),
+        ],
       ),
     );
   }
+
+  Widget _buildProfileData(String label, String? value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16), // Add spacing between items
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label:',
+            style: TextStyle(fontSize: 20),
+          ),
+          Text(
+            value ?? '', // Use an empty string if the value is null
+            style: TextStyle(fontSize: 20),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CenterProfile {
+  final String username;
+  final String address;
+  final String email;
+  final String comReg;
+  final String type;
+  final String phoneNumber;
+  final String description;
+
+  CenterProfile({
+    required this.username,
+    required this.address,
+    required this.email,
+    required this.comReg,
+    required this.type,
+    required this.phoneNumber,
+    required this.description,
+  });
 }
 
 class CProfileEditScreen extends StatefulWidget {
@@ -123,6 +244,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
   String? _comRegError;
   String? _phoneNumberError;
   String? _descriptionError;
+  String? _selectedAddress;
 
   @override
   void initState() {
@@ -216,8 +338,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                     });
 
                     // Pop the edit screen and return to the profile view
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(); // Close the dialog
                   }
                 },
                 child: Text('Save'),
@@ -237,7 +358,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
       return 'Center Name is required';
     }
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name must be between 4 and 25 characters';
+      return 'Center Name must be between 4 and 25 letters';
     }
     if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
       return 'Center Name can only contain letters and spaces';
@@ -333,7 +454,6 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                 onPressed: () {
                   // Discard changes and return to the profile view
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
                 },
                 child: Text('Discard'),
               ),
@@ -347,15 +467,50 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
     }
   }
 
+  //district drop down menu
+  List<String> centerAddresses = [
+    'Ad Diriyah',
+    'Al Batha',
+    'Al Dhahraniyah',
+    'Al Malaz',
+    'Al Manar',
+    'Al Maizilah',
+    'Al Muruj',
+    'Al Olaya',
+    'Al Rawdah',
+    'Al Sulimaniyah',
+    'Al Wadi',
+    'Al Wizarat',
+    'Al Worood',
+    'An Nakheel',
+    'As Safarat',
+    'Diplomatic Quarter',
+    'King Abdullah Financial District',
+    'King Fahd District',
+    'King Faisal District',
+    'King Salman District',
+    'King Saud University',
+    'Kingdom Centre',
+    'Masjid an Nabawi',
+    'Medinah District',
+    'Murabba',
+    'Nemar',
+    'Olaya',
+    'Qurtubah',
+    'Sulaymaniyah',
+    'Takhasusi',
+    'Umm Al Hamam',
+    'Yasmeen',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Profile'),
-        automaticallyImplyLeading: false, // Remove back navigation arrow
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -363,77 +518,88 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
 
             TextField(
               controller: _usernameController,
+              maxLength: 25, // Set the maximum length
               decoration: InputDecoration(
                 labelText: 'Center Name',
                 errorText: _nameError,
               ),
-              maxLength: 25, // Set the maximum length
             ),
 
             //2
 
-            TextField(
-              controller: _addressController,
-              decoration: InputDecoration(
-                labelText: 'Address',
-                errorText: _addressError, // Display error message
-              ),
+            DropdownButtonFormField<String>(
+              value: _selectedAddress ??
+                  centerAddresses[0], // Set an initial value here
+              items: [
+                DropdownMenuItem<String>(
+                  value: '', // Add an empty value as an option
+                  child: Text('Select a District'),
+                ),
+                ...centerAddresses.map((address) {
+                  return DropdownMenuItem<String>(
+                    value: address,
+                    child: Text(address),
+                  );
+                }).toList(),
+              ],
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedAddress = newValue;
+                });
+              },
             ),
 
             //3
 
             TextField(
               controller: _comRegController,
+              maxLength: 10,
               decoration: InputDecoration(
                 labelText: 'Commercial Register',
                 errorText: _comRegError, // Display error message
               ),
-              maxLength: 10,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly, // Allow only digits
-                LengthLimitingTextInputFormatter(10), // Limit to 10 characters
-              ],
             ),
 
             //4
 
             TextField(
               controller: _phoneNumberController,
+              maxLength: 10,
               decoration: InputDecoration(
                 labelText: 'Phone Number',
                 errorText: _phoneNumberError, // Display error message
               ),
-              maxLength: 10,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly, // Allow only digits
-                LengthLimitingTextInputFormatter(10), // Limit to 10 characters
-              ],
             ),
 
             //5
 
             TextField(
               controller: _descriptionController,
+              maxLength: 225,
               decoration: InputDecoration(
                 labelText: 'Description',
                 errorText: _descriptionError, // Display error message
               ),
-              maxLength: 225,
             ),
+
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
+                FloatingActionButton.extended(
                   onPressed: _cancel,
-                  child: Text('Cancel'),
+                  label: Text('Cancel'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
                 SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _hasEdits
-                      ? _saveChanges
-                      : null, // Enable only if there are edits
-                  child: Text('Save Changes'),
-                ),
+                FloatingActionButton.extended(
+                    onPressed: _hasEdits ? _saveChanges : null,
+                    label: Text('Save Changes'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          20), // Customize the button shape
+                    )),
               ],
             ),
           ],
@@ -441,24 +607,4 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
       ),
     );
   }
-}
-
-class CenterProfile {
-  final String username;
-  final String address;
-  final String email;
-  final String comReg;
-  final String type;
-  final String phoneNumber;
-  final String description;
-
-  CenterProfile({
-    required this.username,
-    required this.address,
-    required this.email,
-    required this.comReg,
-    required this.type,
-    required this.phoneNumber,
-    required this.description,
-  });
 }
