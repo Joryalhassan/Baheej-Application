@@ -93,6 +93,26 @@ class _EditServiceState extends State<EditService> {
       },
     );
   }
+  void _showErrorMessageDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Error'),
+        content: Text('Please correct the form errors.'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the error message dialog
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 void navigateToSignInScreen() {
     Navigator.pushReplacement(
       context,
@@ -439,7 +459,7 @@ String? validateMinAge(int? minAge, int? maxAge) {
     if(maxAge>17){
     return 'Maximim age cannot be more than 17';
   }
-  
+
   if (minAge > maxAge) {
     return 'Minimum age cannot be greater than maximum age';
   }
@@ -710,65 +730,101 @@ String? validateTimeSlot(String? value) {
 
 
 
-  void _saveChangesToFirestore() {
-    if (_formKey.currentState!.validate()) {
-    // Get updated values from controllers and selected dates
-    final String updatedServiceName = _serviceNameController.text;
-    final String updatedServiceDescription = _serviceDescriptionController.text;
-    final int updatedCapacityValue =
-        int.tryParse(_capacityValueController.text) ?? 0;
-    final double updatedServicePrice =
-        double.tryParse(_servicePriceController.text) ?? 0.0;
-    final String updatedStartDate =
-        _selectedStartDate != null ? _selectedStartDate!.toIso8601String() : '';
-    final String updatedEndDate =
-        _selectedEndDate != null ? _selectedEndDate!.toIso8601String() : '';
-        
-
-    // Create an updated Service object with the new values
-    final updatedService = Service(
-      id: widget.service.id, // Use the same ID as the original service
-      serviceName: updatedServiceName,
-      description: updatedServiceDescription,
-      centerName: widget.service.centerName, // Keep the same centerName
-      selectedStartDate: _selectedStartDate ?? DateTime.now(),
-      selectedEndDate: _selectedEndDate ?? DateTime.now(),
-      minAge: _minAge,
-      maxAge: _maxAge,
-      capacityValue: updatedCapacityValue,
-      servicePrice: updatedServicePrice,
-      selectedTimeSlot: _selectedTimeSlot, // Add this line to include selectedTimeSlot  
+  void _saveChangesToFirestore() async {
+  if (_formKey.currentState!.validate()) {
+    bool confirmed = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Changes'),
+          content: Text('Are you sure you want to save changes?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
     );
 
-    // Update the service in Firestore using the provided Service object's ID
-    FirebaseFirestore.instance
-        .collection('center-service')
-        .doc(widget.service.id)
-        .update({
-      'serviceName': updatedServiceName,
-      'description': updatedServiceDescription,
-      'centerName': widget.service.centerName,
-      'serviceCapacity': updatedCapacityValue,
-      'servicePrice': updatedServicePrice,
-      'selectedStartDate': updatedStartDate,
-      'selectedEndDate': updatedEndDate,
-      'minAge': _minAge,
-      'maxAge': _maxAge,
-      'selectedTimeSlot': _selectedTimeSlot, // Update the selected time slot
-    }).then((_) {
-      // Success
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Service updated successfully!'),
-      ));
-      Navigator.of(context).pop(); // Close the edit screen
+    if (confirmed) {
+      // Continue with saving changes to Firestore
+      final String updatedServiceName = _serviceNameController.text;
+      final String updatedServiceDescription = _serviceDescriptionController.text;
+      final int updatedCapacityValue =
+          int.tryParse(_capacityValueController.text) ?? 0;
+      final double updatedServicePrice =
+          double.tryParse(_servicePriceController.text) ?? 0.0;
+      final String updatedStartDate =
+          _selectedStartDate != null ? _selectedStartDate!.toIso8601String() : '';
+      final String updatedEndDate =
+          _selectedEndDate != null ? _selectedEndDate!.toIso8601String() : '';
 
-      // Invoke the callback to update the service in HomeScreenCenter
+      final updatedService = Service(
+        id: widget.service.id,
+        serviceName: updatedServiceName,
+        description: updatedServiceDescription,
+        centerName: widget.service.centerName,
+        selectedStartDate: _selectedStartDate ?? DateTime.now(),
+        selectedEndDate: _selectedEndDate ?? DateTime.now(),
+        minAge: _minAge,
+        maxAge: _maxAge,
+        capacityValue: updatedCapacityValue,
+        servicePrice: updatedServicePrice,
+        selectedTimeSlot: _selectedTimeSlot,
+      );
+
+      await FirebaseFirestore.instance
+          .collection('center-service')
+          .doc(widget.service.id)
+          .update({
+        'serviceName': updatedServiceName,
+        'description': updatedServiceDescription,
+        'centerName': widget.service.centerName,
+        'serviceCapacity': updatedCapacityValue,
+        'servicePrice': updatedServicePrice,
+        'selectedStartDate': updatedStartDate,
+        'selectedEndDate': updatedEndDate,
+        'minAge': _minAge,
+        'maxAge': _maxAge,
+        'selectedTimeSlot': _selectedTimeSlot,
+      });
+ Navigator.of(context).pop(); // Close the edit screen
       widget.onUpdateService(updatedService);
-    });}
-    else {
-    // The form is not valid; show a snackbar message.
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Please correct the form errors.'),
-    ));}
+      // Show the success message dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Success'),
+            content: Text('Service updated successfully!'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the success message dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+     // Navigator.of(context).pop(); // Close the edit screen
+    //  widget.onUpdateService(updatedService);
+    }
+  } else {
+    // Show the error message dialog
+    _showErrorMessageDialog();
   }
+}
 }
