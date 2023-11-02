@@ -15,7 +15,7 @@ class EditService extends StatefulWidget {
 }
 
 class _EditServiceState extends State<EditService> {
-  final _formKey = GlobalKey<FormState>(); // Define _formKey here
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _serviceNameController = TextEditingController();
   TextEditingController _serviceDescriptionController = TextEditingController();
   TextEditingController _capacityValueController = TextEditingController();
@@ -162,17 +162,21 @@ void navigateToSignInScreen() {
             _buildEditableField(
               label: 'Service Name',
               controller: _serviceNameController,
+              validator: validateServiceName,
             ),
             _buildEditableField(
               label: 'Service Description',
               controller: _serviceDescriptionController,
+              validator: validateServiceDescription, // Add validator
             ),
             _buildCapacityValueField(
               label: 'Capacity Value',
+              validator: validateCapacityValue, // Add validator
             ),
             _buildEditableField(
               label: 'Service Price',
               controller: _servicePriceController,
+              validator: validateServicePrice, // Add validator
             ),
             _buildDateTimePicker(
               label: 'Start Date',
@@ -182,6 +186,8 @@ void navigateToSignInScreen() {
                   _selectedStartDate = date;
                 });
               },
+              validator: (value) =>
+                          validateDate(_selectedStartDate, _selectedEndDate), // Add validator
             ),
             _buildDateTimePicker(
               label: 'End Date',
@@ -191,6 +197,8 @@ void navigateToSignInScreen() {
                   _selectedEndDate = date;
                 });
               },
+              validator: (value) =>
+                          validateDate(_selectedStartDate, _selectedEndDate), // Add validator
             ),
             _buildAgeSelector(
               label: 'Min Age',
@@ -207,6 +215,7 @@ void navigateToSignInScreen() {
                   }
                 });
               },
+              validator: (value) => validateMinAge(_minAge, _maxAge), // Add validator
             ),
             _buildAgeSelector(
               label: 'Max Age',
@@ -223,8 +232,11 @@ void navigateToSignInScreen() {
                   }
                 });
               },
+              validator: (value) => validateMinAge(_minAge, _maxAge), // Add validator
             ),
-             _buildTimeSlotField(),
+             _buildTimeSlotField(
+              validator: validateTimeSlot, // Add validator
+             ),
 
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -337,132 +349,280 @@ void navigateToSignInScreen() {
   );
     
   }
+  String? validateServiceName(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Service name cannot be empty';
+  }
+  if (value.trim().isEmpty) {
+    return 'Service name cannot consist of only spaces';
+  }
+  if (value.length < 5 || value.length > 20) {
+    return 'Service name should be between 5 and 20 characters';
+  }
+  if (!RegExp(r'^[a-zA-Z0-9\s]*$').hasMatch(value)) {
+    return 'Service name should only contain letters, numbers, and spaces';
+  }
+  return null;
+}
+
+String? validateServiceDescription(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Service description cannot be empty';
+  }
+  if (value.trim().isEmpty) {
+    return 'Service description cannot consist of only spaces';
+  }
+  if (value.length < 5 || value.length > 225) {
+    return 'Service description should be between 5 and 225 characters';
+  }
+  if (!value.contains(RegExp(r'[a-zA-Z]'))) {
+    return 'Service description should contain at least one non-numeric character';
+  }
+  return null;
+}
+
+String? validateCapacityValue(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Capacity value cannot be empty';
+  }
+  int? intValue = int.tryParse(value);
+  if (intValue == null || intValue < 10) {
+    return 'Capacity should be a positive number and more than or equal 10';
+  }
+  if (intValue > 1000) {
+    return 'Capacity cannot exceed 1000';
+  }
+  return null;
+}
+
+String? validateServicePrice(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Service price cannot be empty';
+  }
+  double? doubleValue = double.tryParse(value);
+  if (doubleValue == null) {
+    return 'Only numbers are allowed for price';
+  }
+  if (doubleValue > 10000) {
+    return 'Maximum price limit exceeded (10000)';
+  }
+  if (doubleValue < 0) {
+    return 'Negative prices are not allowed';
+  }
+  return null;
+}
+
+String? validateDate(DateTime? startDate, DateTime? endDate) {
+  if (startDate == null) {
+    return 'Start date cannot be null';
+  }
+  if (endDate == null) {
+    return 'End date cannot be null';
+  }
+  if (endDate.isBefore(startDate)) {
+    return 'End date cannot be before the start date';
+  }
+  return null;
+}
+
+String? validateMinAge(int? minAge, int? maxAge) {
+  if (minAge == null) {
+    return 'Minimum age cannot be null';
+  }
+  if (maxAge == null) {
+    return 'Maximum age cannot be null';
+  }
+  if (minAge > maxAge) {
+    return 'Minimum age cannot be greater than maximum age';
+  }
+  return null;
+}
+
+String? validateTimeSlot(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Time slot cannot be null';
+  }
+  return null;
+}
+
 
  Widget _buildEditableField({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label),
-          TextFormField(
-            decoration: InputDecoration(labelText: label),
-            controller: controller,
+  required String label,
+  required TextEditingController controller,
+  String? Function(String?)? validator, // Add "?" here
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        TextFormField(
+          decoration: InputDecoration(labelText: label),
+          controller: controller,
+          validator: validator, // Keep the "?" here
+        ),
+        // Display error message if validation fails
+        if (validator != null)
+          Text(
+            validator(controller.text) ?? '', // Show the error message from the validator
+            style: TextStyle(color: Colors.red),
           ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
+
+
+
 
 
   Widget _buildCapacityValueField({
-    required String label,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(label),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                int value = int.tryParse(_capacityValueController.text) ?? 0;
-                value = (value > 0) ? value - 1 : 0;
-                _capacityValueController.text = value.toString();
-              });
-            },
-            icon: Icon(Icons.remove),
-          ),
-          Expanded(
-            flex: 2,
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Capacity Value',
-                border: OutlineInputBorder(),
-              ),
-              controller: _capacityValueController,
-              keyboardType: TextInputType.number,
+  required String label,
+  String? Function(String?)? validator,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        Row(
+          children: [
+            Expanded(
+              child: Text(label),
             ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  int value = int.tryParse(_capacityValueController.text) ?? 0;
+                  value = (value > 0) ? value - 1 : 0;
+                  _capacityValueController.text = value.toString();
+                });
+              },
+              icon: Icon(Icons.remove),
+            ),
+            Expanded(
+              flex: 2,
+              child: TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Capacity Value',
+                  border: OutlineInputBorder(),
+                ),
+                controller: _capacityValueController,
+                validator: validator,
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  int value = int.tryParse(_capacityValueController.text) ?? 0;
+                  value++;
+                  _capacityValueController.text = value.toString();
+                });
+              },
+              icon: Icon(Icons.add),
+            ),
+          ],
+        ),
+        if (validator != null)
+          Text(
+            validator(_capacityValueController.text) ?? '',
+            style: TextStyle(color: Colors.red),
           ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                int value = int.tryParse(_capacityValueController.text) ?? 0;
-                value++;
-                _capacityValueController.text = value.toString();
-              });
-            },
-            icon: Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
+
 
   Widget _buildDateTimePicker({
-    required String label,
-    required DateTime? selectedDate,
-    required Function(DateTime?) onDateChanged,
-  }) {
-    return ListTile(
-      title: Text(label),
-      trailing: GestureDetector(
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: selectedDate ?? DateTime.now(),
-            firstDate: DateTime.now(),
-            lastDate: DateTime(2101),
-          );
-          if (picked != null && picked != selectedDate) {
-            onDateChanged(picked);
-          }
-        },
-        child: Text(
-          selectedDate != null
-              ? "${selectedDate.toLocal()}".split(' ')[0]
-              : 'Select Date',
-          style: TextStyle(
-            color: Colors.blue,
-            fontWeight: FontWeight.bold,
+  required String label,
+  required DateTime? selectedDate,
+  required Function(DateTime?) onDateChanged,
+  String? Function(String?)? validator,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label),
+      ListTile(
+        title: Text(label),
+        trailing: GestureDetector(
+          onTap: () async {
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: selectedDate ?? DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2101),
+            );
+            if (picked != null && picked != selectedDate) {
+              onDateChanged(picked);
+            }
+          },
+          child: Text(
+            selectedDate != null
+                ? "${selectedDate.toLocal()}".split(' ')[0]
+                : 'Select Date',
+            style: TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
-    );
-  }
+      if (validator != null)
+        Text(
+          validator(selectedDate?.toIso8601String() ?? '') ?? '',
+          style: TextStyle(color: Colors.red),
+        ),
+    ],
+  );
+}
 
   Widget _buildAgeSelector({
-    required String label,
-    required int value,
-    required Function() onIncrement,
-    required Function() onDecrement,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(label),
+  required String label,
+  required int value,
+  required Function() onIncrement,
+  required Function() onDecrement,
+  String? Function(String?)? validator,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        Row(
+          children: [
+            Expanded(
+              child: Text(label),
+            ),
+            IconButton(
+              onPressed: onDecrement,
+              icon: Icon(Icons.remove),
+            ),
+            Text(value.toString()),
+            IconButton(
+              onPressed: onIncrement,
+              icon: Icon(Icons.add),
+            ),
+          ],
+        ),
+        if (validator != null)
+          Text(
+            validator(value.toString()) ?? '',
+            style: TextStyle(color: Colors.red),
           ),
-          IconButton(
-            onPressed: onDecrement,
-            icon: Icon(Icons.remove),
-          ),
-          Text(value.toString()),
-          IconButton(
-            onPressed: onIncrement,
-            icon: Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildTimeSlotField() {
+      ],
+    ),
+  );
+}
+
+  Widget _buildTimeSlotField({
+  String? Function(String?)? validator,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: Column(
@@ -483,6 +643,11 @@ void navigateToSignInScreen() {
             ),
           ],
         ),
+        if (validator != null)
+          Text(
+            validator(_selectedTimeSlot) ?? '',
+            style: TextStyle(color: Colors.red),
+          ),
         if (_isEditingTimeSlot)
           Row(
             children: [
@@ -511,7 +676,9 @@ void navigateToSignInScreen() {
 }
 
 
+
   void _saveChangesToFirestore() {
+    if (_formKey.currentState!.validate()) {
     // Get updated values from controllers and selected dates
     final String updatedServiceName = _serviceNameController.text;
     final String updatedServiceDescription = _serviceDescriptionController.text;
@@ -564,11 +731,11 @@ void navigateToSignInScreen() {
 
       // Invoke the callback to update the service in HomeScreenCenter
       widget.onUpdateService(updatedService);
-    }).catchError((error) {
-      // Error
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error updating service: $error'),
-      ));
-    });
+    });}
+    else {
+    // The form is not valid; show a snackbar message.
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Please correct the form errors.'),
+    ));}
   }
 }
