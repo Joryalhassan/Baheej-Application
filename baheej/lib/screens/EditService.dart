@@ -251,7 +251,7 @@ void navigateToSignInScreen() {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0),
                     ),
-                    minimumSize: Size(100, 40),
+                    minimumSize: Size(200, 40),
                   ),
                   child: Text('Save'), // Button text
                 ),
@@ -429,9 +429,17 @@ String? validateMinAge(int? minAge, int? maxAge) {
   if (minAge == null) {
     return 'Minimum age cannot be null';
   }
+  if(minAge<4){
+  return 'Minimum age cannot be less than 4';
+  }
+
   if (maxAge == null) {
     return 'Maximum age cannot be null';
   }
+    if(maxAge>17){
+    return 'Maximim age cannot be more than 17';
+  }
+  
   if (minAge > maxAge) {
     return 'Minimum age cannot be greater than maximum age';
   }
@@ -456,7 +464,7 @@ String? validateTimeSlot(String? value) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+       // Text(label),
         TextFormField(
           decoration: InputDecoration(labelText: label),
           controller: controller,
@@ -486,7 +494,7 @@ String? validateTimeSlot(String? value) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+        //Text(label),
         Row(
           children: [
             Expanded(
@@ -506,7 +514,7 @@ String? validateTimeSlot(String? value) {
               flex: 2,
               child: TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Capacity Value',
+                  //labelText: 'Capacity Value',
                   border: OutlineInputBorder(),
                 ),
                 controller: _capacityValueController,
@@ -546,7 +554,7 @@ String? validateTimeSlot(String? value) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label),
+      //Text(label),
       ListTile(
         title: Text(label),
         trailing: GestureDetector(
@@ -593,7 +601,7 @@ String? validateTimeSlot(String? value) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+       //Text(label),
         Row(
           children: [
             Expanded(
@@ -633,12 +641,15 @@ String? validateTimeSlot(String? value) {
           children: [
             Text(_selectedTimeSlot), // Display selected time slot
             SizedBox(width: 16),
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 setState(() {
                   _isEditingTimeSlot = true;
                 });
               },
+              style: TextButton.styleFrom(
+                primary: Colors.grey, // Set text color to grey
+              ),
               child: Text('Edit'),
             ),
           ],
@@ -657,6 +668,16 @@ String? validateTimeSlot(String? value) {
                     _selectedTimeSlot = '8-11 AM';
                   });
                 },
+                style: ElevatedButton.styleFrom(
+                            primary: _selectedTimeSlot == '8-11 AM'
+                                ? Color.fromARGB(255, 0, 65, 105)
+                                : const Color.fromARGB(255, 111, 176, 234),
+                            onPrimary: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            minimumSize: Size(100, 40),
+                          ),
                 child: Text('8-11 AM'),
               ),
               SizedBox(width: 16),
@@ -666,6 +687,16 @@ String? validateTimeSlot(String? value) {
                     _selectedTimeSlot = '2-5 PM';
                   });
                 },
+                style: ElevatedButton.styleFrom(
+                            primary: _selectedTimeSlot == '2-5 PM'
+                                ? Color.fromARGB(255, 0, 65, 105)
+                                : Color.fromARGB(255, 111, 176, 234),
+                            onPrimary: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            minimumSize: Size(100, 40),
+                          ),
                 child: Text('2-5 PM'),
               ),
             ],
@@ -674,6 +705,8 @@ String? validateTimeSlot(String? value) {
     ),
   );
 }
+
+
 
 
 
