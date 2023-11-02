@@ -135,18 +135,22 @@ ButtonStyle customButtonStyle(BuildContext context) {
   ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileData('First Name', _guardianProfile?.firstName),
-            _buildProfileData('Last Name', _guardianProfile?.lastName),
-            _buildProfileData('Email', _guardianProfile?.email),
-            _buildProfileData('Phone Number', _guardianProfile?.phoneNumber),
-            _buildProfileData('Gender', _guardianProfile?.selectedGender),
-          ],
-        ),
-      ),
+      padding: const EdgeInsets.all(16),
+      child: Container(
+     // color: Color.fromARGB(255, 239, 249, 254), // Set the background color
+      child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildProfileData('First Name', _guardianProfile?.firstName),
+        _buildProfileData('Last Name', _guardianProfile?.lastName),
+        _buildProfileData('Email', _guardianProfile?.email),
+        _buildProfileData('Phone Number', _guardianProfile?.phoneNumber),
+        _buildProfileData('Gender', _guardianProfile?.selectedGender),
+      ],
+    ),
+  ),
+),
+
 
     
     floatingActionButton: Row(
@@ -219,6 +223,9 @@ class GuardianProfile {
     required this.selectedGender,
   });
 }
+
+
+
 
 
 
