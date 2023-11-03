@@ -75,9 +75,12 @@ ButtonStyle customButtonStyle(BuildContext context) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white, // Set background color to white
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+          ),
           title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete your account? This action is irreversible.'),
+          content: Text('Are you sure you want to delete your account? This action is irreversible'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -99,6 +102,7 @@ ButtonStyle customButtonStyle(BuildContext context) {
               child: Text(
                 'Delete',
                 style: TextStyle(
+                fontSize: 17,
                 color: Colors.red, // Red color for the Delete button
               ),
             ),
@@ -337,6 +341,9 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
             builder: (BuildContext context) {
               return AlertDialog(
                 backgroundColor: Colors.white, // Set background color to white
+                shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+                ),
                 title: Text('Confirm Changes'),
                 content: Text('Are you sure you want to save changes?'),
                 actions: <Widget>[
@@ -452,6 +459,9 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
           builder: (BuildContext context) {
             return AlertDialog(
               backgroundColor: Colors.white, // Set background color to white
+              shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+               ),
               title: Text('Discard Changes'),
               content: Text('Are you sure you want to discard changes?'),
               actions: <Widget>[
@@ -491,7 +501,7 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
         // No edits were made, so simply return to the profile view
         Navigator.of(context).pop();
       }
-}
+ }
 
 
 
