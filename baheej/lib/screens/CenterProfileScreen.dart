@@ -85,6 +85,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white, // Set background color to white
           title: Text('Delete Account?'),
           content: Text(
               'Are you sure you want to delete your account? This action is irreversible.'),
@@ -93,14 +94,26 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: 17,
+                  color: Color.fromARGB(255, 59, 138,
+                      207), // Use the same color as the buttons below
+                ),
+              ),
             ),
             TextButton(
               onPressed: () {
                 // Call a function to delete the user and their data
                 _deleteUserAndNavigateToSignIn();
               },
-              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              child: Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.red, // Red color for the Delete button
+                ),
+              ),
             ),
           ],
         );
