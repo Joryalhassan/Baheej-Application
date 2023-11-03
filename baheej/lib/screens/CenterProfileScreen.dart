@@ -1,3 +1,4 @@
+import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -139,6 +140,15 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Center Profile'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return HomeScreen();
+            }));
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -157,23 +167,29 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FloatingActionButton.extended(
+          Container(
+            width: 160,
+            child: FloatingActionButton.extended(
               onPressed: _editProfile,
-              label: Text('Edit Profile'),
+              label: Text('Edit Profile', style: TextStyle(fontSize: 17)),
               icon: Icon(Icons.edit),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(20), // Customize the button shape
-              )),
-          SizedBox(width: 16), // Add spacing between buttons
-          FloatingActionButton.extended(
+              backgroundColor: Color.fromARGB(255, 59, 138, 207),
+              foregroundColor: Colors.white,
+              shape: StadiumBorder(),
+            ),
+          ),
+          SizedBox(width: 16),
+          Container(
+            width: 160,
+            child: FloatingActionButton.extended(
               onPressed: _deleteAccount,
-              label: Text('Delete Account'),
-              icon: Icon(Icons.delete),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(20), // Customize the button shape
-              )),
+              label: Text('Delete Account',
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
+              icon: Icon(Icons.delete, color: Colors.red),
+              backgroundColor: Color.fromARGB(255, 59, 138, 207),
+              shape: StadiumBorder(),
+            ),
+          ),
         ],
       ),
     );
@@ -311,15 +327,22 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            backgroundColor: Colors.white, // Set background color to white
             title: Text('Confirm Changes'),
             content: Text('Are you sure you want to save these changes?'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Color.fromARGB(255, 59, 138,
+                        207), // Use the same color as the buttons below
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -332,17 +355,28 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                         .doc(currentUser.uid)
                         .update({
                       'username': _usernameController.text.trim(),
-                      'addres':
-                          _selectedAddress ?? '', // Save the selected address
+                      'addres': _addressController.text.trim(),
                       'comReg': _comRegController.text.trim(),
                       'phonenumber': _phoneNumberController.text.trim(),
                       'Desc': _descriptionController.text.trim(),
                     });
+
                     // Pop the edit screen and return to the profile view
-                    Navigator.of(context).pop(); // Close the dialog
+                    Navigator.of(context).pop();
+                    Navigator.of(context)
+                        .pushReplacement(MaterialPageRoute(builder: (context) {
+                      return CenterProfileViewScreen();
+                    }));
                   }
                 },
-                child: Text('Save'),
+                child: Text(
+                  'Save',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Color.fromARGB(255, 59, 138,
+                        207), // Use the same color as the buttons below
+                  ),
+                ),
               ),
             ],
           );
@@ -448,22 +482,40 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Discard Changes?'),
+            backgroundColor: Colors.white, // Set background color to white
+            title: Text('Discard Changes'),
             content: Text('Are you sure you want to discard changes?'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Color.fromARGB(255, 59, 138,
+                        207), // Use the same color as the buttons below
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () {
                   // Discard changes and return to the profile view
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
+                  Navigator.of(context)
+                      .pushReplacement(MaterialPageRoute(builder: (context) {
+                    return CenterProfileViewScreen();
+                  }));
                 },
-                child: Text('Discard'),
+                child: Text(
+                  'Discard',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Color.fromARGB(255, 59, 138,
+                        207), // Use the same color as the buttons below
+                  ),
+                ),
               ),
             ],
           );
@@ -516,6 +568,8 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Profile'),
+        automaticallyImplyLeading:
+            false, // Add this line to remove the back button
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -601,21 +655,29 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FloatingActionButton.extended(
-                  onPressed: _cancel,
-                  label: Text('Cancel'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                Container(
+                  width: 160,
+                  child: FloatingActionButton.extended(
+                    onPressed: _cancel,
+                    label: Text('Cancel',
+                        style: TextStyle(fontSize: 17, color: Colors.white)),
+                    backgroundColor: Color.fromARGB(255, 59, 138, 207),
+                    foregroundColor: Colors.white,
+                    shape: StadiumBorder(),
                   ),
                 ),
                 SizedBox(width: 16),
-                FloatingActionButton.extended(
+                Container(
+                  width: 160,
+                  child: FloatingActionButton.extended(
                     onPressed: _hasEdits ? _saveChanges : null,
-                    label: Text('Save Changes'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          20), // Customize the button shape
-                    )),
+                    label: Text('Save Changes',
+                        style: TextStyle(fontSize: 17, color: Colors.white)),
+                    backgroundColor: Color.fromARGB(255, 59, 138, 207),
+                    foregroundColor: Colors.white,
+                    shape: StadiumBorder(),
+                  ),
+                ),
               ],
             ),
           ],
