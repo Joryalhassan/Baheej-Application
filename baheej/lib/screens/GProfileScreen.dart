@@ -70,32 +70,45 @@ ButtonStyle customButtonStyle(BuildContext context) {
     );
   }
 
-  void _deleteAccount() {
+   void _deleteAccount() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Account?'),
+          backgroundColor: Colors.white, // Set background color to white
+          title: Text('Delete Account'),
           content: Text('Are you sure you want to delete your account? This action is irreversible.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: 17,
+                  color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
+                ),
+              ),
             ),
             TextButton(
               onPressed: () {
                 // Call a function to delete the user and their data
                 _deleteUserAndNavigateToSignIn();
               },
-              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              child: Text(
+                'Delete',
+                style: TextStyle(
+                color: Colors.red, // Red color for the Delete button
+              ),
             ),
-          ],
-        );
-      },
-    );
-  }
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   // Function to delete the user and navigate to SignInScreen
   void _deleteUserAndNavigateToSignIn() async {
