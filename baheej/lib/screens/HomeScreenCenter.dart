@@ -280,10 +280,23 @@ void updateService(Service updatedService) {
                   ),
                   toolbarOptions: null,
                 ),
-                Expanded(
+                   Expanded(
                   child: SingleChildScrollView(
-                    // Wrap the ListView.builder with SingleChildScrollView
-                    child: Column(
+                    child: filteredServices.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "You don't have any services yet.",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.grey),
+                                ),
+                                SizedBox(height: 20), // Add some spacing
+                              ],
+                            ),
+                          )
+                        : Column(
                       children: filteredServices.map((service) {
                         return GestureDetector(
                           onTap: () {
