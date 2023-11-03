@@ -156,10 +156,10 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProfileData('Center Name', _centerProfile?.username),
-            _buildProfileData('District', _centerProfile?.address),
             _buildProfileData('Email', _centerProfile?.email),
-            _buildProfileData('Commercial Register', _centerProfile?.comReg),
             _buildProfileData('Phone Number', _centerProfile?.phoneNumber),
+            _buildProfileData('Commercial Register', _centerProfile?.comReg),
+            _buildProfileData('District', _centerProfile?.address),
             _buildProfileData('Description', _centerProfile?.description),
           ],
         ),
@@ -577,7 +577,6 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //1
-
             TextField(
               controller: _usernameController,
               maxLength: 25, // Set the maximum length
@@ -588,6 +587,26 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             ),
 
             //2
+            TextField(
+              controller: _phoneNumberController,
+              maxLength: 10,
+              decoration: InputDecoration(
+                labelText: 'Phone Number',
+                errorText: _phoneNumberError, // Display error message
+              ),
+            ),
+
+            //3
+            TextField(
+              controller: _comRegController,
+              maxLength: 10,
+              decoration: InputDecoration(
+                labelText: 'Commercial Register',
+                errorText: _comRegError, // Display error message
+              ),
+            ),
+
+            //4
             TextField(
               controller: _addressController,
               maxLength: 15,
@@ -618,28 +637,6 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             //     });
             //   },
             // ),
-
-            //3
-
-            TextField(
-              controller: _comRegController,
-              maxLength: 10,
-              decoration: InputDecoration(
-                labelText: 'Commercial Register',
-                errorText: _comRegError, // Display error message
-              ),
-            ),
-
-            //4
-
-            TextField(
-              controller: _phoneNumberController,
-              maxLength: 10,
-              decoration: InputDecoration(
-                labelText: 'Phone Number',
-                errorText: _phoneNumberError, // Display error message
-              ),
-            ),
 
             //5
 
