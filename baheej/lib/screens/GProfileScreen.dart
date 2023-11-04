@@ -60,8 +60,17 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
 
   
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+Widget build(BuildContext context) {
+  return WillPopScope(
+    onWillPop: () async {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) {
+          return HomeScreenGaurdian();
+        }),
+      );
+      return false; // Return false to prevent default back behavior
+    },
+    child: Scaffold(
       appBar: AppBar(
         title: Text('Guardian Profile'),
         actions: [
@@ -135,8 +144,14 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
           ),
         ],
       ),
-    );
-  }
+
+      
+    ),
+  );
+
+  
+}
+
 
   Widget _buildProfileData(String label, String? value) {
     return Column(
