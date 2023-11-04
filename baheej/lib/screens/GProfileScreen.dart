@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class GProfileViewScreen extends StatefulWidget {
   @override
   _GProfileViewScreenState createState() => _GProfileViewScreenState();
 }
+
 class _GProfileViewScreenState extends State<GProfileViewScreen> {
   GuardianProfile? _guardianProfile;
 
@@ -44,6 +46,8 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
       }
     }
 
+    
+
     return GuardianProfile(
       firstName: '',
       lastName: '',
@@ -53,16 +57,107 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     );
   }
 
-ButtonStyle customButtonStyle(BuildContext context) {
-  return ElevatedButton.styleFrom(
-    primary: Theme.of(context).primaryColor, // Use the primary color
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20), // Customize the button shape
-    ),
-  );
-}
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Guardian Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              _handleLogout();
+            },
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Image.asset(
+            'assets/images/back3.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 150),
+                _buildProfileData('First Name', _guardianProfile?.firstName),
+                _buildProfileData('Last Name', _guardianProfile?.lastName),
+                _buildProfileData('Email', _guardianProfile?.email),
+                _buildProfileData('Phone Number', _guardianProfile?.phoneNumber),
+                _buildProfileData('Gender', _guardianProfile?.selectedGender),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 200,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 160,
+                  child: ElevatedButton(
+                    onPressed: _editProfile,
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 59, 138, 207),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text('Edit Profile', style: TextStyle(fontSize: 17, color: Colors.white)),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Container(
+                  width: 160,
+                  child: ElevatedButton(
+                    onPressed: _deleteAccount,
+                    style: ElevatedButton.styleFrom(
+                      primary: Color.fromARGB(255, 59, 138, 207),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text('Delete Account',
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  void _editProfile() {
+  Widget _buildProfileData(String label, String? value) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '$label:',
+              style: TextStyle(fontSize: 20),
+            ),
+            Text(
+              value ?? '',
+              style: TextStyle(fontSize: 20),
+            ),
+          ],
+        ),
+        Divider(),
+      ],
+    );
+  }
+
+   void _editProfile() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) {
         return GProfileEditScreen(_guardianProfile);
@@ -70,17 +165,17 @@ ButtonStyle customButtonStyle(BuildContext context) {
     );
   }
 
-   void _deleteAccount() {
+  void _deleteAccount() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+            borderRadius: BorderRadius.circular(5.0),
           ),
           title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete your account? This action is irreversible'),
+          content: Text('Are you sure you want to delete your account? This action is irreversible.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -90,31 +185,28 @@ ButtonStyle customButtonStyle(BuildContext context) {
                 'Cancel',
                 style: TextStyle(
                   fontSize: 17,
-                  color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
+                  color: Color.fromARGB(255, 59, 138, 207),
                 ),
               ),
             ),
             TextButton(
               onPressed: () {
-                // Call a function to delete the user and their data
                 _deleteUserAndNavigateToSignIn();
               },
               child: Text(
                 'Delete',
                 style: TextStyle(
-                fontSize: 17,
-                color: Colors.red, // Red color for the Delete button
+                  fontSize: 17,
+                  color: Colors.red,
+                ),
               ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
+          ],
+        );
+      },
+    );
+  }
 
-
-  // Function to delete the user and navigate to SignInScreen
   void _deleteUserAndNavigateToSignIn() async {
     final currentUser = FirebaseAuth.instance.currentUser;
 
@@ -137,93 +229,37 @@ ButtonStyle customButtonStyle(BuildContext context) {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Guardian Profile'),
-        leading: IconButton(
-       icon: Icon(Icons.arrow_back),
-       onPressed: () {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-        return HomeScreenGaurdian();
-      }));
-    },
-  ),
-      ),
-      body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Container(
-     // color: Color.fromARGB(255, 239, 249, 254), // Set the background color
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildProfileData('First Name', _guardianProfile?.firstName),
-        _buildProfileData('Last Name', _guardianProfile?.lastName),
-        _buildProfileData('Email', _guardianProfile?.email),
-        _buildProfileData('Phone Number', _guardianProfile?.phoneNumber),
-        _buildProfileData('Gender', _guardianProfile?.selectedGender),
-      ],
-    ),
-  ),
-),
-
-
-    
-    floatingActionButton: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 160,
-          child: FloatingActionButton.extended(
-            onPressed: _editProfile,
-            label: Text('Edit Profile', style: TextStyle(fontSize: 17)),
-            icon: Icon(Icons.edit),
-            backgroundColor: Color.fromARGB(255, 59, 138, 207),
-            foregroundColor: Colors.white,
-            shape: StadiumBorder(),
-          ),
-        ),
-        SizedBox(width: 16),
-        Container(
-          width: 160,
-          child: FloatingActionButton.extended(
-            onPressed: _deleteAccount,
-            label: Text('Delete Account', style: TextStyle(fontSize: 16, color: Colors.white)),
-            icon: Icon(Icons.delete, color: Colors.red),
-            backgroundColor: Color.fromARGB(255, 59, 138, 207),
-            shape: StadiumBorder(),
-          ),
-        ),
-      ],
-    ),
-
-
+  void _handleLogout() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logout();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildProfileData(String label, String? value) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16), // Add spacing between items
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label:',
-            style: TextStyle(fontSize: 20),
-          ),
-          Text(
-            value ?? '', // Use an empty string if the value is null
-            style: TextStyle(fontSize: 20),
-          ),
-        ],
-      ),
-    );
+  void _logout() {
+    // Implement the logout functionality
   }
-
-  
 }
-
 
 class GuardianProfile {
   final String firstName;
@@ -240,6 +276,12 @@ class GuardianProfile {
     required this.selectedGender,
   });
 }
+
+
+
+
+
+
 
 
 
@@ -573,27 +615,30 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
       children: [
         Container(
           width: 160,
-          child: FloatingActionButton.extended(
+          child: ElevatedButton(
             onPressed: _cancel,
-            label: Text('Cancel', style: TextStyle(fontSize: 17, color: Colors.white)),
-            backgroundColor: Color.fromARGB(255, 59, 138, 207),
-            foregroundColor: Colors.white,
-            shape: StadiumBorder(),
+            style: ElevatedButton.styleFrom(
+              primary: Color.fromARGB(255, 59, 138, 207),
+              shape: StadiumBorder(),
+            ),
+            child: Text('Cancel', style: TextStyle(fontSize: 17, color: Colors.white)),
           ),
         ),
         SizedBox(width: 16),
         Container(
           width: 160,
-          child: FloatingActionButton.extended(
+          child: ElevatedButton(
             onPressed: _hasEdits ? _saveChanges : null,
-            label: Text('Save Changes', style: TextStyle(fontSize: 17, color: Colors.white)),
-            backgroundColor: Color.fromARGB(255, 59, 138, 207),
-            foregroundColor: Colors.white,
-            shape: StadiumBorder(),
+            style: ElevatedButton.styleFrom(
+              primary: Color.fromARGB(255, 59, 138, 207),
+              shape: StadiumBorder(),
+            ),
+            child: Text('Save Changes', style: TextStyle(fontSize: 17, color: Colors.white)),
           ),
         ),
       ],
     ),
+
 
     );
   }
