@@ -2,7 +2,7 @@ import 'package:baheej/screens/RegisterPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baheej/screens/HomeScreenCenter.dart';
-//import 'HomeScreenGaurdian.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'ResetPassword.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
@@ -68,12 +68,12 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             );
           } else if (usersDoc.exists) {
-            //Navigator.pushReplacement(
-              //context,
-              //MaterialPageRoute(
-               // builder: (context) => HomeScreenGaurdian(),
-             // ),
-           // );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreenGaurdian(),
+              ),
+            );
           } else {
             // Handle unknown user type or user not found
           }

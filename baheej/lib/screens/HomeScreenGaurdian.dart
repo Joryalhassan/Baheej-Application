@@ -6,6 +6,7 @@ import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
 //import 'package:baheej/screens/ServiceDetailsPage.dart';
+import 'package:baheej/screens/GProfileScreen.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -375,7 +376,12 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   color: Colors.white, // Set icon color to white
 
                   onPressed: () {
-                    // _handleAddKids();
+                            Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GProfileViewScreen(),
+        ),
+      );
                   },
                 ),
                 Text(
