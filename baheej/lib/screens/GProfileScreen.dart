@@ -103,7 +103,7 @@ Widget build(BuildContext context) {
       ),
     ),
     Positioned(
-      bottom: 20, // Adjust the position as needed
+      bottom: 200, // Adjust the position as needed
       left: 0,
       right: 0,
       child: Row(
@@ -428,6 +428,28 @@ class GuardianProfile {
   });
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class GProfileEditScreen extends StatefulWidget {
   final GuardianProfile? initialProfile;
 
@@ -689,6 +711,7 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
             false, // Add this line to remove the back button
       ),
       body: SingleChildScrollView(
+    
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -745,36 +768,8 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
           ],
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 160,
-            child: ElevatedButton(
-              onPressed: _cancel,
-              style: ElevatedButton.styleFrom(
-                primary: Color.fromARGB(255, 59, 138, 207),
-                shape: StadiumBorder(),
-              ),
-              child: Text('Cancel',
-                  style: TextStyle(fontSize: 17, color: Colors.white)),
-            ),
-          ),
-          SizedBox(width: 16),
-          Container(
-            width: 160,
-            child: ElevatedButton(
-              onPressed: _hasEdits ? _saveChanges : null,
-              style: ElevatedButton.styleFrom(
-                primary: Color.fromARGB(255, 59, 138, 207),
-                shape: StadiumBorder(),
-              ),
-              child: Text('Save Changes',
-                  style: TextStyle(fontSize: 17, color: Colors.white)),
-            ),
-          ),
-        ],
-      ),
+      
+      
     );
   }
 }
