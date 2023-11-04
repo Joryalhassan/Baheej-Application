@@ -564,12 +564,12 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // Save changes to Firestore
               final currentUser = FirebaseAuth.instance.currentUser;
 
               if (currentUser != null) {
-                FirebaseFirestore.instance
+                await FirebaseFirestore.instance
                     .collection('center')
                     .doc(currentUser.uid)
                     .update({
@@ -586,6 +586,35 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
                     .pushReplacement(MaterialPageRoute(builder: (context) {
                   return CenterProfileViewScreen();
                 }));
+
+                // Show a pop-up message
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      title: Text('Success'),
+                      content: Text('Profile updated successfully!'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'OK',
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
               }
             },
             child: Text(
@@ -601,6 +630,8 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
     },
   );
 }
+
+
 
 
   String? _validateName(String? value) {
@@ -938,7 +969,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
             //4
             // District Dropdown ButtonFormField
             DropdownButtonFormField<String>(
-              value: _selectedAddress,
+              value: widget.initialProfile?.addres,
               decoration: InputDecoration(
                 labelText: 'District',
                 errorText: _addressError,
