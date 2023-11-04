@@ -40,7 +40,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
 
         return CenterProfile(
           username: data['username'] ?? '',
-          address: data['addres'] ?? '',
+          addres: data['addres'] ?? '',
           email: data['email'] ?? '',
           comReg: data['comReg'] ?? '',
           type: data['type'] ?? '',
@@ -53,7 +53,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     // Handle the case where the center's data doesn't exist or the user is not authenticated.
     return CenterProfile(
       username: '',
-      address: '',
+      addres: '',
       email: '',
       comReg: '',
       type: '',
@@ -152,27 +152,81 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
       }
     }
   }
-
+  Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  showLogoutSuccessDialog();
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void showLogoutSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+void navigateToSignInScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
   extendBodyBehindAppBar: true,
   appBar: AppBar(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    title: const Text(
-      'Center Profile',
-      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-    ),
-    leading: IconButton(
-      icon: Icon(Icons.arrow_back),
+  title: null,
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  actions: [
+    IconButton(
+      icon: Icon(Icons.logout),
       onPressed: () {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-          return HomeScreenCenter(centerName: _centerProfile?.username ?? '');
-        }));
+        _handleLogout();
       },
     ),
-  ),
+  ],
+),
+
   body: Stack(
     children: [
       // Background image or content
@@ -192,7 +246,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
             _buildProfileData('Email', _centerProfile?.email),
             _buildProfileData('Phone Number', _centerProfile?.phoneNumber),
             _buildProfileData('Commercial Register', _centerProfile?.comReg),
-            _buildProfileData('District', _centerProfile?.address),
+            _buildProfileData('District', _centerProfile?.addres),
             _buildProfileData('Description', _centerProfile?.description),
           ],
         ),
@@ -346,7 +400,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
 
 class CenterProfile {
   final String username;
-  final String address;
+  final String addres;
   final String email;
   final String comReg;
   final String type;
@@ -355,7 +409,7 @@ class CenterProfile {
 
   CenterProfile({
     required this.username,
-    required this.address,
+    required this.addres,
     required this.email,
     required this.comReg,
     required this.type,
@@ -390,6 +444,41 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
   String? _phoneNumberError;
   String? _descriptionError;
   String? _selectedAddress;
+  // List of districts
+  final List<String> riyadhDistricts = [
+     'Ad Diriyah',
+    'Al Batha',
+    'Al Dhahraniyah',
+    'Al Malaz',
+    'Al Manar',
+    'Al Maizilah',
+    'Al Muruj',
+    'Al Olaya',
+    'Al Rawdah',
+    'Al Sulimaniyah',
+    'Al Wadi',
+    'Al Wizarat',
+    'Al Worood',
+    'An Nakheel',
+    'As Safarat',
+    'Diplomatic Quarter',
+    'King Abdullah Financial District',
+    'King Fahd District',
+    'King Faisal District',
+    'King Salman District',
+    'King Saud University',
+    'Kingdom Centre',
+    'Masjid an Nabawi',
+    'Medinah District',
+    'Murabba',
+    'Nemar',
+    'Olaya',
+    'Qurtubah',
+    'Sulaymaniyah',
+    'Takhasusi',
+    'Umm Al Hamam',
+    'Yasmeen',
+  ];
 
   @override
   void initState() {
@@ -398,7 +487,7 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
     _usernameController =
         TextEditingController(text: widget.initialProfile?.username);
     _addressController =
-        TextEditingController(text: widget.initialProfile?.address);
+        TextEditingController(text: widget.initialProfile?.addres);
     _comRegController =
         TextEditingController(text: widget.initialProfile?.comReg);
     _phoneNumberController =
@@ -439,87 +528,80 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
   }
 
   void _saveChanges() {
-    
-      // Check for validation errors
-      if (_nameError != null ||
-          _addressError != null ||
-          _comRegError != null ||
-          _phoneNumberError != null ||
-          _descriptionError != null) {
-        // Display error messages for each field
-        setState(() {});
-        return;
-      }
-
-      // Show confirmation dialog before saving changes
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: Colors.white, // Set background color to white
-            shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Adjust the radius as needed
-            ),
-            title: Text('Confirm Changes'),
-            content: Text('Are you sure you want to save these changes?'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Color.fromARGB(255, 59, 138,
-                        207), // Use the same color as the buttons below
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Save changes to Firestore
-                  final currentUser = FirebaseAuth.instance.currentUser;
-
-                  if (currentUser != null) {
-                    FirebaseFirestore.instance
-                        .collection('center')
-                        .doc(currentUser.uid)
-                        .update({
-                      'username': _usernameController.text.trim(),
-                      'addres': _addressController.text.trim(),
-                      'comReg': _comRegController.text.trim(),
-                      'phonenumber': _phoneNumberController.text.trim(),
-                      'Desc': _descriptionController.text.trim(),
-                    });
-
-                    // Pop the edit screen and return to the profile view
-                    Navigator.of(context).pop();
-                    Navigator.of(context)
-                        .pushReplacement(MaterialPageRoute(builder: (context) {
-                      return CenterProfileViewScreen();
-                    }));
-                  }
-                },
-                child: Text(
-                  'Save',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Color.fromARGB(255, 59, 138,
-                        207), // Use the same color as the buttons below
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-  
-      // No edits were made, so simply return to the profile view
-      Navigator.of(context).pop();
-    
+  // Check for validation errors
+  if (_nameError != null ||
+      _addressError != null ||
+      _comRegError != null ||
+      _phoneNumberError != null ||
+      _descriptionError != null) {
+    // Display error messages for each field
+    setState(() {});
+    return;
   }
+
+  // Show confirmation dialog before saving changes
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        title: Text('Confirm Changes'),
+        content: Text('Are you sure you want to save these changes?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: 17,
+                color: Color.fromARGB(255, 59, 138, 207),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // Save changes to Firestore
+              final currentUser = FirebaseAuth.instance.currentUser;
+
+              if (currentUser != null) {
+                FirebaseFirestore.instance
+                    .collection('center')
+                    .doc(currentUser.uid)
+                    .update({
+                  'username': _usernameController.text.trim(),
+                  'addres': _selectedAddress,
+                  'comReg': _comRegController.text.trim(),
+                  'phonenumber': _phoneNumberController.text.trim(),
+                  'Desc': _descriptionController.text.trim(),
+                });
+
+                // Pop the edit screen and return to the profile view
+                Navigator.of(context).pop();
+                Navigator.of(context)
+                    .pushReplacement(MaterialPageRoute(builder: (context) {
+                  return CenterProfileViewScreen();
+                }));
+              }
+            },
+            child: Text(
+              'Save',
+              style: TextStyle(
+                fontSize: 17,
+                color: Theme.of(context).primaryColor, // Always blue
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
@@ -709,43 +791,124 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
   //   'Umm Al Hamam',
   //   'Yasmeen',
   // ];
+   Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  showLogoutSuccessDialog();
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void showLogoutSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void navigateToSignInScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
   extendBodyBehindAppBar: true,
   appBar: AppBar(
+    title: null,
     backgroundColor: Colors.transparent,
     elevation: 0,
-    title: const Text(
-      "Edit Profile",
-      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-    ),
-    
-    automaticallyImplyLeading: false,
-      leading: IconButton(
-    icon: Icon(Icons.arrow_back), // Add the back arrow icon
-    onPressed: () {
-      _cancel(); // Call your cancel function when the back arrow is pressed
-    },
-  ),
+    actions: [
+      IconButton(
+        icon: Icon(Icons.logout),
+        onPressed: () {
+          _handleLogout();
+        },
+      ),
+    ],
   ),
   body: Stack(
     children: [
-      // Background image or content
-      Image.asset(
-        'assets/images/back3.png',
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
+      Positioned.fill(
+        child: Image.asset(
+          'assets/images/backG.png',
+          fit: BoxFit.cover,
+        ),
       ),
       SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //1
-             SizedBox(height: 100), // Add space between the header and body content
+        child: Container(
+          margin: EdgeInsets.only(top: 40),
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // IconButton(
+                    // icon: Icon(
+                    // Icons.arrow_back_ios,
+                    // color: Colors.white,
+                    // ),
+                    //  onPressed: () {
+                    //   Navigator.of(context).pop();
+                    //  },
+                    // ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 130.0),
+                      child: Text(
+                        'Edit Profile',
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w700,
+                          color: Color.fromARGB(255, 255, 255, 255),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.0), // Add space between the header and body content
             TextField(
               controller: _usernameController,
               maxLength: 25, // Set the maximum length
@@ -773,13 +936,30 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
               ),
             ),
             //4
-            TextField(
-              controller: _addressController,
-              maxLength: 20,
+            // District Dropdown ButtonFormField
+            DropdownButtonFormField<String>(
+              value: _selectedAddress,
               decoration: InputDecoration(
                 labelText: 'District',
-                errorText: _addressError, // Display error message
+                errorText: _addressError,
               ),
+              items: [
+                DropdownMenuItem<String>(
+                  value: '',
+                  child: Text('Select a District'),
+                ),
+                ...riyadhDistricts.map((district) {
+                  return DropdownMenuItem<String>(
+                    value: district,
+                    child: Text(district),
+                  );
+                }).toList(),
+              ],
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedAddress = newValue;
+                });
+              },
             ),
             //5
             TextField(
@@ -823,6 +1003,8 @@ class _CProfileEditScreenState extends State<CProfileEditScreen> {
 ),
 
           ],
+        ),
+      ),
         ),
       ),
     ],

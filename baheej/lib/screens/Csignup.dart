@@ -520,25 +520,24 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         ),
                       ),
                       DropdownButtonFormField<String>(
-                        value: _selectedDistrict ??
-                            '', // Set an initial value here
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: '', // Add an empty value as an option
-                            child: Text('Select a District'),
-                          ),
-                          ...riyadhDistricts.map((district) {
-                            return DropdownMenuItem<String>(
-                              value: district,
-                              child: Text(district),
-                            );
-                          }).toList(),
-                        ],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedDistrict = newValue;
-                          });
-                        },
+  value: _selectedDistrict ?? '', // Set an initial value here
+  items: [
+    DropdownMenuItem<String>(
+      value: '', // Add an empty value as an option
+      child: Text('Select a District'),
+    ),
+    ...riyadhDistricts.map((district) {
+      return DropdownMenuItem<String>(
+        value: district,
+        child: Text(district),
+      );
+    }).toList(),
+  ],
+  onChanged: (String? newValue) {
+    setState(() {
+      _selectedDistrict = newValue; // Update the selected district when the user makes a choice
+    });
+  },
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.grey[300],
