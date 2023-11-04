@@ -7,6 +7,7 @@ import 'package:baheej/screens/Service.dart';
 //import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/CenterProfileScreen.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -579,6 +580,12 @@ void updateService(Service updatedService) {
                   icon: Icon(Icons.person),
                   color: Colors.white,
                   onPressed: () {
+                    Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CenterProfileViewScreen(),
+            ),
+          );
                     // Handle profile button tap
                   },
                 ),

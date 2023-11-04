@@ -252,7 +252,7 @@ void navigateToSignInScreen() {
                   }
                 });
               },
-              validator: (value) => validateMinAge(_minAge, _maxAge), // Add validator
+              validator: (value) => validateMaxAge(_minAge, _maxAge), // Add validator
             ),
              _buildTimeSlotField(
               validator: validateTimeSlot, // Add validator
@@ -453,6 +453,15 @@ String? validateMinAge(int? minAge, int? maxAge) {
   return 'Minimum age cannot be less than 4';
   }
 
+
+  if (maxAge!=null && minAge > maxAge) {
+    return 'Minimum age cannot be greater than maximum age';
+  }
+  return null;
+}
+String? validateMaxAge(int? minAge, int? maxAge) {
+ 
+
   if (maxAge == null) {
     return 'Maximum age cannot be null';
   }
@@ -460,7 +469,7 @@ String? validateMinAge(int? minAge, int? maxAge) {
     return 'Maximim age cannot be more than 17';
   }
 
-  if (minAge > maxAge) {
+  if (minAge!= null && minAge > maxAge) {
     return 'Minimum age cannot be greater than maximum age';
   }
   return null;

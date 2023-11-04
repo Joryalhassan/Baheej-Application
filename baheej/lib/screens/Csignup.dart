@@ -24,11 +24,10 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _userNameTextController = TextEditingController();
   TextEditingController _PhoneNumTextController = TextEditingController();
-  TextEditingController _DistrictTextController = TextEditingController();
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
-  String type = "center";
   String? _selectedDistrict;
+  String type = "center";
 
   UserCredential? resultaccount;
   Future<void> signUp() async {
@@ -70,7 +69,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           .doc(resultaccount!.user!.uid)
           .set({
         'username': _userNameTextController.text.trim(),
-        'addres': _DistrictTextController.text.trim(),
+        'addres': _selectedDistrict,
         'email': _emailTextController.text.trim(),
         'comReg': _ComRegTextController.text.trim(),
         'type': 'center',
@@ -212,7 +211,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       return 'Center Name is required';
     }
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name must be between 4 and 25 characters';
+      return 'Center Name must be between 4 and 25 letters';
     }
     if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
       return 'Center Name can only contain letters and spaces';
@@ -503,7 +502,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     ],
                   ),
 
-                  //4
                   //4
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

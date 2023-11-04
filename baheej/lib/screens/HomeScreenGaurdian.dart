@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
-import 'package:baheej/screens/ServiceDetailsPage.dart';
+//import 'package:baheej/screens/ServiceDetailsPage.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -65,7 +65,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         selectedEndDate: endDate,
         minAge: minAge,
         maxAge: maxAge,
-        documentId:doc.id,
+        id: doc.id,
       );
     }).toList();
   }
@@ -269,14 +269,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                       ),
                                       InkWell(
                                         onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ServiceDetailsPage(
-                                                      service: service),
-                                            ),
-                                          );
+                                         // Navigator.push(
+                                         //   context,
+                                         //   MaterialPageRoute(
+                                         //     builder: (context) =>
+                                                 // ServiceDetailsPage(
+                                                     // service: service),
+                                          //  ),
+                                         // );
                                         },
                                         child: Row(
                                           children: [
