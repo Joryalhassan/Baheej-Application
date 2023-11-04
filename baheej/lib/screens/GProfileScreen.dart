@@ -57,6 +57,8 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     );
   }
 
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -229,25 +231,55 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     }
   }
 
-  void _handleLogout() {
+  Future<void> _handleLogout() async {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white, // Set background color to white
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+        ),
+        title: Text('Are You Sure?'),
+        content: Text('Do you want to log out?'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('No', style: TextStyle(color: Color.fromARGB(255, 59, 138, 207)),),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Yes', style: TextStyle(color: Color.fromARGB(255, 59, 138, 207)),),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              try {
+                await FirebaseAuth.instance.signOut();
+                showLogoutSuccessDialog();
+              } catch (e) {
+                print("Error signing out: $e");
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  void showLogoutSuccessDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Are You Sure?'),
-          content: Text('Do you want to log out?'),
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
           actions: <Widget>[
             TextButton(
-              child: Text('No'),
+              child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _logout();
+                navigateToSignInScreen();
               },
             ),
           ],
@@ -255,9 +287,11 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
       },
     );
   }
-
-  void _logout() {
-    // Implement the logout functionality
+void navigateToSignInScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+    );
   }
 }
 
@@ -611,33 +645,34 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
       ),
 
      floatingActionButton: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 160,
-          child: ElevatedButton(
-            onPressed: _cancel,
-            style: ElevatedButton.styleFrom(
-              primary: Color.fromARGB(255, 59, 138, 207),
-              shape: StadiumBorder(),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 160,
+            child: ElevatedButton(
+              onPressed: _cancel,
+              style: ElevatedButton.styleFrom(
+                primary: Color.fromARGB(255, 59, 138, 207),
+                shape: StadiumBorder(),
+              ),
+              child: Text('Cancel', style: TextStyle(fontSize: 17, color: Colors.white)),
             ),
-            child: Text('Cancel', style: TextStyle(fontSize: 17, color: Colors.white)),
           ),
-        ),
-        SizedBox(width: 16),
-        Container(
-          width: 160,
-          child: ElevatedButton(
-            onPressed: _hasEdits ? _saveChanges : null,
-            style: ElevatedButton.styleFrom(
-              primary: Color.fromARGB(255, 59, 138, 207),
-              shape: StadiumBorder(),
+          SizedBox(width: 16),
+          Container(
+            width: 160,
+            child: ElevatedButton(
+              onPressed: _hasEdits ? _saveChanges : null,
+              style: ElevatedButton.styleFrom(
+                primary: Color.fromARGB(255, 59, 138, 207),
+                shape: StadiumBorder(),
+              ),
+              child: Text('Save Changes', style: TextStyle(fontSize: 17, color: Colors.white)),
             ),
-            child: Text('Save Changes', style: TextStyle(fontSize: 17, color: Colors.white)),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
+
 
 
     );
