@@ -674,6 +674,16 @@ void _handleAddKids() {
       ),
     );
   }
+  //new in code for button ui
+  ButtonStyle customButtonStyle(BuildContext context) {
+    return ElevatedButton.styleFrom(
+      primary: Theme.of(context).primaryColor, // Use the primary color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // Customize the button shape
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -788,11 +798,8 @@ void _handleAddKids() {
       Expanded( // Using Expanded to fill the available space evenly
         child: ElevatedButton(
           onPressed: _cancel,
-          style: ElevatedButton.styleFrom(
-            primary: Color.fromARGB(255, 59, 138, 207),
-            shape: StadiumBorder(),
-          ),
-          child: Text('Cancel', style: TextStyle(fontSize: 17, color: Colors.white)),
+          style:customButtonStyle(context), // Use your custom button style
+          child: Text('Cancel', style: TextStyle(fontSize: 17)),
         ),
       ),
       SizedBox(width: 16), // This keeps the buttons spaced apart

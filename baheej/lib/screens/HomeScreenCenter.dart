@@ -473,7 +473,7 @@ void updateService(Service updatedService) {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.push(
+                                          Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
@@ -580,7 +580,7 @@ void updateService(Service updatedService) {
                   icon: Icon(Icons.person),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.push(
+                   Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => CenterProfileViewScreen(),
@@ -606,7 +606,7 @@ void updateService(Service updatedService) {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => ServiceFormScreen(),
