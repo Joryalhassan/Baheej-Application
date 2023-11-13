@@ -8,9 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart'; // Import the Service class if it's in a separate file
 
 class compSerListScreen extends StatefulWidget {
-  final String centerName;
+  //final String centerName;
 
-  compSerListScreen({required this.centerName});
+  //compSerListScreen({required this.centerName});
 
   @override
   _compSerListScreenState createState() => _compSerListScreenState();
@@ -60,9 +60,12 @@ class _compSerListScreenState extends State<compSerListScreen> {
             if (selectedEndDate.isBefore(currentDate)) {
               return Service(
                 id: doc.id,
-                serviceName: data['serviceName'] as String? ?? 'Service Name Missing',
-                description: data['serviceDesc'] as String? ?? 'Description Missing',
-                centerName: data['centerName'] as String? ?? 'Center Name Missing',
+                serviceName:
+                    data['serviceName'] as String? ?? 'Service Name Missing',
+                description:
+                    data['serviceDesc'] as String? ?? 'Description Missing',
+                centerName:
+                    data['centerName'] as String? ?? 'Center Name Missing',
                 selectedStartDate: selectedStartDate,
                 selectedEndDate: selectedEndDate,
                 minAge: data['minAge'] as int? ?? 0,
@@ -91,7 +94,6 @@ class _compSerListScreenState extends State<compSerListScreen> {
       print('Error loading completed services: $e');
     }
   }
-
 
   Future<void> _handleLogout() async {
     showDialog(
@@ -125,7 +127,6 @@ class _compSerListScreenState extends State<compSerListScreen> {
     );
   }
 
-
   void showLogoutSuccessDialog() {
     showDialog(
       context: context,
@@ -154,304 +155,302 @@ class _compSerListScreenState extends State<compSerListScreen> {
     );
   }
 
-
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    extendBodyBehindAppBar: true,
-    appBar: AppBar(
-      title: Text('Completed Services Statistics'),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.logout),
-          onPressed: () {
-            _handleLogout();
-          },
-        ),
-      ],
-    ),
-    body: Stack(
-      children: [
-        Positioned.fill(
-          child: Image.asset(
-            'assets/images/backG.png',
-            fit: BoxFit.cover,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text('Completed Services Statistics'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              _handleLogout();
+            },
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 160, left: 16, right: 16),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: completedServices.length,
-                  itemBuilder: (context, index) {
-                    Service service = completedServices[index];
+        ],
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/backG.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: completedServices.length,
+                    itemBuilder: (context, index) {
+                      Service service = completedServices[index];
 
-                    return Card(
-                      elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      color: Color.fromARGB(255, 239, 249, 254),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Service Name: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                      return Card(
+                        elevation: 3,
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        color: Color.fromARGB(255, 239, 249, 254),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'Service Name: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  service.serviceName,
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  Text(
+                                    service.serviceName,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Start Date: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat('MM/dd/yyyy')
-                                      .format(service.selectedStartDate),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'End Date: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat('MM/dd/yyyy')
-                                      .format(service.selectedEndDate),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Service Time: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  service.selectedTimeSlot,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              'Description: ',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                ],
                               ),
-                            ),
-                            Text(
-                              service.description,
-                              style: TextStyle(
-                                fontSize: 16,
+                              Row(
+                                children: [
+                                  Text(
+                                    'Start Date: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('MM/dd/yyyy')
+                                        .format(service.selectedStartDate),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Minimum Age: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                              Row(
+                                children: [
+                                  Text(
+                                    'End Date: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  service.minAge.toString(),
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  Text(
+                                    DateFormat('MM/dd/yyyy')
+                                        .format(service.selectedEndDate),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Maximum Age: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Service Time: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  service.maxAge.toString(),
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  Text(
+                                    service.selectedTimeSlot,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
+                                ],
+                              ),
+                              Text(
+                                'Description: ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Capacity : ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                              ),
+                              Text(
+                                service.description,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Minimum Age: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  service.capacityValue.toString(),
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  Text(
+                                    service.minAge.toString(),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Service Price: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Maximum Age: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  '${service.servicePrice.toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  Text(
+                                    service.maxAge.toString(),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Capacity : ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    service.capacityValue.toString(),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Service Price: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${service.servicePrice.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        color: Color.fromARGB(255, 245, 198, 239),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(width: 24),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.history),
+                  color: Colors.white,
+                  onPressed: () {
+                    // Handle booking history button tap
                   },
                 ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-    bottomNavigationBar: BottomAppBar(
-      shape: CircularNotchedRectangle(),
-      color: Color.fromARGB(255, 245, 198, 239),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(width: 24),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.history),
-                color: Colors.white,
-                onPressed: () {
-                  // Handle booking history button tap
-                },
-              ),
-              Text(
-                'Booking Service',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
+                Text(
+                  'Booking Service',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 50),
-                child: Text(
-                  'Add Service',
+              ],
+            ),
+            SizedBox(),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(top: 50),
+                  child: Text(
+                    'Add Service',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(width: 25),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.person),
+                  color: Colors.white,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CenterProfileViewScreen(),
+                      ),
+                    );
+                    // Handle profile button tap
+                  },
+                ),
+                Text(
+                  'Profile',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(width: 25),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.person),
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CenterProfileViewScreen(),
-                    ),
-                  );
-                  // Handle profile button tap
-                },
-              ),
-              Text(
-                'Profile',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 32),
-        ],
+              ],
+            ),
+            SizedBox(width: 32),
+          ],
+        ),
       ),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    floatingActionButton: FloatingActionButton(
-      backgroundColor: Color.fromARGB(255, 174, 207, 250),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ServiceFormScreen(),
-          ),
-        );
-      },
-      child: Icon(
-        Icons.add,
-        color: Colors.white,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color.fromARGB(255, 174, 207, 250),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ServiceFormScreen(),
+            ),
+          );
+        },
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
-    ),
-  );
-}
-
-
+    );
+  }
 }
