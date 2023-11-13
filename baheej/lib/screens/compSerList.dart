@@ -9,9 +9,9 @@ import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart'; // Import the Service class if it's in a separate file
 
 class compSerListScreen extends StatefulWidget {
-  //final String centerName;
+  final String centerName;
 
-  //compSerListScreen({required this.centerName});
+  compSerListScreen({required this.centerName});
 
   @override
   _compSerListScreenState createState() => _compSerListScreenState();
@@ -20,6 +20,8 @@ class compSerListScreen extends StatefulWidget {
 class _compSerListScreenState extends State<compSerListScreen> {
   List<Service> completedServices = [];
   CenterProfile? _centerProfile;
+  List<Service> services = []; // Add this line
+  List<Service> filteredServices = []; // Add this line
 
   @override
   void initState() {
@@ -28,21 +30,26 @@ class _compSerListScreenState extends State<compSerListScreen> {
   }
 
   Future<void> loadCompletedServices() async {
-    final currentDate = DateTime.now();
-
-    try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      // final userSnapshot = await FirebaseFirestore.instance
+      //     .collection('center')
+      //     .doc(userId)
+      //     .get();
+      // if (userSnapshot.exists) {
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
-          .where('endDate', isLessThan: Timestamp.fromDate(currentDate))
+          .where('centerName', isEqualTo: widget.centerName)
           .get();
-
+      final currentDate = DateTime.now(); // Get the current date
       final List<Service> loadedServices = snapshot.docs
           .map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            // The same logic as in HomeScreenCenter to create Service objects
             DateTime selectedStartDate;
             DateTime selectedEndDate;
 
+            // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
             if (data['startDate'] is String) {
               selectedStartDate = DateTime.parse(data['startDate'] as String);
             } else if (data['startDate'] is Timestamp) {
@@ -59,6 +66,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
               selectedEndDate = DateTime.now();
             }
 
+            // Check if the end date is today or earlier
             if (selectedEndDate.isBefore(currentDate)) {
               return Service(
                 id: doc.id,
@@ -85,15 +93,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
               return null;
             }
           })
-          .where((service) => service != null)
-          .cast<Service>()
+          .where((service) => service != null) // Filter out null values
+          .cast<Service>() // Cast the list to Service
           .toList();
 
       setState(() {
-        completedServices = loadedServices;
+        services = loadedServices;
+        filteredServices = loadedServices;
       });
-    } catch (e) {
-      print('Error loading completed services: $e');
     }
   }
 
@@ -188,9 +195,10 @@ class _compSerListScreenState extends State<compSerListScreen> {
               children: [
                 Expanded(
                   child: ListView.builder(
-                    itemCount: completedServices.length,
+                    itemCount: services.length,
                     itemBuilder: (context, index) {
-                      Service service = completedServices[index];
+                      Service service = services[index];
+                      // or filteredServices[index]
 
                       return Card(
                         elevation: 3,

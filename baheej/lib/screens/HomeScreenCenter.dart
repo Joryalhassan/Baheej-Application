@@ -23,6 +23,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   List<Service> services = [];
   List<Service> filteredServices = [];
   TextEditingController _searchController = TextEditingController();
+  String centerName = ''; // Declare centerName here
 
   @override
   void initState() {
@@ -34,6 +35,16 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
+
+      // Fetch user center data
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        // Now you can use centerDoc.data() to access the data
+        centerName = centerDoc.data()!['username'];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
@@ -555,7 +566,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => compSerListScreen(),
+                        builder: (context) =>
+                            compSerListScreen(centerName: centerName),
                       ),
                     );
                     // Handle profile button tap
