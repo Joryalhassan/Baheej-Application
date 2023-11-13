@@ -1,4 +1,5 @@
 import 'package:baheej/screens/CenterProfileScreen.dart';
+import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,6 +19,7 @@ class compSerListScreen extends StatefulWidget {
 
 class _compSerListScreenState extends State<compSerListScreen> {
   List<Service> completedServices = [];
+  CenterProfile? _centerProfile;
 
   @override
   void initState() {
@@ -374,17 +376,23 @@ class _compSerListScreenState extends State<compSerListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.history),
+                  icon: Icon(Icons.home_filled),
                   color: Colors.white,
                   onPressed: () {
-                    // Handle booking history button tap
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomeScreenCenter(
+                            centerName: _centerProfile?.username ?? ''),
+                      ),
+                    );
                   },
                 ),
                 Text(
-                  'Booking Service',
+                  'Home',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 13,
+                    fontSize: 14,
                   ),
                 ),
               ],
