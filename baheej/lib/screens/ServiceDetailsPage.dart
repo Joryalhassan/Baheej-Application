@@ -81,66 +81,66 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   }
 
 //validation conflict service
-  Future<void> checkForServiceConflict(
-    DateTime selectedStartDate,
-    DateTime selectedEndDate,
-    String selectedTimeSlot,
-  ) async {
-    bool conflict = false;
-    final firestore = FirebaseFirestore.instance;
-    final servicesSnapshot = await firestore.collection('ServiceBook').get();
+  // Future<void> checkForServiceConflict(
+  //   DateTime selectedStartDate,
+  //   DateTime selectedEndDate,
+  //   String selectedTimeSlot,
+  // ) async {
+  //   bool conflict = false;
+  //   final firestore = FirebaseFirestore.instance;
+  //   final servicesSnapshot = await firestore.collection('ServiceBook').get();
 
-    for (var doc in servicesSnapshot.docs) {
-      final serviceData = doc.data() as Map<String, dynamic>;
+  //   for (var doc in servicesSnapshot.docs) {
+  //     final serviceData = doc.data() as Map<String, dynamic>;
 
-      // Extract the date and time from the Firestore document
-      final serviceStartDate =
-          (serviceData['selectedStartDate'] as Timestamp).toDate();
-      final serviceEndDate =
-          (serviceData['selectedEndDate'] as Timestamp).toDate();
-      final serviceTimeSlot = serviceData['selectedTimeSlot'] as String;
+  //     // Extract the date and time from the Firestore document
+  //     final serviceStartDate =
+  //         (serviceData['selectedStartDate'] as Timestamp).toDate();
+  //     final serviceEndDate =
+  //         (serviceData['selectedEndDate'] as Timestamp).toDate();
+  //     final serviceTimeSlot = serviceData['selectedTimeSlot'] as String;
 
-      // Check for conflicts by comparing start date, end date, time slot, and kids
-      if (selectedStartDate.isBefore(serviceEndDate) &&
-          selectedEndDate.isAfter(serviceStartDate) &&
-          selectedTimeSlot == serviceTimeSlot) {
-        conflict = true;
-        // ignore: use_build_context_synchronously
-        // Conflict found
-      } //if
-    } //for
-    if (conflict) {
-      // ignore: use_build_context_synchronously
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(' Warning!'),
-            content: Text(
-                'There is a conflict with a prebooked service for the selected time ,date for one of your kids!\nDo you want to proceed with the payment?'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('No'), // User chooses not to proceed
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-              ),
-              TextButton(
-                child: Text('Yes'), // User chooses to proceed with payment
-                onPressed: () async {
-                  Navigator.of(context).pop(); // Close the dialog
-                  makePayment(context);
-                },
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      // ignore: use_build_context_synchronously
-      makePayment(context);
-    } // No conflict found
-  }
+  //     // Check for conflicts by comparing start date, end date, time slot, and kids
+  //     if (selectedStartDate.isBefore(serviceEndDate) &&
+  //         selectedEndDate.isAfter(serviceStartDate) &&
+  //         selectedTimeSlot == serviceTimeSlot) {
+  //       conflict = true;
+  //       // ignore: use_build_context_synchronously
+  //       // Conflict found
+  //     } //if
+  //   } //for
+  //   if (conflict) {
+  //     // ignore: use_build_context_synchronously
+  //     showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: Text(' Warning!'),
+  //           content: Text(
+  //               'There is a conflict with a prebooked service for the selected time ,date for one of your kids!\nDo you want to proceed with the payment?'),
+  //           actions: <Widget>[
+  //             TextButton(
+  //               child: Text('No'), // User chooses not to proceed
+  //               onPressed: () {
+  //                 Navigator.of(context).pop(); // Close the dialog
+  //               },
+  //             ),
+  //             TextButton(
+  //               child: Text('Yes'), // User chooses to proceed with payment
+  //               onPressed: () async {
+  //                 Navigator.of(context).pop(); // Close the dialog
+  //                 makePayment(context);
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   } else {
+  //     // ignore: use_build_context_synchronously
+  //     makePayment(context);
+  //   } // No conflict found
+  // }
 
 // create payment
   void makePayment(BuildContext context) async {
@@ -778,11 +778,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
+                        makePayment(context);
                         // Simulate a successful payment, then trigger fireworks
-                        checkForServiceConflict(
-                            widget.service.selectedStartDate,
-                            widget.service.selectedEndDate,
-                            widget.service.selectedTimeSlot);
+                        //######//
+                        // checkForServiceConflict(
+                        //     widget.service.selectedStartDate,
+                        //     widget.service.selectedEndDate,
+                        //     widget.service.selectedTimeSlot);
+                        //########//
                         //addServiceToFirestore();
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;

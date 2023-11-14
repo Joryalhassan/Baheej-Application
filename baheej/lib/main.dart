@@ -1,14 +1,16 @@
+import 'package:baheej/notification_manager/notification_manager.dart';
+import 'package:flutter/material.dart';
 import 'package:baheej/firebase_options.dart';
 import 'package:baheej/screens/HomeScreenCenter.dart';
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+// Import NotificationApi class
+import 'package:baheej/screens/SignInScreen.dart';
 
-//jory
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationManager().iniNotification();
 
   Stripe.publishableKey =
       "pk_test_51NxYJkAzFvFRBXEyZnGjEuJ7jTJPSyBsKtpMvLAO4J1Kz1kAlAF8GsmbmYecdjQi7uMNAcC89JuyPPKPgH8cpQw700qsNegMUZ";
@@ -23,6 +25,7 @@ Future<void> main() async {
   } catch (e) {
     print('Error initializing Firebase: $e');
   }
+  // NotificationApi.init();
 
   runApp(MyApp());
 }
@@ -30,21 +33,14 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Initialize the NotificationApi and pass the context
+    // NotificationApi.init(context: context);
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: const SignInScreen(),

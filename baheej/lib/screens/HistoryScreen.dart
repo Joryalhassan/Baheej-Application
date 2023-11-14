@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/GProfileScreen.dart';
 
 class HistoryScreen extends StatelessWidget {
   @override
@@ -166,7 +167,13 @@ class HistoryScreen extends StatelessWidget {
                   color: Colors.white, // Set icon color to white
 
                   onPressed: () {
-                    _handleAddKids();
+                    String currentUserEmail =
+                        FirebaseAuth.instance.currentUser?.email ?? '';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => GProfileViewScreen()),
+                    );
                   },
                 ),
                 Text(

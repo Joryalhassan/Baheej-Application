@@ -1,6 +1,7 @@
 //import 'package:baheej/screens/firebase_service.dart';
 
 class Service {
+  final String id;
   final String serviceName;
   final String description;
   final String centerName;
@@ -14,6 +15,7 @@ class Service {
   // final Map<String, String> selectedKidsNames; // Define the property
 
   Service({
+    required this.id,
     required this.serviceName,
     required this.description,
     required this.centerName,
