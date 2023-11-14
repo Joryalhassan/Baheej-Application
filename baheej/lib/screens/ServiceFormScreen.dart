@@ -300,7 +300,9 @@ String userName = '';// add this to store centername(jo)
             TextButton(
               child: Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+              //Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pop(true); // Navigate back to HomeScreen with a success flag
+                  
               },
             ),
           ],
