@@ -29,6 +29,57 @@ class _compSerListScreenState extends State<compSerListScreen> {
     loadCompletedServices();
   }
 
+  Future<double> calculateBookingRatio(Service service) async {
+    if (service.capacityValue > 0) {
+      // Fetch the booked services for the logged-in center
+      int bookedServicesCount =
+          await getBookedServicesCount(service.centerName);
+
+      // Calculate the booking ratio
+      return bookedServicesCount > 0
+          ? bookedServicesCount / service.capacityValue
+          : 0.0;
+    } else {
+      return 0.0; // Handle the case where capacityValue is 0 to avoid division by zero
+    }
+  }
+
+// Fetch the number of booked services for the specified center
+  Future<int> getBookedServicesCount(String centerName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+
+      try {
+        final QuerySnapshot snapshot = await FirebaseFirestore.instance
+            .collection('ServiceBook')
+            .where('centerName', isEqualTo: centerName)
+            .get();
+
+        return snapshot.size; // Return the count of booked services
+      } catch (e) {
+        print('Error fetching booked services: $e');
+      }
+    }
+
+    return 0; // Return 0 in case of an error or no booked services
+  }
+
+  static String formatServiceInfo(Service service) {
+    return """
+      Service Name: ${service.serviceName}
+      Description: ${service.description}
+      Center Name: ${service.centerName}
+      Start Date: ${service.selectedStartDate}
+      End Date: ${service.selectedEndDate}
+      Min Age: ${service.minAge}
+      Max Age: ${service.maxAge}
+      Capacity: ${service.capacityValue}
+      Service Price: ${service.servicePrice}
+      Time Slot: ${service.selectedTimeSlot}
+    """;
+  }
+
   Future<void> loadCompletedServices() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -38,6 +89,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
       //     .doc(userId)
       //     .get();
       // if (userSnapshot.exists) {
+
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
           .where('centerName', isEqualTo: widget.centerName)
@@ -197,174 +249,213 @@ class _compSerListScreenState extends State<compSerListScreen> {
                   child: ListView.builder(
                     itemCount: services.length,
                     itemBuilder: (context, index) {
-                      Service service = services[index];
+                      final service = services[index];
                       // or filteredServices[index]
 
                       return Card(
-                        elevation: 3,
-                        margin:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        color: Color.fromARGB(255, 239, 249, 254),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    'Service Name: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                          elevation: 3,
+                          margin:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          color: Color.fromARGB(255, 239, 249, 254),
+                          child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Service Name: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          service.serviceName,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  Text(
-                                    service.serviceName,
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Start Date: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          DateFormat('MM/dd/yyyy').format(
+                                              service.selectedStartDate),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Start Date: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'End Date: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          DateFormat('MM/dd/yyyy')
+                                              .format(service.selectedEndDate),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  Text(
-                                    DateFormat('MM/dd/yyyy')
-                                        .format(service.selectedStartDate),
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Service Time: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          service.selectedTimeSlot,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'End Date: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                    // Text(
+                                    //   'Description: ',
+                                    //   style: TextStyle(
+                                    //     fontSize: 16,
+                                    //     fontWeight: FontWeight.bold,
+                                    //   ),
+                                    // ),
+                                    // Text(
+                                    //   service.description,
+                                    //   style: TextStyle(
+                                    //     fontSize: 16,
+                                    //   ),
+                                    // ),
+                                    // Row(
+                                    //   children: [
+                                    //     Text(
+                                    //       'Minimum Age: ',
+                                    //       style: TextStyle(
+                                    //         fontSize: 16,
+                                    //         fontWeight: FontWeight.bold,
+                                    //       ),
+                                    //     ),
+                                    //     Text(
+                                    //       service.minAge.toString(),
+                                    //       style: TextStyle(
+                                    //         fontSize: 16,
+                                    //       ),
+                                    //     ),
+                                    //   ],
+                                    // ),
+                                    // Row(
+                                    //   children: [
+                                    //     Text(
+                                    //       'Maximum Age: ',
+                                    //       style: TextStyle(
+                                    //         fontSize: 16,
+                                    //         fontWeight: FontWeight.bold,
+                                    //       ),
+                                    //     ),
+                                    //     Text(
+                                    //       service.maxAge.toString(),
+                                    //       style: TextStyle(
+                                    //         fontSize: 16,
+                                    //       ),
+                                    //     ),
+                                    //   ],
+                                    // ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Capacity : ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          service.capacityValue.toString(),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  Text(
-                                    DateFormat('MM/dd/yyyy')
-                                        .format(service.selectedEndDate),
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Service Price: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${service.servicePrice.toStringAsFixed(2)}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Service Time: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Booking Ratio: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        FutureBuilder<double>(
+                                          future:
+                                              calculateBookingRatio(service),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Text(
+                                                'Loading...', // or another placeholder text
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              );
+                                            } else if (snapshot.hasError) {
+                                              return Text(
+                                                'Error',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              );
+                                            } else {
+                                              double bookingRatio =
+                                                  snapshot.data ?? 0.0;
+                                              return Text(
+                                                '${bookingRatio.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  Text(
-                                    service.selectedTimeSlot,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                'Description: ',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                service.description,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Minimum Age: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    service.minAge.toString(),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Maximum Age: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    service.maxAge.toString(),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Capacity : ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    service.capacityValue.toString(),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Service Price: ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${service.servicePrice.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                                  ])));
                     },
                   ),
                 ),
