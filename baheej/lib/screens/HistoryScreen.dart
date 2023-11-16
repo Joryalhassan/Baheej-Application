@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Addkids.dart';
+import 'package:baheej/screens/star_rating.dart'; // Replace with the actual path to your StarRating file
+
 import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/GProfileScreen.dart';
 
 class HistoryScreen extends StatelessWidget {
   @override
@@ -166,7 +169,13 @@ class HistoryScreen extends StatelessWidget {
                   color: Colors.white, // Set icon color to white
 
                   onPressed: () {
-                    _handleAddKids();
+                    String currentUserEmail =
+                        FirebaseAuth.instance.currentUser?.email ?? '';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => GProfileViewScreen()),
+                    );
                   },
                 ),
                 Text(
@@ -213,26 +222,26 @@ class HistoryScreen extends StatelessWidget {
 
     // Define margin values (top, bottom, left, right)
     final cardMargin = EdgeInsets.fromLTRB(20, 10, 16, 0); // Adjust as needed
+    final isStartDateInPast = selectedStartDate.isBefore(DateTime.now());
 
     return Card(
       elevation: 3,
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 26),
-      // margin: cardMargin, // Set the margin here
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10), // Customize border radius
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Container(
-        padding: EdgeInsets.all(16), // Adjust inner padding
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color.fromARGB(255, 239, 249, 254),
               const Color.fromARGB(255, 239, 249, 254),
-            ], // Customize the card background gradient
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(10), // Adjust border radius
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,47 +251,64 @@ class HistoryScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
-            SizedBox(height: 10), // Add a SizedBox for spacing
+            SizedBox(height: 10),
 
             Text(
               '$centerName',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 24, 24, 24), // Customize text color
+                color: Color.fromARGB(255, 24, 24, 24),
               ),
             ),
             Text(
               'Selected Kids: $selectedKidsString',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             Text(
               'From: $startDateFormatted' '     To: $endDateFormatted ',
               style: TextStyle(
                 fontSize: 16,
-                color:
-                    const Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             Text(
               'At: $selectedTimeSlot',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 2, 2, 2), // Customize text color
+                color: Color.fromARGB(255, 2, 2, 2),
               ),
             ),
             Text(
               'Total Price: $totalPrice' ' SAR',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
+            SizedBox(height: 10),
+            Text(
+              'Rate the service:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+            ),
+            // Add a RatingBar if the start date is today or in the past
+            //if (isStartDateInPast)
+            StarRating(
+              initialRating: 3.0, // Set the initial rating
+              onRatingChanged: (newRating) {
+                print("User rated with $newRating stars");
+                // Handle the new rating as needed, such as updating it in your data model
+              },
+            )
           ],
         ),
       ),
