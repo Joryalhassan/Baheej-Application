@@ -6,6 +6,10 @@ import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceDetailsPage.dart';
+import 'dart:async';
+//import 'package:baheej/screens/LocalNotificationHandler.dart';
+//import 'package:baheej/screens/NotificationsPage.dart';
+import 'package:baheej/screens/GProfileScreen.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -16,9 +20,19 @@ class HomeScreenGaurdian extends StatefulWidget {
 
 class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   String FirstName = '';
+  String? type;
   late List<Service> _allServices;
   List<Service> _filteredServices = [];
   TextEditingController _searchController = TextEditingController();
+  Timer? _pollingTimer; // The timer for polling
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+ // LocalNotificationHandler _notificationHandler = LocalNotificationHandler();
+  final Set<String> notifiedDocumentIds = Set<String>();
+  StreamSubscription<QuerySnapshot>?
+      _subscription; // To manage the subscription
+  //final String? payload;
+
+  bool hasNewNotification = false;
 
   void initState() {
     super.initState();
@@ -29,43 +43,124 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       });
     });
     fetchName(); // Call fetchName to fetch the user's first name
+
+    _pollingTimer = Timer.periodic(
+        Duration(seconds: 30), (timer) => checkForNotifications());
+  }
+
+  void checkForNotifications() {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final String currentUserId = user.uid;
+      final firestore = FirebaseFirestore.instance;
+
+      // Cancel any existing subscription before starting a new one
+      _subscription?.cancel();
+
+      _subscription = firestore
+          .collection('notifications')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .snapshots()
+          .listen((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          if (!notifiedDocumentIds.contains(doc.id)) {
+            final String? message = doc.data()?['message'];
+            if (message != null) {
+            //  _notificationHandler.showNotification('Baheej App', message);
+              notifiedDocumentIds.add(doc.id);
+              doc.reference.update({
+                'seenBy': FieldValue.arrayUnion([currentUserId])
+              });
+
+              // Set hasNewNotification to true when a new notification is received
+              setState(() {
+                hasNewNotification = true;
+              });
+            }
+          }
+        }
+      });
+    } else {
+      // Handle the scenario where the user is not logged in, if needed.
+    }
+  }
+
+  void stopListening() {
+    _subscription?.cancel();
+    _subscription = null;
+  }
+
+  void _showLocalNotification(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Bheej App'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<List<Service>> fetchDataFromFirebase() async {
     final firestore = FirebaseFirestore.instance;
     final collection = firestore.collection('center-service');
     final querySnapshot = await collection.get();
+    final currentDate = DateTime.now(); // Get the current date
 
-    return querySnapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      final serviceName = data['serviceName'] ?? 'Title';
-      final description = data['serviceDesc'] ?? 'Description';
-      final startDate = data['startDate'] != null
-          ? DateTime.parse(data['startDate'])
-          : DateTime.now();
-      final endDate = data['endDate'] != null
-          ? DateTime.parse(data['endDate'])
-          : DateTime.now();
-      final centerName = data['centerName'] ?? 'Center Name';
-      final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
-      final capacityValue = data['capacityValue'] ?? 0;
-      final servicePrice = data['servicePrice'] ?? 0.0;
-      final minAge = data['minAge'] ?? 4;
-      final maxAge = data['maxAge'] ?? 17;
+    final services = querySnapshot.docs
+        .map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final serviceName = data['serviceName'] ?? 'Title';
+          final description = data['serviceDesc'] ?? 'Description';
+          final startDate = data['startDate'] != null
+              ? DateTime.parse(data['startDate'])
+              : DateTime.now();
+          final endDate = data['endDate'] != null
+              ? DateTime.parse(data['endDate'])
+              : DateTime.now();
+          final centerName = data['centerName'] ?? 'Center Name';
+          final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
+          final capacityValue = data['capacityValue'] ?? 0;
+          final servicePrice = data['servicePrice'] ?? 0.0;
+          final minAge = data['minAge'] ?? 4;
+          final maxAge = data['maxAge'] ?? 17;
+          final id = data['id'] ?? 'id';
 
-      return Service(
-        serviceName: serviceName,
-        description: description,
-        centerName: centerName,
-        selectedTimeSlot: selectedTimeSlot,
-        capacityValue: capacityValue,
-        servicePrice: servicePrice,
-        selectedStartDate: startDate,
-        selectedEndDate: endDate,
-        minAge: minAge,
-        maxAge: maxAge,
-      );
-    }).toList();
+          if (!startDate.isBefore(currentDate)) {
+            return Service(
+              serviceName: serviceName,
+              description: description,
+              centerName: centerName,
+              selectedTimeSlot: selectedTimeSlot,
+              capacityValue: capacityValue,
+              servicePrice: servicePrice,
+              selectedStartDate: startDate,
+              selectedEndDate: endDate,
+              minAge: minAge,
+              maxAge: maxAge,
+              id: id,
+                 participantNo: data['participantNo'] as int? ?? 0,
+            );
+          } else {
+            return null;
+          }
+        })
+        .where((service) => service != null)
+        .toList();
+
+    return List<Service>.from(services);
   }
 
   Future<void> _handleLogout() async {
@@ -167,15 +262,26 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           .get();
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
-        final firstName =
-            userData['fname'] ?? ''; // Get the first name from Firestore
-        print(
-            'Fetched first name: $firstName'); // Add a print statement for debugging
+        final firstName = userData['fname'] ?? '';
+        final userRole = userData[
+            'userType']; // Assuming userType is a field in the Firestore document
+        print('Fetched first name: $firstName');
         setState(() {
           FirstName = firstName;
+          type = userRole;
         });
       }
     }
+  }
+
+  // view the notification
+  void navigateToNotificationsPage() {
+    //Navigator.push(
+      //context,
+     // MaterialPageRoute(
+      //  builder: (context) => NotificationsPage(),
+    //  ),
+   // );
   }
 
   @override
@@ -189,9 +295,43 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _handleLogout,
+          Row(
+            children: [
+              IconButton(
+                icon: Stack(
+                  children: [
+                    Icon(
+                      Icons.notifications, // Bell icon
+                      color: Colors.yellow, // Set icon color to yellow
+                    ),
+                    // if (hasNewNotification) // Only show the indicator if there are new notifications
+                    //   Positioned(
+                    //     right: 0,
+                    //     top: 0,
+                    //     child: Container(
+                    //       padding: EdgeInsets.all(4),
+                    //       decoration: BoxDecoration(
+                    //         shape: BoxShape.circle,
+                    //         color: Colors.red, // Indicator color
+                    //       ),
+                    //       child: Text(
+                    //         '1',
+                    //         style: TextStyle(
+                    //           color: Colors.white,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                  ],
+                ),
+                onPressed:
+                    navigateToNotificationsPage, // Navigate to notifications page
+              ),
+              IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: _handleLogout,
+              ),
+            ],
           ),
         ],
       ),
@@ -373,7 +513,13 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   color: Colors.white, // Set icon color to white
 
                   onPressed: () {
-                    // _handleAddKids();
+                    String currentUserEmail =
+                        FirebaseAuth.instance.currentUser?.email ?? '';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => GProfileViewScreen()),
+                    );
                   },
                 ),
                 Text(

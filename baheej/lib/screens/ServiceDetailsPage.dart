@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
@@ -56,6 +56,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
+
       };
 
       // Add the data to the 'ServiceBook' collection
@@ -64,6 +65,18 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       print('Error booking service: $error');
     }
   }
+Future<void> updateServiceInFirestore(Service service) async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    await firestore.collection('Services') // Assuming the collection name is 'Services'
+        .doc(service.id) // Use the service ID to locate the document
+        .update({'participantNo': service.participantNo});
+  } catch (e) {
+    print('Error updating service: $e');
+  }
+}
+
+
 
   //function to get kids
   Future<Map<String, String>> getSelectedKidsNames(List<String> kidIds) async {
@@ -149,23 +162,23 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       paymentIntent = await createPaymentIntent(totalPrice);
 
       // ignore: prefer_const_constructors
-      var gpay = PaymentSheetGooglePay(
-        merchantCountryCode: "US",
-        currencyCode: 'SAR',
-        testEnv: true,
-      );
+     // var gpay = PaymentSheetGooglePay(
+      //  merchantCountryCode: "US",
+      //  currencyCode: 'SAR',
+      //  testEnv: true,
+     // );
 
       String formattedPrice =
           NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-      Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntent!["client_secret"],
-          style: ThemeMode.dark,
-          merchantDisplayName: "baheej",
-          googlePay: gpay,
-        ),
-      );
+     // Stripe.instance.initPaymentSheet(
+       // paymentSheetParameters: SetupPaymentSheetParameters(
+          //paymentIntentClientSecret: paymentIntent!["client_secret"],
+         // style: ThemeMode.dark,
+         // merchantDisplayName: "baheej",
+        //  googlePay: gpay,
+       // ),
+      //);
 
       await displayPaymentSheet(context); // Always display payment sheet
     } catch (e) {
@@ -176,7 +189,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   displayPaymentSheet(BuildContext context) async {
     try {
       print('before await');
-      await Stripe.instance.presentPaymentSheet();
+     // await Stripe.instance.presentPaymentSheet();
       print('after await');
       // Show a success message
       // ignore: use_build_context_synchronously
@@ -261,6 +274,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       );
     } else {
       onKidsSelected();
+       // Increment the participant number in the local object
+    widget.service.incrementParticipantNo(selectedKids.length);
+
+    // Call Firestore to update the participant number
+    updateServiceInFirestore(widget.service);
     }
   }
 

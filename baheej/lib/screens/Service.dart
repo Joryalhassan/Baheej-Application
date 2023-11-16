@@ -1,6 +1,7 @@
 //import 'package:baheej/screens/firebase_service.dart';
 
 class Service {
+  final String id;
   final String serviceName;
   final String description;
   final String centerName;
@@ -12,8 +13,10 @@ class Service {
   final int minAge;
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
+    int participantNo;
 
   Service({
+    required this.id,
     required this.serviceName,
     required this.description,
     required this.centerName,
@@ -25,7 +28,11 @@ class Service {
     required this.servicePrice,
     required this.selectedTimeSlot,
     // required this.selectedKidsNames,
+    required this.participantNo
   });
+ void incrementParticipantNo(int increment) {
+    this.participantNo += increment;
+  }
   // Define constants for the timeslots
   static const String timeslotMorning = '8-11 AM';
   static const String timeslotAfternoon = '2-5 PM';

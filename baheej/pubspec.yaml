@@ -40,10 +40,10 @@ dependencies:
   cloud_firestore: ^4.9.1
   http: ^1.1.0
   firebase_database: ^10.2.5
-  intl: ^0.17.0
-  flutter_stripe: ^9.4.0
+  intl: ^0.18.1
   
   
+ 
 
 dev_dependencies:
   flutter_test:
