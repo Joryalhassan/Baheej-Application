@@ -791,18 +791,18 @@ class _EditServiceState extends State<EditService> {
             _selectedEndDate != null ? _selectedEndDate!.toIso8601String() : '';
 
         final updatedService = Service(
-          id: widget.service.id,
-          serviceName: updatedServiceName,
-          description: updatedServiceDescription,
-          centerName: widget.service.centerName,
-          selectedStartDate: _selectedStartDate ?? DateTime.now(),
-          selectedEndDate: _selectedEndDate ?? DateTime.now(),
-          minAge: _minAge,
-          maxAge: _maxAge,
-          capacityValue: updatedCapacityValue,
-          servicePrice: updatedServicePrice,
-          selectedTimeSlot: _selectedTimeSlot,
-        );
+            id: widget.service.id,
+            serviceName: updatedServiceName,
+            description: updatedServiceDescription,
+            centerName: widget.service.centerName,
+            selectedStartDate: _selectedStartDate ?? DateTime.now(),
+            selectedEndDate: _selectedEndDate ?? DateTime.now(),
+            minAge: _minAge,
+            maxAge: _maxAge,
+            capacityValue: updatedCapacityValue,
+            servicePrice: updatedServicePrice,
+            selectedTimeSlot: _selectedTimeSlot,
+            participantNo: widget.service.participantNo);
 
         await FirebaseFirestore.instance
             .collection('center-service')

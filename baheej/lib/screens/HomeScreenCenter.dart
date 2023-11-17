@@ -1,4 +1,5 @@
 import 'package:baheej/screens/EditService.dart';
+import 'package:baheej/screens/compSerList.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,135 +23,36 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   List<Service> services = [];
   List<Service> filteredServices = [];
   TextEditingController _searchController = TextEditingController();
-
-  String userName = ''; // Initialize userName
-  String? userRole;
-
-  TextEditingController notificationMessageController = TextEditingController();
+  String centerName = ''; // Declare centerName here
 
   @override
   void initState() {
     super.initState();
     loadServices();
-    fetchUserName();
-    fetchUserRoleAndName();
   }
 
-// notification
-  Future<void> sendNotification(String message) async {
-    final firestore = FirebaseFirestore.instance;
-
-    // Add the notification to Firestore
-    await firestore.collection('notifications').add({
-      'message': '$userName: $message', // Update the format here
-      'timestamp': FieldValue.serverTimestamp(),
-      'seenBy': [], // Initialize the seenBy field as an empty list
-      'centerName': userName,
-    });
-
-    //normal message
-
-    // final scaffold = ScaffoldMessenger.of(context);
-    // scaffold.showSnackBar(
-    //   SnackBar(
-    //     content: Text('Notification sent successfully!'),
-    //     backgroundColor: Colors.green, // Set the background color to green
-    //   ),
-    // );
-
-    // pop up message
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Success'),
-          content: Text('Notification sent successfully!'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-
-    // Fetch the user's type
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-      final userDoc = await firestore.collection('users').doc(userId).get();
-      if (userDoc.exists) {
-        final userType = userDoc['type'];
-        if (userType == 'guardian') {
-          sendNotification(message);
-        }
-      }
+  double calculatePercentageBooked(int capacity, int participants) {
+    if (capacity <= 0) {
+      return 0.0; // Return 0 if capacity is invalid
     }
+
+    return (participants / capacity) * 100; // Calculate percentage booked
   }
-
-  Future<void> fetchUserRoleAndName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-      final centerDoc = await FirebaseFirestore.instance
-          .collection('center')
-          .doc(userId)
-          .get();
-      if (centerDoc.exists) {
-        userRole = 'center'; // Set user role to center
-        final userData = centerDoc.data() as Map<String, dynamic>;
-        final firstName = userData['username'] ?? '';
-        setState(() {
-          userName = firstName;
-        });
-      } else {
-        final guardianDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .get();
-        if (guardianDoc.exists) {
-          userRole = 'guardian'; // Set user role to guardian
-        }
-      }
-    }
-  }
-
-  void fetchUserName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-      final userDoc = await FirebaseFirestore.instance
-          .collection('center')
-          .doc(userId)
-          .get();
-      if (userDoc.exists) {
-        final userData = userDoc.data() as Map<String, dynamic>;
-        final firstName = userData['username'] ?? '';
-        setState(() {
-          userName = firstName;
-        });
-      }
-    }
-  }
-
-  // void onTabTapped(int index) {
-  //   setState(() {
-  //     _currentIndex = index;
-  //   });
-
-  //   if (index == 1) {
-  //     navigateToServiceFormScreen();
-  //   }
-  // }
 
   Future<void> loadServices() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
+
+      // Fetch user center data
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        // Now you can use centerDoc.data() to access the data
+        centerName = centerDoc.data()!['username'];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
@@ -179,6 +81,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             } else {
               selectedEndDate = DateTime.now();
             }
+            final participantNo = data['participateNo'] ?? 0;
 
             // Check if the start date is today or earlier
             if (!selectedStartDate.isBefore(currentDate)) {
@@ -202,6 +105,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         : 0.0),
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
+                participantNo: participantNo,
               );
             } else {
               // Return null for services with start dates in the past or today
@@ -363,53 +267,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Welcome ${widget.centerName}'),
-        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          if (userRole == 'center') // Only show the bell icon for center users
-            IconButton(
-              icon: Icon(Icons.notifications),
-              // You can replace this with your custom bell icon
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text('Send Notification'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          TextField(
-                            controller: notificationMessageController,
-                            decoration: InputDecoration(
-                              labelText: 'Notification Message',
-                            ),
-                          ),
-                        ],
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text('Done'),
-                          onPressed: () {
-                            sendNotification(
-                                notificationMessageController.text);
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              color: Colors.yellow,
-            ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -487,6 +347,23 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             ),
                                             Text(
                                               service.serviceName,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'Percentage Booked: ',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -713,7 +590,14 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   icon: Icon(Icons.history),
                   color: Colors.white,
                   onPressed: () {
-                    // Handle booking history button tap
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            compSerListScreen(centerName: centerName),
+                      ),
+                    );
+                    // Handle profile button tap
                   },
                 ),
                 Text(
