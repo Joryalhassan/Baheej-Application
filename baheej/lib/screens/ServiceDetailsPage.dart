@@ -18,6 +18,7 @@ class ServiceDetailsPage extends StatefulWidget {
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   //defind anything you want
+  int ToalParticipant=0;
   double total = 0.0;
   Map<String, String> selectedKidsNames = {};
   Map<String, dynamic>? paymentIntent;
@@ -56,7 +57,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
-
+        'participantNo': widget.service.participantNo,
       };
 
       // Add the data to the 'ServiceBook' collection
@@ -65,18 +66,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       print('Error booking service: $error');
     }
   }
-Future<void> updateServiceInFirestore(Service service) async {
-  try {
-    final firestore = FirebaseFirestore.instance;
-    await firestore.collection('Services') // Assuming the collection name is 'Services'
-        .doc(service.id) // Use the service ID to locate the document
-        .update({'participantNo': service.participantNo});
-  } catch (e) {
-    print('Error updating service: $e');
-  }
-}
-
-
 
   //function to get kids
   Future<Map<String, String>> getSelectedKidsNames(List<String> kidIds) async {
@@ -92,6 +81,19 @@ Future<void> updateServiceInFirestore(Service service) async {
     }
     return selectedKidsNames;
   }
+   Future<void> updateServiceInFirestore() async {
+  final firestore = FirebaseFirestore.instance;
+  try {
+    await firestore.collection('center-service') .doc(widget.service.id) // Use the service ID to identify the document
+      .update({'participantNo': ToalParticipant}); // Update the participantNo
+      print('updated done');
+  } catch (e) {
+    print('Error updating service: $e');
+  }
+}
+
+
+
 
 //validation conflict service
   Future<void> checkForServiceConflict(
@@ -171,13 +173,13 @@ Future<void> updateServiceInFirestore(Service service) async {
       String formattedPrice =
           NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-     // Stripe.instance.initPaymentSheet(
-       // paymentSheetParameters: SetupPaymentSheetParameters(
-          //paymentIntentClientSecret: paymentIntent!["client_secret"],
-         // style: ThemeMode.dark,
-         // merchantDisplayName: "baheej",
-        //  googlePay: gpay,
-       // ),
+      //Stripe.instance.initPaymentSheet(
+      //  paymentSheetParameters: SetupPaymentSheetParameters(
+      //    paymentIntentClientSecret: paymentIntent!["client_secret"],
+      //    style: ThemeMode.dark,
+      //    merchantDisplayName: "baheej",
+      //    googlePay: gpay,
+      //  ),
       //);
 
       await displayPaymentSheet(context); // Always display payment sheet
@@ -189,10 +191,17 @@ Future<void> updateServiceInFirestore(Service service) async {
   displayPaymentSheet(BuildContext context) async {
     try {
       print('before await');
-     // await Stripe.instance.presentPaymentSheet();
+    //  await Stripe.instance.presentPaymentSheet();
       print('after await');
       // Show a success message
       // ignore: use_build_context_synchronously
+       // Payment is successful
+    // Increment the participantNo by the number of selected kids
+    
+   ToalParticipant=(selectedKids.length)+widget.service.participantNo;
+
+    // After incrementing, update the service in Firestore
+    updateServiceInFirestore();
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -274,11 +283,6 @@ Future<void> updateServiceInFirestore(Service service) async {
       );
     } else {
       onKidsSelected();
-       // Increment the participant number in the local object
-    widget.service.incrementParticipantNo(selectedKids.length);
-
-    // Call Firestore to update the participant number
-    updateServiceInFirestore(widget.service);
     }
   }
 
@@ -796,11 +800,12 @@ Future<void> updateServiceInFirestore(Service service) async {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
+                           makePayment(context);
                         // Simulate a successful payment, then trigger fireworks
-                        checkForServiceConflict(
-                            widget.service.selectedStartDate,
-                            widget.service.selectedEndDate,
-                            widget.service.selectedTimeSlot);
+                        //checkForServiceConflict(
+                        //    widget.service.selectedStartDate,
+                        //    widget.service.selectedEndDate,
+                          //  widget.service.selectedTimeSlot);
                         //addServiceToFirestore();
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;
