@@ -13,7 +13,7 @@ class Service {
   final int minAge;
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
-   final int participantNo;
+    int participantNo;
 
   Service({
     required this.id,
@@ -30,7 +30,8 @@ class Service {
     // required this.selectedKidsNames,
     required this.participantNo
   });
- 
+
+
   
   // Define constants for the timeslots
   static const String timeslotMorning = '8-11 AM';

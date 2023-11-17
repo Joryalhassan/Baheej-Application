@@ -18,7 +18,6 @@ class ServiceDetailsPage extends StatefulWidget {
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   //defind anything you want
-  int ToalParticipant=0;
   double total = 0.0;
   Map<String, String> selectedKidsNames = {};
   Map<String, dynamic>? paymentIntent;
@@ -57,11 +56,18 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
-        'participantNo': widget.service.participantNo,
+        
       };
+     // Get the current number of participants(jory)
+    int currentParticipantNo = widget.service.participantNo;
 
+    // Update the participant number(jory)
+    int newParticipantNo = currentParticipantNo + selectedKids.length;
+    widget.service.participantNo = newParticipantNo;
       // Add the data to the 'ServiceBook' collection
       await firestore.collection('ServiceBook').add(serviceData);
+      // Update the participant number in the original service document(jory)
+    await updateServiceParticipantNo(newParticipantNo);
     } catch (error) {
       print('Error booking service: $error');
     }
@@ -81,19 +87,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     }
     return selectedKidsNames;
   }
-   Future<void> updateServiceInFirestore() async {
+Future<void> updateServiceParticipantNo(int newParticipantNo) async {
   final firestore = FirebaseFirestore.instance;
   try {
-    await firestore.collection('center-service') .doc(widget.service.id) // Use the service ID to identify the document
-      .update({'participantNo': ToalParticipant}); // Update the participantNo
-      print('updated done');
-  } catch (e) {
-    print('Error updating service: $e');
+    await firestore.collection('center-service').doc(widget.service.id).update({'participantNo': newParticipantNo});
+  } catch (error) {
+    print('Error updating service participant number: $error');
   }
-}
-
-
-
+}//add it to update part (jory)
 
 //validation conflict service
   Future<void> checkForServiceConflict(
@@ -167,20 +168,20 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
      // var gpay = PaymentSheetGooglePay(
       //  merchantCountryCode: "US",
       //  currencyCode: 'SAR',
-      //  testEnv: true,
-     // );
+       // testEnv: true,
+     // );//make it comment(jory)
 
       String formattedPrice =
           NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-      //Stripe.instance.initPaymentSheet(
-      //  paymentSheetParameters: SetupPaymentSheetParameters(
+    //  Stripe.instance.initPaymentSheet(
+     //   paymentSheetParameters: SetupPaymentSheetParameters(
       //    paymentIntentClientSecret: paymentIntent!["client_secret"],
       //    style: ThemeMode.dark,
       //    merchantDisplayName: "baheej",
       //    googlePay: gpay,
-      //  ),
-      //);
+//),
+     // );//make it comment(jory)
 
       await displayPaymentSheet(context); // Always display payment sheet
     } catch (e) {
@@ -191,17 +192,19 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   displayPaymentSheet(BuildContext context) async {
     try {
       print('before await');
-    //  await Stripe.instance.presentPaymentSheet();
+     // await Stripe.instance.presentPaymentSheet();//make it comment(jory)
       print('after await');
       // Show a success message
       // ignore: use_build_context_synchronously
-       // Payment is successful
-    // Increment the participantNo by the number of selected kids
-    
-   ToalParticipant=(selectedKids.length)+widget.service.participantNo;
+       // Get the current number of participants(jory)
+    int currentParticipantNo = widget.service.participantNo;
 
-    // After incrementing, update the service in Firestore
-    updateServiceInFirestore();
+    // Update the participant number(jory)
+    int newParticipantNo = currentParticipantNo + selectedKids.length;
+    widget.service.participantNo = newParticipantNo;
+      
+      // Update the participant number in the original service document(jory)
+    await updateServiceParticipantNo(newParticipantNo);
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -222,6 +225,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           );
         },
       );
+      
 
       final user = FirebaseAuth
           .instance.currentUser; //use it for display kids for this gaurd
@@ -800,12 +804,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
-                           makePayment(context);
+                         makePayment(context);
                         // Simulate a successful payment, then trigger fireworks
-                        //checkForServiceConflict(
+                      //  checkForServiceConflict(
                         //    widget.service.selectedStartDate,
                         //    widget.service.selectedEndDate,
-                          //  widget.service.selectedTimeSlot);
+                         //   widget.service.selectedTimeSlot);
                         //addServiceToFirestore();
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;
