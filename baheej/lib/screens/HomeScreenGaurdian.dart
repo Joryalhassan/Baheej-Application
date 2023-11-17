@@ -133,7 +133,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           final centerName = data['centerName'] ?? 'Center Name';
           final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
           final capacityValue = data['capacityValue'] ?? 0;
-          final servicePrice = data['servicePrice'] ?? 0.0;
+          final servicePrice = (data['servicePrice'] ?? 0).toDouble();
           final minAge = data['minAge'] ?? 4;
           final maxAge = data['maxAge'] ?? 17;
           final id = data['id'] ?? 'id';

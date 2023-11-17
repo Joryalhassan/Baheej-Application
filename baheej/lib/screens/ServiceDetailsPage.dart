@@ -58,16 +58,18 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'userEmail': userEmail,
         
       };
-     // Get the current number of participants(jory)
+        // Get the current number of participants(jory)
     int currentParticipantNo = widget.service.participantNo;
 
     // Update the participant number(jory)
     int newParticipantNo = currentParticipantNo + selectedKids.length;
-    widget.service.participantNo = newParticipantNo;
+    
       // Add the data to the 'ServiceBook' collection
       await firestore.collection('ServiceBook').add(serviceData);
       // Update the participant number in the original service document(jory)
+    
     await updateServiceParticipantNo(newParticipantNo);
+   
     } catch (error) {
       print('Error booking service: $error');
     }
@@ -90,7 +92,21 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 Future<void> updateServiceParticipantNo(int newParticipantNo) async {
   final firestore = FirebaseFirestore.instance;
   try {
-    await firestore.collection('center-service').doc(widget.service.id).update({'participantNo': newParticipantNo});
+    await firestore..collection('center-service')
+            .doc(widget.service.id)
+            .update({
+          'serviceName':widget.service.serviceName,
+          'serviceDesc': widget.service.description,
+          'centerName': widget.service.centerName,
+          'serviceCapacity': widget.service.capacityValue,
+          'servicePrice': widget.service.servicePrice,
+          'startDate': widget.service.selectedStartDate,
+          'endDate': widget.service.selectedEndDate,
+          'minAge':widget.service.minAge,
+          'maxAge': widget.service.maxAge,
+          'selectedTimeSlot': widget.service.selectedTimeSlot,
+          'participantNo':newParticipantNo,
+        });
   } catch (error) {
     print('Error updating service participant number: $error');
   }
@@ -196,15 +212,9 @@ Future<void> updateServiceParticipantNo(int newParticipantNo) async {
       print('after await');
       // Show a success message
       // ignore: use_build_context_synchronously
-       // Get the current number of participants(jory)
-    int currentParticipantNo = widget.service.participantNo;
-
-    // Update the participant number(jory)
-    int newParticipantNo = currentParticipantNo + selectedKids.length;
-    widget.service.participantNo = newParticipantNo;
+       
       
-      // Update the participant number in the original service document(jory)
-    await updateServiceParticipantNo(newParticipantNo);
+      
       showDialog(
         context: context,
         builder: (BuildContext context) {

@@ -13,7 +13,7 @@ class Service {
   final int minAge;
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
-    int participantNo;
+    final int participantNo;
 
   Service({
     required this.id,
