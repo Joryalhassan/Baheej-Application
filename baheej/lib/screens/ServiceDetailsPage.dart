@@ -88,20 +88,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 Future<void> updateServiceParticipantNo() async {
   
   try {
+    int newparticipantNo=widget.service.participantNo+(selectedKids.length);
     await FirebaseFirestore.instance.collection('center-service')
             .doc(widget.service.id)
             .update({
-          'serviceName':widget.service.serviceName,
-          'serviceDesc': widget.service.description,
-          'centerName': widget.service.centerName,
-          'serviceCapacity': widget.service.capacityValue,
-          'servicePrice': widget.service.servicePrice,
-          'startDate': widget.service.selectedStartDate,
-          'endDate': widget.service.selectedEndDate,
-          'minAge':widget.service.minAge,
-          'maxAge': widget.service.maxAge,
-          'selectedTimeSlot': widget.service.selectedTimeSlot,
-          'participateNo':calculateparticipant(widget.service),
+          'participateNo':newparticipantNo,
         });
   } catch (error) {
     print('Error updating service participant number: $error');
@@ -855,12 +846,5 @@ Future<void> updateServiceParticipantNo() async {
     double totalPrice = service.servicePrice * (selectedKids.length);
     return totalPrice;
   }
-int calculateparticipant(Service service) {
-  
-    // Update the participant number(jory)
-    int newParticipantNo = service.participantNo + (selectedKids.length);
-    print('calculated kids and add new');
-    print(newParticipantNo);
-    return newParticipantNo;
-}
+
 }

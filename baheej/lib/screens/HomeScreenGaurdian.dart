@@ -26,7 +26,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   TextEditingController _searchController = TextEditingController();
   Timer? _pollingTimer; // The timer for polling
   final FirebaseAuth _auth = FirebaseAuth.instance;
- // LocalNotificationHandler _notificationHandler = LocalNotificationHandler();
+  //LocalNotificationHandler _notificationHandler = LocalNotificationHandler();
   final Set<String> notifiedDocumentIds = Set<String>();
   StreamSubscription<QuerySnapshot>?
       _subscription; // To manage the subscription
@@ -67,7 +67,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           if (!notifiedDocumentIds.contains(doc.id)) {
             final String? message = doc.data()?['message'];
             if (message != null) {
-            //  _notificationHandler.showNotification('Baheej App', message);
+           //   _notificationHandler.showNotification('Baheej App', message);
               notifiedDocumentIds.add(doc.id);
               doc.reference.update({
                 'seenBy': FieldValue.arrayUnion([currentUserId])
@@ -122,23 +122,36 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     final services = querySnapshot.docs
         .map((doc) {
           final data = doc.data() as Map<String, dynamic>;
+            DateTime selectedStartDate;
+            DateTime selectedEndDate;
+
+            // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
+            if (data['startDate'] is String) {
+              selectedStartDate = DateTime.parse(data['startDate'] as String);
+            } else if (data['startDate'] is Timestamp) {
+              selectedStartDate = (data['startDate'] as Timestamp).toDate();
+            } else {
+              selectedStartDate = DateTime.now();
+            }
+
+            if (data['endDate'] is String) {
+              selectedEndDate = DateTime.parse(data['endDate'] as String);
+            } else if (data['endDate'] is Timestamp) {
+              selectedEndDate = (data['endDate'] as Timestamp).toDate();
+            } else {
+              selectedEndDate = DateTime.now();
+            }
           final serviceName = data['serviceName'] ?? 'Title';
           final description = data['serviceDesc'] ?? 'Description';
-          final startDate = data['startDate'] != null
-              ? DateTime.parse(data['startDate'])
-              : DateTime.now();
-          final endDate = data['endDate'] != null
-              ? DateTime.parse(data['endDate'])
-              : DateTime.now();
           final centerName = data['centerName'] ?? 'Center Name';
           final selectedTimeSlot = data['selectedTimeSlot'] ?? 'time slot';
           final capacityValue = data['capacityValue'] ?? 0;
-          final servicePrice = (data['servicePrice'] ?? 0).toDouble();
+            final servicePrice = (data['servicePrice'] ?? 0).toDouble();
           final minAge = data['minAge'] ?? 4;
           final maxAge = data['maxAge'] ?? 17;
-         
-          final participantNo=data['participantNo'] as int? ?? 0;
-          if (!startDate.isBefore(currentDate)) {
+          //final id = data['id'] ?? 'id';
+           final participantNo=data['participateNo']??0;
+          if (!selectedStartDate.isBefore(currentDate)) {
             return Service(
               serviceName: serviceName,
               description: description,
@@ -146,12 +159,12 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               selectedTimeSlot: selectedTimeSlot,
               capacityValue: capacityValue,
               servicePrice: servicePrice,
-              selectedStartDate: startDate,
-              selectedEndDate: endDate,
+              selectedStartDate: selectedStartDate,
+              selectedEndDate: selectedEndDate,
               minAge: minAge,
               maxAge: maxAge,
               id: doc.id,
-              participantNo: participantNo,
+              participantNo:participantNo,
             );
           } else {
             return null;
@@ -276,12 +289,12 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
   // view the notification
   void navigateToNotificationsPage() {
-    //Navigator.push(
+   // Navigator.push(
       //context,
-     // MaterialPageRoute(
-      //  builder: (context) => NotificationsPage(),
+      //MaterialPageRoute(
+     //   builder: (context) => NotificationsPage(),
     //  ),
-   // );
+    //);
   }
 
   @override
@@ -412,7 +425,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   ServiceDetailsPage(
-                                                      service:service),
+                                                      service: service),
                                             ),
                                           );
                                         },

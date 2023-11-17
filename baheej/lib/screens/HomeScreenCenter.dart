@@ -202,7 +202,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         : 0.0),
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-                    participantNo: data['participantNo'] as int? ?? 0,
+                    participantNo: data['participateNo'] as int? ?? 0,
               );
             } else {
               // Return null for services with start dates in the past or today
