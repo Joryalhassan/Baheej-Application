@@ -31,6 +31,14 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     loadServices();
   }
 
+  double calculatePercentageBooked(int capacity, int participants) {
+    if (capacity <= 0) {
+      return 0.0; // Return 0 if capacity is invalid
+    }
+
+    return (participants / capacity) * 100; // Calculate percentage booked
+  }
+
   Future<void> loadServices() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -73,6 +81,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             } else {
               selectedEndDate = DateTime.now();
             }
+            final participantNo = data['participateNo'] ?? 0;
 
             // Check if the start date is today or earlier
             if (!selectedStartDate.isBefore(currentDate)) {
@@ -96,6 +105,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         : 0.0),
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
+                participantNo: participantNo,
               );
             } else {
               // Return null for services with start dates in the past or today
@@ -337,6 +347,23 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             ),
                                             Text(
                                               service.serviceName,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'Percentage Booked: ',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),

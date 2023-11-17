@@ -1,7 +1,7 @@
 //import 'package:baheej/screens/firebase_service.dart';
 
 class Service {
-  final String id; // Add an ID field
+  final String id;
   final String serviceName;
   final String description;
   final String centerName;
@@ -13,24 +13,24 @@ class Service {
   final int minAge;
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
+  final int participantNo;
 
-  Service({
-    required this.id, // Initialize the ID field in the constructor
-    required this.serviceName,
-    required this.description,
-    required this.centerName,
-    required this.selectedEndDate,
-    required this.selectedStartDate,
-    required this.minAge,
-    required this.maxAge,
-    required this.capacityValue,
-    required this.servicePrice,
-    required this.selectedTimeSlot,
-    // required this.selectedKidsNames,
-  });
+  Service(
+      {required this.id,
+      required this.serviceName,
+      required this.description,
+      required this.centerName,
+      required this.selectedEndDate,
+      required this.selectedStartDate,
+      required this.minAge,
+      required this.maxAge,
+      required this.capacityValue,
+      required this.servicePrice,
+      required this.selectedTimeSlot,
+      // required this.selectedKidsNames,
+      required this.participantNo});
+
   // Define constants for the timeslots
   static const String timeslotMorning = '8-11 AM';
   static const String timeslotAfternoon = '2-5 PM';
-
-
 }

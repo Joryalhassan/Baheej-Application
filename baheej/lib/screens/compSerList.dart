@@ -5,6 +5,8 @@ import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart'; // Make sure to import the Cupertino library
+
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart'; // Import the Service class if it's in a separate file
 
@@ -84,76 +86,83 @@ class _compSerListScreenState extends State<compSerListScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
-      // final userSnapshot = await FirebaseFirestore.instance
-      //     .collection('center')
-      //     .doc(userId)
-      //     .get();
-      // if (userSnapshot.exists) {
 
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
           .where('centerName', isEqualTo: widget.centerName)
           .get();
-      final currentDate = DateTime.now(); // Get the current date
-      final List<Service> loadedServices = snapshot.docs
-          .map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            DateTime selectedStartDate;
-            DateTime selectedEndDate;
+      final currentDate = DateTime.now();
+      final List<Service?> loadedServices =
+          await Future.wait(snapshot.docs.map((doc) async {
+        final data = doc.data() as Map<String, dynamic>;
+        DateTime selectedStartDate;
+        DateTime selectedEndDate;
 
-            // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
-            if (data['startDate'] is String) {
-              selectedStartDate = DateTime.parse(data['startDate'] as String);
-            } else if (data['startDate'] is Timestamp) {
-              selectedStartDate = (data['startDate'] as Timestamp).toDate();
-            } else {
-              selectedStartDate = DateTime.now();
-            }
+        if (data['startDate'] is String) {
+          selectedStartDate = DateTime.parse(data['startDate'] as String);
+        } else if (data['startDate'] is Timestamp) {
+          selectedStartDate = (data['startDate'] as Timestamp).toDate();
+        } else {
+          selectedStartDate = DateTime.now();
+        }
 
-            if (data['endDate'] is String) {
-              selectedEndDate = DateTime.parse(data['endDate'] as String);
-            } else if (data['endDate'] is Timestamp) {
-              selectedEndDate = (data['endDate'] as Timestamp).toDate();
-            } else {
-              selectedEndDate = DateTime.now();
-            }
+        if (data['endDate'] is String) {
+          selectedEndDate = DateTime.parse(data['endDate'] as String);
+        } else if (data['endDate'] is Timestamp) {
+          selectedEndDate = (data['endDate'] as Timestamp).toDate();
+        } else {
+          selectedEndDate = DateTime.now();
+        }
 
-            // Check if the end date is today or earlier
-            if (selectedEndDate.isBefore(currentDate)) {
-              return Service(
-                id: doc.id,
-                serviceName:
-                    data['serviceName'] as String? ?? 'Service Name Missing',
-                description:
-                    data['serviceDesc'] as String? ?? 'Description Missing',
-                centerName:
-                    data['centerName'] as String? ?? 'Center Name Missing',
-                selectedStartDate: selectedStartDate,
-                selectedEndDate: selectedEndDate,
-                minAge: data['minAge'] as int? ?? 0,
-                maxAge: data['maxAge'] as int? ?? 0,
-                capacityValue: data['serviceCapacity'] as int? ?? 0,
-                servicePrice: data['servicePrice'] is double
-                    ? data['servicePrice']
-                    : (data['servicePrice'] is int
-                        ? (data['servicePrice'] as int).toDouble()
-                        : 0.0),
-                selectedTimeSlot:
-                    data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-              );
-            } else {
-              return null;
-            }
-          })
-          .where((service) => service != null) // Filter out null values
-          .cast<Service>() // Cast the list to Service
-          .toList();
+        if (selectedEndDate.isBefore(currentDate)) {
+          // List<String> subscribedUsers = await getSubscribedUsers(doc.id);
+          final participantNo = data['participateNo'] ?? 0;
+
+          return Service(
+            id: doc.id,
+            serviceName:
+                data['serviceName'] as String? ?? 'Service Name Missing',
+            description:
+                data['serviceDesc'] as String? ?? 'Description Missing',
+            centerName: data['centerName'] as String? ?? 'Center Name Missing',
+            selectedStartDate: selectedStartDate,
+            selectedEndDate: selectedEndDate,
+            minAge: data['minAge'] as int? ?? 0,
+            maxAge: data['maxAge'] as int? ?? 0,
+            capacityValue: data['serviceCapacity'] as int? ?? 0,
+            servicePrice: data['servicePrice'] is double
+                ? data['servicePrice']
+                : (data['servicePrice'] is int
+                    ? (data['servicePrice'] as int).toDouble()
+                    : 0.0),
+            selectedTimeSlot:
+                data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
+            participantNo: participantNo,
+          );
+        } else {
+          return null;
+        }
+      }));
 
       setState(() {
-        services = loadedServices;
-        filteredServices = loadedServices;
+        services = loadedServices
+            .where((service) => service != null)
+            .cast<Service>()
+            .toList();
+        filteredServices = loadedServices
+            .where((service) => service != null)
+            .cast<Service>()
+            .toList();
       });
     }
+  }
+
+  double calculatePercentageBooked(int capacity, int participants) {
+    if (capacity <= 0) {
+      return 0.0; // Return 0 if capacity is invalid
+    }
+
+    return (participants / capacity) * 100; // Calculate percentage booked
   }
 
   Future<void> _handleLogout() async {
@@ -282,123 +291,6 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Start Date: ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          DateFormat('MM/dd/yyyy').format(
-                                              service.selectedStartDate),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'End Date: ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          DateFormat('MM/dd/yyyy')
-                                              .format(service.selectedEndDate),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Service Time: ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          service.selectedTimeSlot,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    // Text(
-                                    //   'Description: ',
-                                    //   style: TextStyle(
-                                    //     fontSize: 16,
-                                    //     fontWeight: FontWeight.bold,
-                                    //   ),
-                                    // ),
-                                    // Text(
-                                    //   service.description,
-                                    //   style: TextStyle(
-                                    //     fontSize: 16,
-                                    //   ),
-                                    // ),
-                                    // Row(
-                                    //   children: [
-                                    //     Text(
-                                    //       'Minimum Age: ',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //         fontWeight: FontWeight.bold,
-                                    //       ),
-                                    //     ),
-                                    //     Text(
-                                    //       service.minAge.toString(),
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
-                                    // Row(
-                                    //   children: [
-                                    //     Text(
-                                    //       'Maximum Age: ',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //         fontWeight: FontWeight.bold,
-                                    //       ),
-                                    //     ),
-                                    //     Text(
-                                    //       service.maxAge.toString(),
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Capacity : ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          service.capacityValue.toString(),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
                                           'Service Price: ',
                                           style: TextStyle(
                                             fontSize: 16,
@@ -416,44 +308,34 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Booking Ratio: ',
+                                          'Percentage Booked: ',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        FutureBuilder<double>(
-                                          future:
-                                              calculateBookingRatio(service),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return Text(
-                                                'Loading...', // or another placeholder text
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              );
-                                            } else if (snapshot.hasError) {
-                                              return Text(
-                                                'Error',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              );
-                                            } else {
-                                              double bookingRatio =
-                                                  snapshot.data ?? 0.0;
-                                              return Text(
-                                                '${bookingRatio.toStringAsFixed(2)}',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              );
-                                            }
-                                          },
+                                        Text(
+                                          '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
                                         ),
                                       ],
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        _showServiceDetails(
+                                          service,
+                                        ); // Create a method to show details
+                                      },
+                                      child: Text(
+                                        'More Details',
+                                        style: TextStyle(
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                          fontSize: 16,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
                                     ),
                                   ])));
                     },
@@ -482,7 +364,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => HomeScreenCenter(
-                            centerName: _centerProfile?.username ?? ''),
+                          centerName: _centerProfile?.username ?? '',
+                        ),
                       ),
                     );
                   },
@@ -558,6 +441,67 @@ class _compSerListScreenState extends State<compSerListScreen> {
           color: Colors.white,
         ),
       ),
+    );
+  }
+
+// Outside the build method, create the method to show detailed information in a pop-up
+  void _showServiceDetails(Service service) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            // color: const Color.fromARGB(255, 234, 212, 219),
+            color: Color.fromARGB(255, 239, 249, 254),
+
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(20.0)), // Customize the shape here
+          ),
+          child: CupertinoActionSheet(
+            title: Text(
+              'Service Details',
+              style: TextStyle(fontSize: 16.0, color: Colors.black),
+            ),
+            message: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Service Description: ${service.description}',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+                Text(
+                  'Start Date: ${DateFormat('MM/dd/yyyy').format(service.selectedStartDate)}',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+                Text(
+                  'End Date: ${DateFormat('MM/dd/yyyy').format(service.selectedEndDate)}',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+                Text(
+                  'Service Capacity: ${service.capacityValue}',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+
+                // Include other details you want to display here
+              ],
+            ),
+            actions: [
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Colors
+                        .black, // Change text color for the 'Close' button
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }
