@@ -58,17 +58,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'userEmail': userEmail,
         
       };
-        // Get the current number of participants(jory)
-    int currentParticipantNo = widget.service.participantNo;
-
-    // Update the participant number(jory)
-    int newParticipantNo = currentParticipantNo + selectedKids.length;
+       
     
       // Add the data to the 'ServiceBook' collection
       await firestore.collection('ServiceBook').add(serviceData);
       // Update the participant number in the original service document(jory)
     
-    await updateServiceParticipantNo(newParticipantNo);
+    await updateServiceParticipantNo();
    
     } catch (error) {
       print('Error booking service: $error');
@@ -89,10 +85,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     }
     return selectedKidsNames;
   }
-Future<void> updateServiceParticipantNo(int newParticipantNo) async {
-  final firestore = FirebaseFirestore.instance;
+Future<void> updateServiceParticipantNo() async {
+  
   try {
-    await firestore..collection('center-service')
+    await FirebaseFirestore.instance.collection('center-service')
             .doc(widget.service.id)
             .update({
           'serviceName':widget.service.serviceName,
@@ -105,7 +101,7 @@ Future<void> updateServiceParticipantNo(int newParticipantNo) async {
           'minAge':widget.service.minAge,
           'maxAge': widget.service.maxAge,
           'selectedTimeSlot': widget.service.selectedTimeSlot,
-          'participantNo':newParticipantNo,
+          'participateNo':calculateparticipant(widget.service),
         });
   } catch (error) {
     print('Error updating service participant number: $error');
@@ -859,4 +855,12 @@ Future<void> updateServiceParticipantNo(int newParticipantNo) async {
     double totalPrice = service.servicePrice * (selectedKids.length);
     return totalPrice;
   }
+int calculateparticipant(Service service) {
+  
+    // Update the participant number(jory)
+    int newParticipantNo = service.participantNo + (selectedKids.length);
+    print('calculated kids and add new');
+    print(newParticipantNo);
+    return newParticipantNo;
+}
 }

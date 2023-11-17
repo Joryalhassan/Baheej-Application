@@ -136,8 +136,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           final servicePrice = (data['servicePrice'] ?? 0).toDouble();
           final minAge = data['minAge'] ?? 4;
           final maxAge = data['maxAge'] ?? 17;
-          final id = data['id'] ?? 'id';
-
+         
+          final participantNo=data['participantNo'] as int? ?? 0;
           if (!startDate.isBefore(currentDate)) {
             return Service(
               serviceName: serviceName,
@@ -150,8 +150,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               selectedEndDate: endDate,
               minAge: minAge,
               maxAge: maxAge,
-              id: id,
-                 participantNo: data['participantNo'] as int? ?? 0,
+              id: doc.id,
+              participantNo: participantNo,
             );
           } else {
             return null;
@@ -412,7 +412,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   ServiceDetailsPage(
-                                                      service: service),
+                                                      service:service),
                                             ),
                                           );
                                         },
