@@ -589,48 +589,53 @@ class _EditServiceState extends State<EditService> {
   }
 
   Widget _buildDateTimePicker({
-    required String label,
-    required DateTime? selectedDate,
-    required Function(DateTime?) onDateChanged,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        //Text(label),
-        ListTile(
-          title: Text(label),
-          trailing: GestureDetector(
-            onTap: () async {
-              final DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: selectedDate ?? DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime(2101),
-              );
-              if (picked != null && picked != selectedDate) {
-                onDateChanged(picked);
-              }
-            },
-            child: Text(
-              selectedDate != null
-                  ? "${selectedDate.toLocal()}".split(' ')[0]
-                  : 'Select Date',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-              ),
+  required String label,
+  required DateTime? selectedDate,
+  required Function(DateTime?) onDateChanged,
+  String? Function(String?)? validator,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      ListTile(
+        title: Text(label),
+        trailing: GestureDetector(
+          onTap: () async {
+            DateTime firstDate = DateTime.now();
+            if (label == 'Start Date') {
+              firstDate = firstDate.add(Duration(days: 1)); // Adjusting for start date
+            }
+
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: selectedDate ?? firstDate,
+              firstDate: firstDate,
+              lastDate: DateTime(2101),
+            );
+            if (picked != null && picked != selectedDate) {
+              onDateChanged(picked);
+            }
+          },
+          child: Text(
+            selectedDate != null
+                ? "${selectedDate.toLocal()}".split(' ')[0]
+                : 'Select Date',
+            style: TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        if (validator != null)
-          Text(
-            validator(selectedDate?.toIso8601String() ?? '') ?? '',
-            style: TextStyle(color: Colors.red),
-          ),
-      ],
-    );
-  }
+      ),
+      if (validator != null)
+        Text(
+          validator(selectedDate?.toIso8601String() ?? '') ?? '',
+          style: TextStyle(color: Colors.red),
+        ),
+    ],
+  );
+}
+
 
   Widget _buildAgeSelector({
     required String label,

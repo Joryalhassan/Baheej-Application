@@ -891,25 +891,28 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime picked = (await showDatePicker(
-      context: context,
-      initialDate: isStartDate
-          ? selectedStartDate ?? DateTime.now()
-          : selectedEndDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    ))!;
+  final DateTime picked = (await showDatePicker(
+    context: context,
+    initialDate: isStartDate
+        ? selectedStartDate ?? DateTime.now().add(Duration(days: 1)) // Adjusted here
+        : selectedEndDate ?? DateTime.now(),
+    firstDate: isStartDate
+        ? DateTime.now().add(Duration(days: 1)) // Prevent selecting today's date for start date
+        : DateTime.now(), // Keep as is for end date
+    lastDate: DateTime(2101),
+  ))!;
 
-    if (picked != null &&
-        picked != (isStartDate ? selectedStartDate : selectedEndDate)) {
-      setState(() {
-        if (isStartDate) {
-          selectedStartDate = picked;
-        } else {
-          selectedEndDate = picked;
-        }
-        dateSelected = selectedStartDate != null && selectedEndDate != null;
-      });
-    }
+  if (picked != null &&
+      picked != (isStartDate ? selectedStartDate : selectedEndDate)) {
+    setState(() {
+      if (isStartDate) {
+        selectedStartDate = picked;
+      } else {
+        selectedEndDate = picked;
+      }
+      dateSelected = selectedStartDate != null && selectedEndDate != null;
+    });
   }
+}
+
 }

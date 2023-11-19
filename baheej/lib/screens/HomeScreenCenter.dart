@@ -181,7 +181,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             }
 
             // Check if the start date is today or earlier
-            if (!selectedStartDate.isBefore(currentDate)) {
+            if (!selectedStartDate.isBefore(currentDate)&& 
+              (data['participateNo'] as int? ?? 0) < (data['serviceCapacity'] as int? ?? 0)) {
               return Service(
                 id: doc.id,
                 serviceName:
