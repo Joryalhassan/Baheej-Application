@@ -56,7 +56,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
-        'Serviceid':widget.service.id,  
+        'Serviceid':widget.service.id,
       };
        
     

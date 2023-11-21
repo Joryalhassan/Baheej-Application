@@ -32,6 +32,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   int minAge = 4;
   int maxAge = 17;
   int participantNo=0;
+  int starsrate=0;
   @override
   void initState() {
     // add this to store centername(jo)
@@ -281,7 +282,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'centerName': userName, // change this to store centername(jo)
         'minAge': minAge,
         'maxAge': maxAge,
-        'participateNo':participantNo
+        'participateNo':participantNo,
+        'starsrate':starsrate,
       });
 
       // Data has been successfully added to Firestore.
