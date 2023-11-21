@@ -807,7 +807,8 @@ class _EditServiceState extends State<EditService> {
           capacityValue: updatedCapacityValue,
           servicePrice: updatedServicePrice,
           selectedTimeSlot: _selectedTimeSlot,
-          participateNo: widget.service.participateNo
+          participateNo: widget.service.participateNo,
+          starsrate:widget.service.starsrate
         );
 
         await FirebaseFirestore.instance

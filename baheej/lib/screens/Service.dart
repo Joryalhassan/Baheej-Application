@@ -14,7 +14,7 @@ class Service {
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
     final int participateNo;
-    
+    final int  starsrate;
 
   Service({
     required this.id,
@@ -30,6 +30,7 @@ class Service {
     required this.selectedTimeSlot,
     // required this.selectedKidsNames,
     required this.participateNo,
+    required this.starsrate,
   });
 
 
