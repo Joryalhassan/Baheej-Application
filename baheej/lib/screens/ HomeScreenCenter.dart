@@ -7,6 +7,7 @@ import 'package:baheej/screens/Service.dart';
 //import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/CenterProfileScreen.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -22,66 +23,198 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   List<Service> filteredServices = [];
   TextEditingController _searchController = TextEditingController();
 
+  String userName = ''; // Initialize userName
+  String? userRole;
+
+  TextEditingController notificationMessageController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     loadServices();
+    fetchUserName();
+    fetchUserRoleAndName();
   }
+
+// notification
+  Future<void> sendNotification(String message) async {
+    final firestore = FirebaseFirestore.instance;
+
+    // Add the notification to Firestore
+    await firestore.collection('notifications').add({
+      'message': '$userName: $message', // Update the format here
+      'timestamp': FieldValue.serverTimestamp(),
+      'seenBy': [], // Initialize the seenBy field as an empty list
+      'centerName': userName,
+    });
+
+    //normal message
+
+    // final scaffold = ScaffoldMessenger.of(context);
+    // scaffold.showSnackBar(
+    //   SnackBar(
+    //     content: Text('Notification sent successfully!'),
+    //     backgroundColor: Colors.green, // Set the background color to green
+    //   ),
+    // );
+
+    // pop up message
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Notification sent successfully!'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Fetch the user's type
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        final userType = userDoc['type'];
+        if (userType == 'guardian') {
+          sendNotification(message);
+        }
+      }
+    }
+  }
+
+  Future<void> fetchUserRoleAndName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        userRole = 'center'; // Set user role to center
+        final userData = centerDoc.data() as Map<String, dynamic>;
+        final firstName = userData['username'] ?? '';
+        setState(() {
+          userName = firstName;
+        });
+      } else {
+        final guardianDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
+        if (guardianDoc.exists) {
+          userRole = 'guardian'; // Set user role to guardian
+        }
+      }
+    }
+  }
+
+  void fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final firstName = userData['username'] ?? '';
+        setState(() {
+          userName = firstName;
+        });
+      }
+    }
+  }
+
+  // void onTabTapped(int index) {
+  //   setState(() {
+  //     _currentIndex = index;
+  //   });
+
+  //   if (index == 1) {
+  //     navigateToServiceFormScreen();
+  //   }
+  // }
 
   Future<void> loadServices() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
-      final now = DateTime.now(); // Get the current date and time
+
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
           .where('centerName', isEqualTo: widget.centerName)
-          .where('startDate',
-              isGreaterThan: Timestamp.fromDate(
-                  now)) // Filter by start date greater than current date
           .get();
+      final currentDate = DateTime.now(); // Get the current date
+      final List<Service> loadedServices = snapshot.docs
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            DateTime selectedStartDate;
+            DateTime selectedEndDate;
 
-      final List<Service> loadedServices = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        DateTime selectedStartDate;
-        DateTime selectedEndDate;
+            // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
+            if (data['startDate'] is String) {
+              selectedStartDate = DateTime.parse(data['startDate'] as String);
+            } else if (data['startDate'] is Timestamp) {
+              selectedStartDate = (data['startDate'] as Timestamp).toDate();
+            } else {
+              selectedStartDate = DateTime.now();
+            }
 
-        // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
-        if (data['startDate'] is String) {
-          selectedStartDate = DateTime.parse(data['startDate'] as String);
-        } else if (data['startDate'] is Timestamp) {
-          selectedStartDate = (data['startDate'] as Timestamp).toDate();
-        } else {
-          selectedStartDate = DateTime.now();
-        }
+            if (data['endDate'] is String) {
+              selectedEndDate = DateTime.parse(data['endDate'] as String);
+            } else if (data['endDate'] is Timestamp) {
+              selectedEndDate = (data['endDate'] as Timestamp).toDate();
+            } else {
+              selectedEndDate = DateTime.now();
+            }
 
-        if (data['endDate'] is String) {
-          selectedEndDate = DateTime.parse(data['endDate'] as String);
-        } else if (data['endDate'] is Timestamp) {
-          selectedEndDate = (data['endDate'] as Timestamp).toDate();
-        } else {
-          selectedEndDate = DateTime.now();
-        }
-
-        return Service(
-          id: doc.id,
-          serviceName: data['serviceName'] as String? ?? 'Service Name Missing',
-          description: data['serviceDesc'] as String? ?? 'Description Missing',
-          centerName: data['centerName'] as String? ?? 'Center Name Missing',
-          selectedStartDate: selectedStartDate,
-          selectedEndDate: selectedEndDate,
-          minAge: data['minAge'] as int? ?? 0,
-          maxAge: data['maxAge'] as int? ?? 0,
-          capacityValue: data['serviceCapacity'] as int? ?? 0,
-          servicePrice: data['servicePrice'] is double
-              ? data['servicePrice']
-              : (data['servicePrice'] is int
-                  ? (data['servicePrice'] as int).toDouble()
-                  : 0.0),
-          selectedTimeSlot:
-              data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-        );
-      }).toList();
+            // Check if the start date is today or earlier
+            if (!selectedStartDate.isBefore(currentDate) &&
+                (data['participateNo'] as int? ?? 0) <
+                    (data['serviceCapacity'] as int? ?? 0)) {
+              return Service(
+                id: doc.id,
+                serviceName:
+                    data['serviceName'] as String? ?? 'Service Name Missing',
+                description:
+                    data['serviceDesc'] as String? ?? 'Description Missing',
+                centerName:
+                    data['centerName'] as String? ?? 'Center Name Missing',
+                selectedStartDate: selectedStartDate,
+                selectedEndDate: selectedEndDate,
+                minAge: data['minAge'] as int? ?? 0,
+                maxAge: data['maxAge'] as int? ?? 0,
+                capacityValue: data['serviceCapacity'] as int? ?? 0,
+                servicePrice: data['servicePrice'] is double
+                    ? data['servicePrice']
+                    : (data['servicePrice'] is int
+                        ? (data['servicePrice'] as int).toDouble()
+                        : 0.0),
+                selectedTimeSlot:
+                    data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
+                participateNo: data['participateNo'] as int? ?? 0,
+                starsrate: data['starsrate'] as int? ?? 0,
+              );
+            } else {
+              // Return null for services with start dates in the past or today
+              return null;
+            }
+          })
+          .where((service) => service != null) // Filter out null values
+          .cast<Service>() // Cast the list to Service
+          .toList();
 
       setState(() {
         services = loadedServices;
@@ -164,14 +297,11 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     query = query.trim();
     final now = DateTime.now();
     setState(() {
-      filteredServices = services.where((service) {
-        // Check if the service's start date is greater than today's date
-        return service.selectedStartDate.isAfter(now) &&
-            (service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
-                service.description
-                    .toLowerCase()
-                    .contains(query.toLowerCase()));
-      }).toList();
+      filteredServices = services
+          .where((service) =>
+              service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
+              service.description.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     });
   }
 
@@ -237,9 +367,53 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Welcome ${widget.centerName}'),
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          if (userRole == 'center') // Only show the bell icon for center users
+            IconButton(
+              icon: Icon(Icons.notifications),
+              // You can replace this with your custom bell icon
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('Send Notification'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          TextField(
+                            controller: notificationMessageController,
+                            decoration: InputDecoration(
+                              labelText: 'Notification Message',
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text('Done'),
+                          onPressed: () {
+                            sendNotification(
+                                notificationMessageController.text);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              color: Colors.yellow,
+            ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -450,7 +624,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               ),
                                             ),
                                             Text(
-                                              '\$${service.servicePrice.toStringAsFixed(2)}',
+                                              '${service.servicePrice.toStringAsFixed(2)}',
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -579,6 +753,12 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   icon: Icon(Icons.person),
                   color: Colors.white,
                   onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CenterProfileViewScreen(),
+                      ),
+                    );
                     // Handle profile button tap
                   },
                 ),

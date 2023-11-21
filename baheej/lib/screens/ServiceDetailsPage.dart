@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
@@ -56,10 +56,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
+        'Serviceid': widget.service.id,
       };
 
       // Add the data to the 'ServiceBook' collection
       await firestore.collection('ServiceBook').add(serviceData);
+      // Update the participant number in the original service document(jory)
+
+      await updateServiceParticipantNo();
     } catch (error) {
       print('Error booking service: $error');
     }
@@ -79,6 +83,19 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     }
     return selectedKidsNames;
   }
+
+  Future<void> updateServiceParticipantNo() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('center-service')
+          .doc(widget.service.id)
+          .update({
+        'participateNo': calculateparticipant(widget.service),
+      });
+    } catch (error) {
+      print('Error updating service participant number: $error');
+    }
+  } //add it to update part (jory)
 
 //validation conflict service
   Future<void> checkForServiceConflict(
@@ -149,23 +166,23 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       paymentIntent = await createPaymentIntent(totalPrice);
 
       // ignore: prefer_const_constructors
-      var gpay = PaymentSheetGooglePay(
-        merchantCountryCode: "US",
-        currencyCode: 'SAR',
-        testEnv: true,
-      );
+      // var gpay = PaymentSheetGooglePay(
+      //  merchantCountryCode: "US",
+      //  currencyCode: 'SAR',
+      // testEnv: true,
+      // );//make it comment(jory)
 
       String formattedPrice =
           NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-      Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntent!["client_secret"],
-          style: ThemeMode.dark,
-          merchantDisplayName: "baheej",
-          googlePay: gpay,
-        ),
-      );
+      //  Stripe.instance.initPaymentSheet(
+      //   paymentSheetParameters: SetupPaymentSheetParameters(
+      //    paymentIntentClientSecret: paymentIntent!["client_secret"],
+      //    style: ThemeMode.dark,
+      //    merchantDisplayName: "baheej",
+      //    googlePay: gpay,
+//),
+      // );//make it comment(jory)
 
       await displayPaymentSheet(context); // Always display payment sheet
     } catch (e) {
@@ -176,10 +193,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   displayPaymentSheet(BuildContext context) async {
     try {
       print('before await');
-      await Stripe.instance.presentPaymentSheet();
+      // await Stripe.instance.presentPaymentSheet();//make it comment(jory)
       print('after await');
       // Show a success message
       // ignore: use_build_context_synchronously
+
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -778,11 +796,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
+                        makePayment(context);
                         // Simulate a successful payment, then trigger fireworks
-                        checkForServiceConflict(
-                            widget.service.selectedStartDate,
-                            widget.service.selectedEndDate,
-                            widget.service.selectedTimeSlot);
+                        //  checkForServiceConflict(
+                        //    widget.service.selectedStartDate,
+                        //    widget.service.selectedEndDate,
+                        //   widget.service.selectedTimeSlot);
                         //addServiceToFirestore();
                         // Check if payment is successful (you can replace this with your actual logic)
                         //bool paymentSuccessful = true;
@@ -821,5 +840,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   double calculateTotalPrice(Service service) {
     double totalPrice = service.servicePrice * (selectedKids.length);
     return totalPrice;
+  }
+
+  int calculateparticipant(Service service) {
+    // Update the participant number(jory)
+    int newParticipantNo = widget.service.participateNo + (selectedKids.length);
+    print(widget.service.participateNo);
+    print('calculated kids and add new');
+    print(newParticipantNo);
+    return newParticipantNo;
   }
 }
