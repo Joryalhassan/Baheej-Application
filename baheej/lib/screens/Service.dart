@@ -14,6 +14,7 @@ class Service {
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
     final int participateNo;
+    
 
   Service({
     required this.id,
