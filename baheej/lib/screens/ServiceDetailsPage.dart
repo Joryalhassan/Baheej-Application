@@ -56,6 +56,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'selectedKidsNames': selectedKidsNames,
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
+      
         
       };
        
@@ -85,20 +86,18 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     }
     return selectedKidsNames;
   }
-Future<void> updateServiceParticipantNo() async {
-  
+       Future<void> updateServiceParticipantNo() async {
+
   try {
-    int newparticipantNo=widget.service.participantNo+(selectedKids.length);
     await FirebaseFirestore.instance.collection('center-service')
             .doc(widget.service.id)
             .update({
-          'participateNo':newparticipantNo,
+          'participateNo':calculateparticipant(widget.service),
         });
   } catch (error) {
     print('Error updating service participant number: $error');
   }
 }//add it to update part (jory)
-
 //validation conflict service
   Future<void> checkForServiceConflict(
     DateTime selectedStartDate,
@@ -847,4 +846,13 @@ Future<void> updateServiceParticipantNo() async {
     return totalPrice;
   }
 
+  int calculateparticipant(Service service) {
+
+    // Update the participant number(jory)
+    int newParticipantNo = widget.service.participateNo + (selectedKids.length);
+    print(widget.service.participateNo);
+    print('calculated kids and add new');
+    print(newParticipantNo);
+    return newParticipantNo;
+}
 }
