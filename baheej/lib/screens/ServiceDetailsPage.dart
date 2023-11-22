@@ -57,6 +57,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         'totalPrice': total, // Store the calculated total price
         'userEmail': userEmail,
         'Serviceid': widget.service.id,
+        'starsrate': widget.service.starsrate,
       };
 
       // Add the data to the 'ServiceBook' collection

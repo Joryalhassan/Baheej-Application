@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /*class StarRating extends StatefulWidget {
-  final double initialRating;
+  final int initialRating;
   final String serviceDocumentId; // Add the service document ID
-  final void Function(double) onRatingChanged;
+  final void Function(int) onRatingChanged;
 
   StarRating({
     required this.initialRating,
@@ -17,7 +17,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 }
 
 class _StarRatingState extends State<StarRating> {
-  late double currentRating;
+  late int currentRating;
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _StarRatingState extends State<StarRating> {
             await FirebaseFirestore.instance
                 .collection('ServiceBook')
                 .doc(widget.serviceDocumentId)
-                .update({'userRating': newRating});
+                .update({'starsrate': newRating});
 
             widget.onRatingChanged(newRating);
           },
@@ -60,7 +60,7 @@ class _StarRatingState extends State<StarRating> {
 class StarRating extends StatefulWidget {
   final String serviceDocumentId;
   final void Function(int) onRatingChanged;
-  final int initialRating; // Add this line
+  final int initialRating; // Add this line with a default value
 
   StarRating({
     required this.serviceDocumentId,
@@ -94,13 +94,22 @@ class _StarRatingState extends State<StarRating> {
               currentRating = newRating;
             });
 
-            // Update Firestore with the new rating
-            await FirebaseFirestore.instance
-                .collection('ServiceBook')
-                .doc(widget.serviceDocumentId)
-                .update({'starsrate': newRating});
+            try {
+              // Update Firestore with the new rating
+              await FirebaseFirestore.instance
+                  .collection('ServiceBook')
+                  .doc(widget.serviceDocumentId)
+                  .update({'starsrate': newRating}).then((_) {
+                print('Document ID: ${widget.serviceDocumentId}');
+              }).catchError((error) {
+                print('Error updating rating: $error');
+              });
 
-            widget.onRatingChanged(newRating);
+              widget.onRatingChanged(newRating);
+            } catch (e) {
+              // Handle Firestore update error
+              print('Error updating rating: $e');
+            }
           },
           icon: Icon(
             index < currentRating ? Icons.star : Icons.star_border,

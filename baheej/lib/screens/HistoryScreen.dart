@@ -76,7 +76,7 @@ class HistoryScreen extends StatelessWidget {
                           data['selectedEndDate'] as Timestamp;
                       final totalPrice = data['totalPrice'] as double;
                       final selectedTimeSlot = data['selectedTimeSlot'];
-
+                      final starsrate = data['starsrate'];
                       String selectedKidsString = '';
 
                       if (selectedKidsMap != null) {
@@ -213,7 +213,8 @@ class HistoryScreen extends StatelessWidget {
 
     final cardMargin = EdgeInsets.fromLTRB(20, 10, 16, 0);
     final isStartDateInPast = selectedStartDate.isBefore(DateTime.now());
-    final starsrate = serviceDocument['starsrate'] as int? ?? 0;
+    final data = serviceDocument.data() as Map<String, dynamic>;
+    final starsrate = data['starsrate'] ?? 0;
 
     return Card(
       elevation: 3,
