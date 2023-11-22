@@ -76,7 +76,7 @@ class HistoryScreen extends StatelessWidget {
                           data['selectedEndDate'] as Timestamp;
                       final totalPrice = data['totalPrice'].toDouble(); // Convert to double
                       final selectedTimeSlot = data['selectedTimeSlot'];
-                      
+                      final starsrate= data['starsrate'];
 
                       String selectedKidsString = '';
 
@@ -93,6 +93,7 @@ class HistoryScreen extends StatelessWidget {
                         selectedEndDate.toDate(),
                         selectedTimeSlot,
                         totalPrice,
+                       
                         
                       );
                     },
