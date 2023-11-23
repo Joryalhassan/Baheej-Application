@@ -70,7 +70,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           .doc(resultaccount!.user!.uid)
           .set({
         'username': _userNameTextController.text.trim(),
-        'addres': _DistrictTextController.text.trim(),
+        'addres': _selectedDistrict,
         'email': _emailTextController.text.trim(),
         'comReg': _ComRegTextController.text.trim(),
         'type': 'center',
