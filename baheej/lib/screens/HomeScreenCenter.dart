@@ -353,23 +353,23 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             ),
                                           ],
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Percentage Booked: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                        // Row(
+                                        //   children: [
+                                        //     Text(
+                                        //       'Percentage Booked: ',
+                                        //       style: TextStyle(
+                                        //         fontSize: 16,
+                                        //         fontWeight: FontWeight.bold,
+                                        //       ),
+                                        //     ),
+                                        //     Text(
+                                        //       '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
+                                        //       style: TextStyle(
+                                        //         fontSize: 16,
+                                        //       ),
+                                        //     ),
+                                        //   ],
+                                        // ),
                                         Row(
                                           children: [
                                             Text(
