@@ -138,6 +138,9 @@ class _compSerListScreenState extends State<compSerListScreen> {
             selectedTimeSlot:
                 data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
             participantNo: participantNo,
+            starsrate: data['starsrate'] as int? ?? 0,
+        
+
           );
         } else {
           return null;
@@ -316,6 +319,23 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                         Text(
                                           '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Average Rating: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${calculateAverageRating(services, service.serviceName).toStringAsFixed(2)}',
                                           style: TextStyle(
                                             fontSize: 16,
                                           ),
@@ -504,4 +524,16 @@ class _compSerListScreenState extends State<compSerListScreen> {
       },
     );
   }
+}
+double calculateAverageRating(List<Service> services, String serviceName) {
+  final List<Service> filteredServices =
+      services.where((service) => service.serviceName == serviceName).toList();
+
+  if (filteredServices.isEmpty) {
+    return 0.0;
+  }
+
+  final totalRating =
+      filteredServices.fold(0, (sum, service) => sum + service.starsrate);
+  return totalRating / filteredServices.length;
 }

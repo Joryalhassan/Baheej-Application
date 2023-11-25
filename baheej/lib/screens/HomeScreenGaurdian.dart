@@ -151,6 +151,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           final maxAge = data['maxAge'] ?? 17;
           //final id = data['id'] ?? 'id';
           final participantNo = data['participateNo'] ?? 0;
+           final starsrate = data['starsrate'] as int? ?? 0;
           if (!selectedStartDate.isBefore(currentDate)) {
             return Service(
               serviceName: serviceName,
@@ -165,6 +166,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               maxAge: maxAge,
               id: doc.id,
               participantNo: participantNo,
+               starsrate: starsrate,
+
             );
           } else {
             return null;

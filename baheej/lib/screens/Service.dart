@@ -12,6 +12,9 @@ class Service {
   final DateTime selectedEndDate;
   final int minAge;
   final int maxAge;
+    final int starsrate;
+
+
   // final Map<String, String> selectedKidsNames; // Define the property
   final int participantNo;
 
@@ -27,6 +30,10 @@ class Service {
       required this.capacityValue,
       required this.servicePrice,
       required this.selectedTimeSlot,
+          required this.starsrate,
+
+
+
       // required this.selectedKidsNames,
       required this.participantNo});
 

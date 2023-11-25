@@ -82,6 +82,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
               selectedEndDate = DateTime.now();
             }
             final participantNo = data['participateNo'] ?? 0;
+              final starsrate = data['starsrate'] as int? ?? 0;
+
 
             // Check if the start date is today or earlier
             if (!selectedStartDate.isBefore(currentDate)) {
@@ -106,6 +108,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
                 participantNo: participantNo,
+              starsrate: starsrate,
+
               );
             } else {
               // Return null for services with start dates in the past or today
@@ -510,19 +514,19 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        EditService(
-                                                      service: service,
-                                                      onUpdateService:
-                                                          updateService,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
+                                            //  onTap: () {
+                                             //   Navigator.push(
+                                              //    context,
+                                                 // MaterialPageRoute(
+                                                   // builder: (context) =>
+                                                      //  EditService(
+                                                     // service: service,
+                                                    //  onUpdateService:
+                                                     //     updateService,
+                                                    //),
+                                               //   ),
+                                               // );
+                                            //  },
                                               child: Row(
                                                 children: [
                                                   Text(
