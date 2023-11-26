@@ -308,10 +308,11 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ],
                                     ),
+                                    Divider(),
                                     Row(
                                       children: [
                                         Text(
-                                          'Percentage Booked: ',
+                                          'Booked Capacity Percentage: ',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
@@ -357,7 +358,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ),
                                     ),
-                                  ])));
+                                  ]))
+                                  );
                     },
                   ),
                 ),
@@ -504,7 +506,9 @@ class _compSerListScreenState extends State<compSerListScreen> {
 
                 // Include other details you want to display here
               ],
+              
             ),
+            
             actions: [
               CupertinoActionSheetAction(
                 onPressed: () {
