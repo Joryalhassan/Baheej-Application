@@ -1,16 +1,12 @@
-import 'package:baheej/notification_manager/notification_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:baheej/firebase_options.dart';
-import 'package:baheej/screens/HomeScreenCenter.dart';
-import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-// Import NotificationApi class
 import 'package:baheej/screens/SignInScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationManager().iniNotification();
+  // NotificationManager().iniNotification();
 
   Stripe.publishableKey =
       "pk_test_51NxYJkAzFvFRBXEyZnGjEuJ7jTJPSyBsKtpMvLAO4J1Kz1kAlAF8GsmbmYecdjQi7uMNAcC89JuyPPKPgH8cpQw700qsNegMUZ";

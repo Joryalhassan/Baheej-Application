@@ -21,10 +21,10 @@ class compSerListScreen extends StatefulWidget {
 
 class _compSerListScreenState extends State<compSerListScreen> {
   List<Service> completedServices = [];
-  CenterProfile? _centerProfile;
+  // CenterProfile? _centerProfile;
   List<Service> services = []; // Add this line
   List<Service> filteredServices = []; // Add this line
-
+  String centerName = '';
   @override
   void initState() {
     super.initState();
@@ -86,6 +86,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        // Now you can use centerDoc.data() to access the data
+        centerName = centerDoc.data()!['username'];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
@@ -137,7 +145,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
                     : 0.0),
             selectedTimeSlot:
                 data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-            participantNo: participantNo,
+            participateNo: participantNo,
+            starsrate: data['starsrate'] as int? ?? 0,
           );
         } else {
           return null;
@@ -288,106 +297,35 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ],
                                     ),
-
                                     // Row(
                                     //   children: [
                                     //     Text(
-                                    //       'Start Date: ',
+                                    //       'Service Price: ',
                                     //       style: TextStyle(
                                     //         fontSize: 16,
                                     //         fontWeight: FontWeight.bold,
                                     //       ),
                                     //     ),
                                     //     Text(
-                                    //       DateFormat('MM/dd/yyyy').format(
-                                    //           service.selectedStartDate),
+                                    //       '${service.servicePrice.toStringAsFixed(2)}',
                                     //       style: TextStyle(
                                     //         fontSize: 16,
                                     //       ),
                                     //     ),
                                     //   ],
                                     // ),
-                                    // Row(
-                                    //   children: [
-                                    //     Text(
-                                    //       'End Date: ',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //         fontWeight: FontWeight.bold,
-                                    //       ),
-                                    //     ),
-                                    //     Text(
-                                    //       DateFormat('MM/dd/yyyy')
-                                    //           .format(service.selectedEndDate),
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
-                                    // Row(
-                                    //   children: [
-                                    //     Text(
-                                    //       'Service Time: ',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //         fontWeight: FontWeight.bold,
-                                    //       ),
-                                    //     ),
-                                    //     Text(
-                                    //       service.selectedTimeSlot,
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
-                                    // Row(
-                                    //   children: [
-                                    //     Text(
-                                    //       'Subscribers: ',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //         fontWeight: FontWeight.bold,
-                                    //       ),
-                                    //     ),
-                                    //     Text(
-                                    //       '${service.subscribedUsers.length}',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
-
-                                    // Row(
-                                    //   children: [
-                                    //     Text(
-                                    //       'Capacity : ',
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //         fontWeight: FontWeight.bold,
-                                    //       ),
-                                    //     ),
-                                    //     Text(
-                                    //       service.capacityValue.toString(),
-                                    //       style: TextStyle(
-                                    //         fontSize: 16,
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
+                                    Divider(),
                                     Row(
                                       children: [
                                         Text(
-                                          'Service Price: ',
+                                          'Booked Capacity Percentage: ',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          '${service.servicePrice.toStringAsFixed(2)}',
+                                          '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
                                           style: TextStyle(
                                             fontSize: 16,
                                           ),
@@ -397,14 +335,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Percentage Booked: ',
+                                          'Average Rating: ',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
+                                          '${calculateAverageRating(services, service.serviceName).toStringAsFixed(2)}',
                                           style: TextStyle(
                                             fontSize: 16,
                                           ),
@@ -452,9 +390,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HomeScreenCenter(
-                          centerName: _centerProfile?.username ?? '',
-                        ),
+                        builder: (context) =>
+                            HomeScreenCenter(centerName: centerName),
                       ),
                     );
                   },
@@ -555,9 +492,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Service Description: ${service.description}',
+                  'Program Description: ${service.description}',
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
+                Text(
+                  'Program price: ${service.servicePrice}',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+
                 Text(
                   'Start Date: ${DateFormat('MM/dd/yyyy').format(service.selectedStartDate)}',
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
@@ -567,7 +509,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
                 Text(
-                  'Service Capacity: ${service.capacityValue}',
+                  'Program Capacity: ${service.capacityValue}',
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
 
@@ -593,4 +535,17 @@ class _compSerListScreenState extends State<compSerListScreen> {
       },
     );
   }
+}
+
+double calculateAverageRating(List<Service> services, String serviceName) {
+  final List<Service> filteredServices =
+      services.where((service) => service.serviceName == serviceName).toList();
+
+  if (filteredServices.isEmpty) {
+    return 0.0;
+  }
+
+  final totalRating =
+      filteredServices.fold(0, (sum, service) => sum + service.starsrate);
+  return totalRating / filteredServices.length;
 }

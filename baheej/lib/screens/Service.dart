@@ -2,33 +2,36 @@
 
 class Service {
   final String id;
-  final String serviceName;
-  final String description;
+  final String serviceName; // done
+  final String description; // done
   final String centerName;
-  final String selectedTimeSlot;
+  final String selectedTimeSlot; //done
   final int capacityValue;
-  final double servicePrice;
-  final DateTime selectedStartDate; // Make it nullable
-  final DateTime selectedEndDate;
+  final double servicePrice; //done
+  final DateTime selectedStartDate; // Make it nullable // done
+  final DateTime selectedEndDate; //done
   final int minAge;
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
-  final int participantNo;
+  final int participateNo;
+  final int starsrate; // Define the starsrate property
 
-  Service(
-      {required this.id,
-      required this.serviceName,
-      required this.description,
-      required this.centerName,
-      required this.selectedEndDate,
-      required this.selectedStartDate,
-      required this.minAge,
-      required this.maxAge,
-      required this.capacityValue,
-      required this.servicePrice,
-      required this.selectedTimeSlot,
-      // required this.selectedKidsNames,
-      required this.participantNo});
+  Service({
+    required this.id,
+    required this.serviceName,
+    required this.description,
+    required this.centerName,
+    required this.selectedEndDate,
+    required this.selectedStartDate,
+    required this.minAge,
+    required this.maxAge,
+    required this.capacityValue,
+    required this.servicePrice,
+    required this.selectedTimeSlot,
+    // required this.selectedKidsNames,
+    required this.participateNo,
+    required this.starsrate,
+  });
 
   // Define constants for the timeslots
   static const String timeslotMorning = '8-11 AM';

@@ -105,7 +105,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         : 0.0),
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-                participantNo: participantNo,
+                participateNo: participantNo,
+                starsrate: data['starsrate'] as int? ?? 0,
               );
             } else {
               // Return null for services with start dates in the past or today
@@ -210,7 +211,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Service'),
+          title: Text('Delete Program'),
           content: Text('Are you sure you want to delete this service?'),
           actions: <Widget>[
             TextButton(
@@ -296,7 +297,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                     _handleSearch(value);
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search services...',
+                    hintText: 'Search Programs...',
                     prefixIcon: Icon(Icons.search),
                   ),
                   toolbarOptions: null,
@@ -339,7 +340,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Name: ',
+                                              'Program name: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -353,23 +354,6 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             ),
                                           ],
                                         ),
-                                        // Row(
-                                        //   children: [
-                                        //     Text(
-                                        //       'Percentage Booked: ',
-                                        //       style: TextStyle(
-                                        //         fontSize: 16,
-                                        //         fontWeight: FontWeight.bold,
-                                        //       ),
-                                        //     ),
-                                        //     Text(
-                                        //       '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
-                                        //       style: TextStyle(
-                                        //         fontSize: 16,
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
                                         Row(
                                           children: [
                                             Text(
@@ -409,7 +393,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Time: ',
+                                              'Program Time: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -490,7 +474,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Price: ',
+                                              'Program Price: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -510,23 +494,23 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        EditService(
-                                                      service: service,
-                                                      onUpdateService:
-                                                          updateService,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
+                                              // onTap: () {
+                                              //   Navigator.push(
+                                              //     context,
+                                              //     MaterialPageRoute(
+                                              //       builder: (context) =>
+                                              //       //     EditService(
+                                              //       //   service: service,
+                                              //       //   onUpdateService:
+                                              //       //       updateService,
+                                              //       // ),
+                                              //     //),
+                                              //   );
+                                              // },
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    'Edit Service',
+                                                    'Edit Program',
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -549,7 +533,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    'Delete Service',
+                                                    'Delete Program',
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -601,7 +585,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   },
                 ),
                 Text(
-                  'Booking Service',
+                  'Booked Programs',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -616,7 +600,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 Padding(
                   padding: EdgeInsets.only(top: 50),
                   child: Text(
-                    'Add Service',
+                    'Add Program',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,

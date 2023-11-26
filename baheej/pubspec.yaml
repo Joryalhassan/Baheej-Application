@@ -42,7 +42,7 @@ dependencies:
   firebase_database: ^10.2.5
   intl: ^0.17.0
   flutter_stripe: ^9.4.0
-  flutter_local_notifications: ^16.1.0
+  # flutter_local_notifications: ^16.1.0
   
   
 
@@ -74,6 +74,11 @@ flutter:
     - assets/images/back3.png
     - assets/images/backLo.png
     - assets/images/logo2.png
+    - assets/images/kids.png
+    - assets/images/kids_kid.png
+    - assets/images/funnyKids.png
+    - assets/images/family.png
+    - assets/images/kidsyellow.png
     # - assets/images/backD.png
     - assets/images/backasf.png
     # - assets/images/backH.png

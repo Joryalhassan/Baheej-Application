@@ -151,6 +151,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           final maxAge = data['maxAge'] ?? 17;
           //final id = data['id'] ?? 'id';
           final participantNo = data['participateNo'] ?? 0;
+          final starsrate = data['starsrate'] ?? 0;
           if (!selectedStartDate.isBefore(currentDate)) {
             return Service(
               serviceName: serviceName,
@@ -164,7 +165,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
               minAge: minAge,
               maxAge: maxAge,
               id: doc.id,
-              participantNo: participantNo,
+              participateNo: participantNo,
+              starsrate: starsrate,
             );
           } else {
             return null;
@@ -314,9 +316,10 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                 icon: Stack(
                   children: [
                     Icon(
-                      Icons.notifications, // Bell icon
-                      color: Colors.yellow, // Set icon color to yellow
+                      Icons.notifications_active, // Bell icon
+                      color: Colors.white, // Set icon color to yellow
                     ),
+
                     // if (hasNewNotification) // Only show the indicator if there are new notifications
                     //   Positioned(
                     //     right: 0,
@@ -366,7 +369,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                     _handleSearch(value);
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search services...',
+                    hintText: 'Search program...',
                     prefixIcon: Icon(Icons.search),
                   ),
                   toolbarOptions: null, // Remove paste button
@@ -413,7 +416,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Service Time: ${service.selectedTimeSlot}',
+                                        'Program Time: ${service.selectedTimeSlot}',
                                         style: TextStyle(
                                           fontSize: 16,
                                         ),
@@ -489,7 +492,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                   padding: EdgeInsets.only(top: 5), // Add margin to the top
 
                   child: Text(
-                    'Booked Service ',
+                    'Booked Programs ',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
