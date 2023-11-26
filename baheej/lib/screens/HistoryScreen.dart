@@ -1,26 +1,36 @@
-import 'package:baheej/screens/HomeScreenGaurdian.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Addkids.dart';
-import 'package:baheej/screens/SignInScreen.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
+import 'package:baheej/screens/GProfileScreen.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
+  @override
+  _HistoryScreenState createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  late final currentUserEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+  }
+
+  void _handleAddKids() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddKidsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Get the current user's email from Firebase Authentication
-    final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
-
-    void _handleAddKids() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AddKidsPage(),
-        ),
-      );
-    }
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -37,8 +47,7 @@ class HistoryScreen extends StatelessWidget {
             ),
           ),
           Positioned(
-            top:
-                100, // Adjust the top value to control the vertical position of cards
+            top: 100,
             left: 0,
             right: 0,
             bottom: 0,
@@ -50,12 +59,13 @@ class HistoryScreen extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
-                      child: CircularProgressIndicator()); // Loading indicator
+                    child: CircularProgressIndicator(),
+                  );
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
-                    child: Text('No booked services found'), // Centered text
+                    child: Text('No booked services found'),
                   );
                 } else {
                   final bookedServices = snapshot.data!.docs;
@@ -80,11 +90,11 @@ class HistoryScreen extends StatelessWidget {
                       String selectedKidsString = '';
 
                       if (selectedKidsMap != null) {
-                        // Convert the values of 'selectedKidsMap' into a single string
                         selectedKidsString = selectedKidsMap.values.join(', ');
                       }
 
                       return buildServiceCard(
+                        context,
                         centerName,
                         serviceName,
                         selectedKidsString,
@@ -92,6 +102,7 @@ class HistoryScreen extends StatelessWidget {
                         selectedEndDate.toDate(),
                         selectedTimeSlot,
                         totalPrice,
+                        serviceDocument,
                       );
                     },
                   );
@@ -115,21 +126,19 @@ class HistoryScreen extends StatelessWidget {
                   icon: Icon(Icons.home),
                   color: Colors.white,
                   onPressed: () {
-                    // Use pushAndRemoveUntil to navigate to the home page directly
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => HomeScreenGaurdian(),
                       ),
-                      (route) => false, // Remove all previous routes
+                      (route) => false,
                     );
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 5), // Add margin to the top
-
+                  padding: EdgeInsets.only(top: 5),
                   child: Text(
-                    '         Home        ',
+                    'Home',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -143,9 +152,7 @@ class HistoryScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      1, 50, 17, 1), // Add margin to the top
-
+                  padding: EdgeInsets.fromLTRB(50, 50, 17, 1),
                   child: Text(
                     'View Kids',
                     style: TextStyle(
@@ -161,12 +168,15 @@ class HistoryScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.person), // Profile Icon
-
-                  color: Colors.white, // Set icon color to white
-
+                  icon: Icon(Icons.person),
+                  color: Colors.white,
                   onPressed: () {
-                    _handleAddKids();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GProfileViewScreen(),
+                      ),
+                    );
                   },
                 ),
                 Text(
@@ -185,10 +195,7 @@ class HistoryScreen extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          onPressed:
-          _handleAddKids();
-        },
+        onPressed: _handleAddKids,
         child: Icon(
           Icons.add_reaction_outlined,
           color: Colors.white,
@@ -198,6 +205,7 @@ class HistoryScreen extends StatelessWidget {
   }
 
   Widget buildServiceCard(
+    BuildContext context,
     String centerName,
     String serviceName,
     String selectedKidsString,
@@ -205,34 +213,94 @@ class HistoryScreen extends StatelessWidget {
     DateTime selectedEndDate,
     String selectedTimeSlot,
     double totalPrice,
+    DocumentSnapshot serviceDocument,
   ) {
-    // Format selectedStartDate and selectedEndDate to strings
     final startDateFormatted =
         DateFormat('yyyy-MM-dd').format(selectedStartDate);
     final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
 
-    // Define margin values (top, bottom, left, right)
-    final cardMargin = EdgeInsets.fromLTRB(20, 10, 16, 0); // Adjust as needed
+    final currentDate = DateTime.now();
+    final canCancel = currentDate.isBefore(selectedStartDate);
+
+    Future<void> cancelService() async {
+      if (canCancel) {
+        try {
+          bool confirmCancel = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Confirmation'),
+                content: Text('Are you sure you want to cancel your service?'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pop(false); // Return false when canceled
+                    },
+                  ),
+                  TextButton(
+                    child: Text('Yes'),
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pop(true); // Return true when confirmed
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+
+          if (confirmCancel == true) {
+            await FirebaseFirestore.instance
+                .collection('ServiceBook')
+                .doc(serviceDocument.id)
+                .delete();
+
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Service Canceled Successfully!'),
+                  content: Text('Your service has been canceled.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+
+            setState(() {});
+          }
+        } catch (error) {
+          print('Error canceling service: $error');
+        }
+      }
+    }
 
     return Card(
       elevation: 3,
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 26),
-      // margin: cardMargin, // Set the margin here
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10), // Customize border radius
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Container(
-        padding: EdgeInsets.all(16), // Adjust inner padding
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color.fromARGB(255, 239, 249, 254),
               const Color.fromARGB(255, 239, 249, 254),
-            ], // Customize the card background gradient
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(10), // Adjust border radius
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,47 +310,56 @@ class HistoryScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
-            SizedBox(height: 10), // Add a SizedBox for spacing
-
+            SizedBox(height: 10),
             Text(
               '$centerName',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 24, 24, 24), // Customize text color
+                color: Color.fromARGB(255, 24, 24, 24),
               ),
             ),
             Text(
               'Selected Kids: $selectedKidsString',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             Text(
-              'From: $startDateFormatted' '     To: $endDateFormatted ',
+              'From: $startDateFormatted   To: $endDateFormatted ',
               style: TextStyle(
                 fontSize: 16,
-                color:
-                    const Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             Text(
               'At: $selectedTimeSlot',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 2, 2, 2), // Customize text color
+                color: Color.fromARGB(255, 2, 2, 2),
               ),
             ),
             Text(
-              'Total Price: $totalPrice' ' SAR',
+              'Total Price: $totalPrice SAR',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0), // Customize text color
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
+            if (canCancel)
+              TextButton(
+                onPressed: cancelService,
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
