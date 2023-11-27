@@ -529,7 +529,9 @@ class _compSerListScreenState extends State<compSerListScreen> {
     );
   }
 }
-double calculateAverageRating(List<Service> services, String serviceName) {
+
+
+ double calculateAverageRating(List<Service> services, String serviceName) {
   final List<Service> filteredServices =
       services.where((service) => service.serviceName == serviceName).toList();
 
@@ -537,7 +539,13 @@ double calculateAverageRating(List<Service> services, String serviceName) {
     return 0.0;
   }
 
-  final totalRating =
-      filteredServices.fold(0, (sum, service) => sum + service.starsrate);
-  return totalRating / filteredServices.length;
+  // Calculate the sum of starsrate
+  int sumOfStars = 0;
+  for (Service service in filteredServices) {
+    sumOfStars += service.starsrate;
+  }
+
+  // Calculate the average rating
+  return sumOfStars / filteredServices.length.toDouble();
 }
+
