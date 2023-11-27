@@ -326,7 +326,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ],
                                     ),
-                                    Row(
+                                   Row(
                                       children: [
                                         Text(
                                           'Average Rating: ',
@@ -343,6 +343,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ],
                                     ),
+
                                     TextButton(
                                       onPressed: () {
                                         _showServiceDetails(
@@ -531,7 +532,51 @@ class _compSerListScreenState extends State<compSerListScreen> {
 }
 
 
- double calculateAverageRating(List<Service> services, String serviceName) {
+//  double calculateAverageRating(List<Service> services, String serviceName) {
+//   final List<Service> filteredServices =
+//       services.where((service) => service.serviceName == serviceName).toList();
+
+//   if (filteredServices.isEmpty) {
+//     return 0.0;
+//   }
+
+//   // Calculate the sum of starsrate
+//   int sumOfStars = 0;
+//   for (Service service in filteredServices) {
+//     sumOfStars += service.starsrate;
+//   }
+
+//   // Calculate the average rating
+//   return sumOfStars / filteredServices.length.toDouble();
+// }
+
+// Map<String, double> calculateAverageRating(List<Service> services) {
+//   Map<String, List<Service>> servicesMap = {};
+
+//   // Group services by serviceName
+//   for (Service service in services) {
+//     if (!servicesMap.containsKey(service.serviceName)) {
+//       servicesMap[service.serviceName] = [];
+//     }
+//     servicesMap[service.serviceName]!.add(service);
+//   }
+
+//   // Calculate average rating for each serviceName
+//   Map<String, double> averageRatings = {};
+//   servicesMap.forEach((serviceName, serviceList) {
+//     double sumOfStars = 0;
+//     for (Service service in serviceList) {
+//       sumOfStars += service.starsrate;
+//     }
+//     averageRatings[serviceName] = sumOfStars / serviceList.length;
+//   });
+
+//   return averageRatings;
+// }
+
+
+
+double calculateAverageRating(List<Service> services, String serviceName) {
   final List<Service> filteredServices =
       services.where((service) => service.serviceName == serviceName).toList();
 
@@ -548,4 +593,6 @@ class _compSerListScreenState extends State<compSerListScreen> {
   // Calculate the average rating
   return sumOfStars / filteredServices.length.toDouble();
 }
+
+
 
