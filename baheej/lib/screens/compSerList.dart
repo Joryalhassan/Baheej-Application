@@ -21,10 +21,10 @@ class compSerListScreen extends StatefulWidget {
 
 class _compSerListScreenState extends State<compSerListScreen> {
   List<Service> completedServices = [];
-  CenterProfile? _centerProfile;
+  // CenterProfile? _centerProfile;
   List<Service> services = []; // Add this line
   List<Service> filteredServices = []; // Add this line
-
+  String centerName = '';
   @override
   void initState() {
     super.initState();
@@ -86,6 +86,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        // Now you can use centerDoc.data() to access the data
+        centerName = centerDoc.data()!['username'];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
@@ -137,10 +145,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
                     : 0.0),
             selectedTimeSlot:
                 data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-            participantNo: participantNo,
+            participateNo: participantNo,
             starsrate: data['starsrate'] as int? ?? 0,
-        
-
           );
         } else {
           return null;
@@ -291,23 +297,23 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ],
                                     ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Service Price: ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${service.servicePrice.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    // Row(
+                                    //   children: [
+                                    //     Text(
+                                    //       'Service Price: ',
+                                    //       style: TextStyle(
+                                    //         fontSize: 16,
+                                    //         fontWeight: FontWeight.bold,
+                                    //       ),
+                                    //     ),
+                                    //     Text(
+                                    //       '${service.servicePrice.toStringAsFixed(2)}',
+                                    //       style: TextStyle(
+                                    //         fontSize: 16,
+                                    //       ),
+                                    //     ),
+                                    //   ],
+                                    // ),
                                     Divider(),
                                     Row(
                                       children: [
@@ -319,14 +325,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
+                                          '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
                                           style: TextStyle(
                                             fontSize: 16,
                                           ),
                                         ),
                                       ],
                                     ),
-                                   Row(
+                                    Row(
                                       children: [
                                         Text(
                                           'Average Rating: ',
@@ -335,11 +341,25 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Text(
-                                          '${calculateAverageRating(services, service.serviceName).toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
+                                        FutureBuilder<double>(
+                                          future: calculateAverageRating(
+                                              service.serviceName),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return CircularProgressIndicator(); // Show loading indicator
+                                            } else if (snapshot.hasError) {
+                                              return Text(
+                                                  'Error'); // Show error message
+                                            } else {
+                                              return Text(
+                                                '${snapshot.data!.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              );
+                                            }
+                                          },
                                         ),
                                       ],
                                     ),
@@ -359,8 +379,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                         ),
                                       ),
                                     ),
-                                  ]))
-                                  );
+                                  ])));
                     },
                   ),
                 ),
@@ -386,9 +405,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HomeScreenCenter(
-                          centerName: _centerProfile?.username ?? '',
-                        ),
+                        builder: (context) =>
+                            HomeScreenCenter(centerName: centerName),
                       ),
                     );
                   },
@@ -489,9 +507,14 @@ class _compSerListScreenState extends State<compSerListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Service Description: ${service.description}',
+                  'Program Description: ${service.description}',
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
+                Text(
+                  'Program price: ${service.servicePrice}',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+
                 Text(
                   'Start Date: ${DateFormat('MM/dd/yyyy').format(service.selectedStartDate)}',
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
@@ -501,15 +524,13 @@ class _compSerListScreenState extends State<compSerListScreen> {
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
                 Text(
-                  'Service Capacity: ${service.capacityValue}',
+                  'Program Capacity: ${service.capacityValue}',
                   style: TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
 
                 // Include other details you want to display here
               ],
-              
             ),
-            
             actions: [
               CupertinoActionSheetAction(
                 onPressed: () {
@@ -531,68 +552,34 @@ class _compSerListScreenState extends State<compSerListScreen> {
   }
 }
 
+Future<double> calculateAverageRating(String serviceName) async {
+  try {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('ServiceBook')
+        .where('serviceName', isEqualTo: serviceName)
+        .get();
 
-//  double calculateAverageRating(List<Service> services, String serviceName) {
-//   final List<Service> filteredServices =
-//       services.where((service) => service.serviceName == serviceName).toList();
+    if (snapshot.docs.isEmpty) {
+      return 0.0;
+    }
 
-//   if (filteredServices.isEmpty) {
-//     return 0.0;
-//   }
+    int sumOfStars = 0;
+    int totalServices = 0;
 
-//   // Calculate the sum of starsrate
-//   int sumOfStars = 0;
-//   for (Service service in filteredServices) {
-//     sumOfStars += service.starsrate;
-//   }
+    snapshot.docs.forEach((doc) {
+      final data = doc.data()
+          as Map<String, dynamic>?; // Cast to Map<String, dynamic> or null
+      final starsRate = data?['starsrate']; // Use null-aware access
 
-//   // Calculate the average rating
-//   return sumOfStars / filteredServices.length.toDouble();
-// }
+      if (starsRate != null && starsRate is int) {
+        sumOfStars += starsRate;
+        totalServices++;
+      }
+    });
 
-// Map<String, double> calculateAverageRating(List<Service> services) {
-//   Map<String, List<Service>> servicesMap = {};
-
-//   // Group services by serviceName
-//   for (Service service in services) {
-//     if (!servicesMap.containsKey(service.serviceName)) {
-//       servicesMap[service.serviceName] = [];
-//     }
-//     servicesMap[service.serviceName]!.add(service);
-//   }
-
-//   // Calculate average rating for each serviceName
-//   Map<String, double> averageRatings = {};
-//   servicesMap.forEach((serviceName, serviceList) {
-//     double sumOfStars = 0;
-//     for (Service service in serviceList) {
-//       sumOfStars += service.starsrate;
-//     }
-//     averageRatings[serviceName] = sumOfStars / serviceList.length;
-//   });
-
-//   return averageRatings;
-// }
-
-
-
-double calculateAverageRating(List<Service> services, String serviceName) {
-  final List<Service> filteredServices =
-      services.where((service) => service.serviceName == serviceName).toList();
-
-  if (filteredServices.isEmpty) {
+    return totalServices > 0 ? sumOfStars / totalServices.toDouble() : 0.0;
+  } catch (e) {
+    print('Error calculating average rating: $e');
     return 0.0;
   }
-
-  // Calculate the sum of starsrate
-  int sumOfStars = 0;
-  for (Service service in filteredServices) {
-    sumOfStars += service.starsrate;
-  }
-
-  // Calculate the average rating
-  return sumOfStars / filteredServices.length.toDouble();
 }
-
-
-
