@@ -32,6 +32,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   int minAge = 4;
   int maxAge = 17;
   int participantNo = 0;
+  int starsrate = 0;
   @override
   void initState() {
     // add this to store centername(jo)
@@ -281,7 +282,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'centerName': userName, // change this to store centername(jo)
         'minAge': minAge,
         'maxAge': maxAge,
-        'participateNo': participantNo
+        'participateNo': participantNo,
+        'starsrate': starsrate,
       });
 
       // Data has been successfully added to Firestore.
@@ -373,16 +375,16 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                 label == 'Service Capacity' ? validateCapacity : validator,
             onChanged: (value) {
               setState(() {
-                if (label == 'Service Name') {
+                if (label == 'Program Name') {
                   serviceName = value;
                 } //else if (label == 'Center Name') {
                 //centerName = value; // Update centerName here
                 //} / commented this to store centername(jo)
-                else if (label == 'Service Price') {
+                else if (label == 'Program Price') {
                   selectedPrice = double.tryParse(value);
-                } else if (label == 'Service Capacity') {
+                } else if (label == 'Program Capacity') {
                   capacityValue = int.tryParse(value) ?? 0;
-                } else if (label == 'Service Description') {
+                } else if (label == 'Program Description') {
                   selectedDescription = value;
                 } else if (label == 'Min Age') {
                   minAge = int.tryParse(value) ?? 0;
@@ -720,11 +722,11 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                       ],
                     ),
                     SizedBox(height: 20.0),
-                    buildTextField('Service Name', validateServiceName,
+                    buildTextField('Program Name', validateServiceName,
                         maxLength: 20),
                     // buildTextField('Center Name', validateServiceName,
                     //   maxLength: 20),/ commented this to store centername(jo)
-                    buildTextField('Service Price', validatePrice),
+                    buildTextField('Program Price', validatePrice),
                     Row(
                       mainAxisAlignment: MainAxisAlignment
                           .spaceBetween, // Adjust this as needed
@@ -774,7 +776,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 // max age
 
                     buildIncrementDecrementField(
-                      'Service Capacity',
+                      'Program Capacity',
                       capacityValue,
                       () {
                         setState(() {
@@ -789,7 +791,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         });
                       },
                     ), // capacity
-                    buildTextField('Service Description', validateDescription,
+                    buildTextField('Program Description', validateDescription,
                         maxLength: 225),
                     SizedBox(height: 2.0),
                     Row(
@@ -807,7 +809,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     ),
                     SizedBox(height: 0),
                     Text(
-                      'Service Period Time',
+                      'Program Period Time',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -894,9 +896,13 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     final DateTime picked = (await showDatePicker(
       context: context,
       initialDate: isStartDate
-          ? selectedStartDate ?? DateTime.now()
+          ? selectedStartDate ??
+              DateTime.now().add(Duration(days: 1)) // Adjusted here
           : selectedEndDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: isStartDate
+          ? DateTime.now().add(Duration(
+              days: 1)) // Prevent selecting today's date for start date
+          : DateTime.now(), // Keep as is for end date
       lastDate: DateTime(2101),
     ))!;
 

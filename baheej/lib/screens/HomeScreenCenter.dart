@@ -9,6 +9,10 @@ import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+// import 'package:baheej/screens/NotificationService1.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -24,12 +28,62 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   List<Service> filteredServices = [];
   TextEditingController _searchController = TextEditingController();
   String centerName = ''; // Declare centerName here
+  String? userRole;
+  TextEditingController notificationMessageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     loadServices();
   }
+
+  ///0000000
+
+  TextEditingController adMessageController = TextEditingController();
+
+  void _showAdMessageDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create Advertisement'),
+          content: TextField(
+            controller: adMessageController,
+            decoration: InputDecoration(
+              hintText: 'Enter your advertisement message',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Submit'),
+              onPressed: () async {
+                String adMessage = adMessageController.text.trim();
+                if (adMessage.isNotEmpty) {
+                  // Store ad message in Firestore under 'notification2' collection
+                  await FirebaseFirestore.instance
+                      .collection('notification2')
+                      .add({
+                    'message': adMessage,
+                    'timestamp': DateTime.now(),
+                  });
+                  adMessageController.clear(); // Clear the text field
+                  Navigator.of(context).pop(); // Close the dialog
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+//000000
 
   double calculatePercentageBooked(int capacity, int participants) {
     if (capacity <= 0) {
@@ -267,10 +321,32 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Welcome ${widget.centerName}'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          SizedBox(width: 10), // Add space to the left of the first icon
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              _showAdMessageDialog();
+            },
+          ),
+          SizedBox(width: 10), // Add space between the icons and the text
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 4), // Adjust the height to move the text down
+              Text(
+                'Welcome ${widget.centerName}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 70), // Add space between the text and the last icon
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -291,6 +367,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             padding: EdgeInsets.only(top: 160, left: 16, right: 16),
             child: Column(
               children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                ),
                 TextField(
                   controller: _searchController,
                   onChanged: (value) {
@@ -310,7 +389,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "You don't have any services yet.",
+                                  "You don't have any programs yet.",
                                   style: TextStyle(
                                       fontSize: 16, color: Colors.grey),
                                 ),
@@ -494,34 +573,33 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                              // onTap: () {
-                                              //   Navigator.push(
-                                              //     context,
-                                              //     MaterialPageRoute(
-                                              //       builder: (context) =>
-                                              //       //     EditService(
-                                              //       //   service: service,
-                                              //       //   onUpdateService:
-                                              //       //       updateService,
-                                              //       // ),
-                                              //     //),
-                                              //   );
-                                              // },
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditService(
+                                                      service: service,
+                                                      onUpdateService:
+                                                          updateService,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                               child: Row(
                                                 children: [
                                                   Text(
                                                     'Edit Program',
                                                     style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              158,
-                                                              158,
-                                                              158),
-                                                    ),
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 59, 138, 207)),
                                                   ),
                                                 ],
                                               ),
@@ -538,6 +616,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.bold,
+                                                      decoration: TextDecoration
+                                                          .underline,
                                                       color: Colors.red,
                                                     ),
                                                   ),

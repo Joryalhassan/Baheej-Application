@@ -27,12 +27,37 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
   TextEditingController _DescriptionTextController = TextEditingController();
 
   String? _selectedDistrict;
-  bool _isLoading = true; // New field to track loading state
+  bool _isLoading = true;
+  String? centerName; // New field to track loading state
 
   @override
   void initState() {
     super.initState();
+    fetchCenterName();
     _loadUserData();
+    // Fetch the center name
+  }
+
+  void fetchCenterName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final firstName = userData['username'] ?? '';
+        // final userRole = userData[
+        //     'userType']; // Assuming userType is a field in the Firestore document
+        print('Fetched first name: $firstName');
+        setState(() {
+          centerName = firstName;
+          // type = userRole;
+        });
+      }
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -283,7 +308,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the AppBar
       appBar: AppBar(
-        title: Text('Center Profile'), // Title for the AppBar
+        title: Text('$centerName profile'), // Title for the AppBar
         backgroundColor: Colors.transparent, // Transparent AppBar background
         elevation: 0, // No shadow
         leading: IconButton(
@@ -355,7 +380,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
                 Padding(
                   padding: EdgeInsets.only(top: 50),
                   child: Text(
-                    'Add Service',
+                    'Add Program',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -771,12 +796,12 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
                 ElevatedButton(
                   onPressed: _confirmSaveChanges,
                   style: ElevatedButton.styleFrom(
-                    primary:
-                        Color.fromARGB(255, 59, 138, 207), // Your desired color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
+                      primary: Color.fromARGB(
+                          255, 59, 138, 207), // Your desired color
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      minimumSize: Size(170, 50)),
                   child: Text(
                     "Save Changes",
                     style: TextStyle(fontSize: 17, color: Colors.white),
@@ -785,12 +810,12 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
                 ElevatedButton(
                   onPressed: _confirmDeleteAccount,
                   style: ElevatedButton.styleFrom(
-                    primary: Color.fromARGB(255, 242, 12,
-                        12), // Same color as the "Save Changes" button
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
+                      primary: Color.fromARGB(255, 242, 12,
+                          12), // Same color as the "Save Changes" button
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      minimumSize: Size(170, 50)),
                   child: Text(
                     "Delete Account",
                     style: TextStyle(fontSize: 17, color: Colors.white),

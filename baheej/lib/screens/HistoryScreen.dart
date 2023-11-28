@@ -6,6 +6,7 @@ import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/star_rating.dart'; // Replace with the actual path to your StarRating file
 import 'package:baheej/screens/GProfileScreen.dart';
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
+import 'package:baheej/screens/SignInScreen.dart';
 
 class HistoryScreen extends StatelessWidget {
   @override
@@ -21,12 +22,82 @@ class HistoryScreen extends StatelessWidget {
       );
     }
 
+    void navigateToSignInScreen() {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreen()),
+        (route) =>
+            false, // Replace the current route and prevent back navigation
+      );
+    }
+
+    void showLogoutSuccessDialog() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Logout Successful'),
+            content: Text('You have successfully logged out.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  navigateToSignInScreen();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    Future<void> _handleLogout() async {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Are You Sure?'),
+            content: Text('Do you want to log out?'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Yes'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  try {
+                    await FirebaseAuth.instance.signOut();
+                    showLogoutSuccessDialog();
+                  } catch (e) {
+                    print("Error signing out: $e");
+                  }
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text("Booked Programs"),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              _handleLogout();
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [

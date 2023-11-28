@@ -15,7 +15,7 @@ class NotificationsPage extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backH.png',
+              'assets/images/backasf.png',
               fit: BoxFit.cover,
             ),
           ),

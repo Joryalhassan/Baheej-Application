@@ -17,6 +17,8 @@ class GProfileViewScreen extends StatefulWidget {
 class _GProfileViewScreenState extends State<GProfileViewScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
+  String FirstName = '';
+  String? type;
 
   // Initialize controllers directly instead of using 'late'
   TextEditingController _fnameController = TextEditingController();
@@ -29,7 +31,30 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
   @override
   void initState() {
     super.initState();
+    fetchName();
     _loadUserData();
+  }
+
+  void fetchName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final firstName = userData['fname'] ?? '';
+        final userRole = userData[
+            'userType']; // Assuming userType is a field in the Firestore document
+        print('Fetched first name: $firstName');
+        setState(() {
+          FirstName = firstName;
+          type = userRole;
+        });
+      }
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -198,28 +223,17 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white, // Set background color to white
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(5.0), // Adjust the radius as needed
-          ),
           title: Text('Are You Sure?'),
           content: Text('Do you want to log out?'),
           actions: <Widget>[
             TextButton(
-              child: Text(
-                'No',
-                style: TextStyle(color: Color.fromARGB(255, 59, 138, 207)),
-              ),
+              child: Text('No'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text(
-                'Yes',
-                style: TextStyle(color: Color.fromARGB(255, 59, 138, 207)),
-              ),
+              child: Text('Yes'),
               onPressed: () async {
                 Navigator.of(context).pop();
                 try {
@@ -278,7 +292,7 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the AppBar
       appBar: AppBar(
-        title: Text('Guardian Profile'), // Title for the AppBar
+        title: Text('$FirstName Profile'), // Title for the AppBar
         backgroundColor: Colors.transparent, // Transparent AppBar background
         elevation: 0, // No shadow
         leading: IconButton(
@@ -373,11 +387,12 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
                   icon: Icon(Icons.home),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => HomeScreenGaurdian(),
                       ),
+                      (route) => false,
                     );
                   },
                 ),

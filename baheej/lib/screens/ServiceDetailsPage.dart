@@ -145,18 +145,15 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
       // Check for conflicts by comparing start date, end date, time slot, and kids
       if (selectedStartDate.isBefore(serviceEndDate) &&
-              selectedEndDate.isAfter(serviceStartDate) ||
+          selectedEndDate.isAfter(serviceStartDate) &&
           selectedTimeSlot == serviceTimeSlot) {
         conflict = true;
         // ignore: use_build_context_synchronously
         // Conflict found
       } //if
     } //for
-    if (!conflict) {
+    if (conflict) {
       print('step1');
-      // ignore: use_build_context_synchronously
-      makePayment(context);
-    } else {
       // ignore: use_build_context_synchronously
       showDialog(
         context: context,
@@ -185,6 +182,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           );
         },
       );
+    } else {
+      makePayment(context);
+      // ignore: use_build_context_synchronously
     } // No conflict found
   }
 
@@ -224,8 +224,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     try {
       print('before await');
       await Stripe.instance.presentPaymentSheet();
-      succPayment();
+
       print('after await');
+      succPayment();
       // Show a success message
       // ignore: use_build_context_synchronously
       // showDialog(

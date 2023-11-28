@@ -306,50 +306,40 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Welcome $FirstName'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          Row(
-            children: [
-              IconButton(
-                icon: Stack(
-                  children: [
-                    Icon(
-                      Icons.notifications_active, // Bell icon
-                      color: Colors.white, // Set icon color to yellow
-                    ),
-
-                    // if (hasNewNotification) // Only show the indicator if there are new notifications
-                    //   Positioned(
-                    //     right: 0,
-                    //     top: 0,
-                    //     child: Container(
-                    //       padding: EdgeInsets.all(4),
-                    //       decoration: BoxDecoration(
-                    //         shape: BoxShape.circle,
-                    //         color: Colors.red, // Indicator color
-                    //       ),
-                    //       child: Text(
-                    //         '1',
-                    //         style: TextStyle(
-                    //           color: Colors.white,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                  ],
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: Stack(
+                    children: [
+                      Icon(
+                        Icons.notifications_active, // Bell icon
+                        color: Colors.white, // Set icon color to yellow
+                      ),
+                      // Indicator code here...
+                    ],
+                  ),
+                  onPressed: navigateToNotificationsPage,
                 ),
-                onPressed:
-                    navigateToNotificationsPage, // Navigate to notifications page
-              ),
-              IconButton(
-                icon: Icon(Icons.logout),
-                onPressed: _handleLogout,
-              ),
-            ],
-          ),
-        ],
+                SizedBox(width: 8), // Add some space between the icons and text
+              ],
+            ),
+            Text('Welcome $FirstName'),
+            Row(
+              children: [
+                SizedBox(width: 8), // Add some space between the text and icon
+                IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: _handleLogout,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       body: Stack(
         children: [
@@ -439,14 +429,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.grey,
+                                                color: Colors.black,
+                                                decoration:
+                                                    TextDecoration.underline,
                                               ),
                                             ),
-                                            Icon(
-                                              Icons.arrow_forward_ios,
-                                              size: 14,
-                                              color: Colors.grey,
-                                            ),
+                                            // Icon(
+                                            //   Icons.arrow_forward_ios,
+                                            //   size: 14,
+                                            //   color: Colors.grey,
+                                            // ),
                                           ],
                                         ),
                                       ),

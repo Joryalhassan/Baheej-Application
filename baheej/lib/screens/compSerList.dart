@@ -239,7 +239,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Completed Services Statistics'),
+        title: Text(' Programs Statistics'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -283,7 +283,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Service Name: ',
+                                          'Program Name: ',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
@@ -341,14 +341,29 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Text(
-                                          '${calculateAverageRating(services, service.serviceName).toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
+                                        FutureBuilder<double>(
+                                          future: calculateAverageRating(
+                                              service.serviceName),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return CircularProgressIndicator(); // Show loading indicator
+                                            } else if (snapshot.hasError) {
+                                              return Text(
+                                                  'Error'); // Show error message
+                                            } else {
+                                              return Text(
+                                                '${snapshot.data!.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              );
+                                            }
+                                          },
                                         ),
                                       ],
                                     ),
+
                                     TextButton(
                                       onPressed: () {
                                         _showServiceDetails(
@@ -412,7 +427,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                 Padding(
                   padding: EdgeInsets.only(top: 50),
                   child: Text(
-                    'Add Service',
+                    '        Add Programs',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -485,7 +500,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
           ),
           child: CupertinoActionSheet(
             title: Text(
-              'Service Details',
+              'Program Details',
               style: TextStyle(fontSize: 16.0, color: Colors.black),
             ),
             message: Column(
@@ -537,15 +552,34 @@ class _compSerListScreenState extends State<compSerListScreen> {
   }
 }
 
-double calculateAverageRating(List<Service> services, String serviceName) {
-  final List<Service> filteredServices =
-      services.where((service) => service.serviceName == serviceName).toList();
+Future<double> calculateAverageRating(String serviceName) async {
+  try {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('ServiceBook')
+        .where('serviceName', isEqualTo: serviceName)
+        .get();
 
-  if (filteredServices.isEmpty) {
+    if (snapshot.docs.isEmpty) {
+      return 0.0;
+    }
+
+    int sumOfStars = 0;
+    int totalServices = 0;
+
+    snapshot.docs.forEach((doc) {
+      final data = doc.data()
+          as Map<String, dynamic>?; // Cast to Map<String, dynamic> or null
+      final starsRate = data?['starsrate']; // Use null-aware access
+
+      if (starsRate != null && starsRate is int) {
+        sumOfStars += starsRate;
+        totalServices++;
+      }
+    });
+
+    return totalServices > 0 ? sumOfStars / totalServices.toDouble() : 0.0;
+  } catch (e) {
+    print('Error calculating average rating: $e');
     return 0.0;
   }
-
-  final totalRating =
-      filteredServices.fold(0, (sum, service) => sum + service.starsrate);
-  return totalRating / filteredServices.length;
 }
