@@ -98,6 +98,30 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     print('Error updating service participant number: $error');
   }
 }//add it to update part (jory)
+
+Future<void> succPayment() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // ignore: prefer_const_constructors
+          title: Text('Payment Successful'),
+          // ignore: prefer_const_constructors
+          content: Text('Your payment was successful!'),
+          actions: <Widget>[
+            TextButton(
+              // ignore: prefer_const_constructors
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); //  the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 //validation conflict service
   Future<void> checkForServiceConflict(
     DateTime selectedStartDate,
@@ -120,7 +144,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
       // Check for conflicts by comparing start date, end date, time slot, and kids
       if (selectedStartDate.isBefore(serviceEndDate) &&
-          selectedEndDate.isAfter(serviceStartDate) &&
+              selectedEndDate.isAfter(serviceStartDate) &&
           selectedTimeSlot == serviceTimeSlot) {
         conflict = true;
         // ignore: use_build_context_synchronously
@@ -128,8 +152,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       } //if
     } //for
     if (conflict) {
+      print('step1');
       // ignore: use_build_context_synchronously
-      showDialog(
+       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -140,24 +165,26 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               TextButton(
                 child: Text('No'), // User chooses not to proceed
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); //  the dialog
                 },
               ),
               TextButton(
-                child: Text('Yes'), // User chooses to proceed with payment
-                onPressed: () async {
-                  Navigator.of(context).pop(); // Close the dialog
+                child: Text('Yes'),
+                onPressed: () {
                   makePayment(context);
+                  Navigator.of(context).pop();
+                  // showDialog(
+                  // Make the payment
                 },
-              ),
+              )
             ],
           );
         },
       );
+   
     } else {
-      // ignore: use_build_context_synchronously
       makePayment(context);
-    } // No conflict found
+    } 
   }
 
 // create payment
@@ -195,33 +222,36 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     try {
       print('before await');
      // await Stripe.instance.presentPaymentSheet();//make it comment(jory)
+      
       print('after await');
       // Show a success message
+      succPayment();
       // ignore: use_build_context_synchronously
        
       
       
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            // ignore: prefer_const_constructors
-            title: Text('Payment Successful'),
-            // ignore: prefer_const_constructors
-            content: Text('Your payment was successful!'),
-            actions: <Widget>[
-              TextButton(
-                // ignore: prefer_const_constructors
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
-      
+       // Show a success message
+      // ignore: use_build_context_synchronously
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       // ignore: prefer_const_constructors
+      //       title: Text('Payment Successful'),
+      //       // ignore: prefer_const_constructors
+      //       content: Text('Your payment was successful!'),
+      //       actions: <Widget>[
+      //         TextButton(
+      //           // ignore: prefer_const_constructors
+      //           child: Text('OK'),
+      //           onPressed: () {
+      //             Navigator.of(context).pop(); //  the dialog
+      //           },
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
 
       final user = FirebaseAuth
           .instance.currentUser; //use it for display kids for this gaurd
@@ -800,17 +830,17 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       bookService(() {
-                         makePayment(context);
+                        
                         // Simulate a successful payment, then trigger fireworks
-                      //  checkForServiceConflict(
-                        //    widget.service.selectedStartDate,
-                        //    widget.service.selectedEndDate,
-                         //   widget.service.selectedTimeSlot);
-                        //addServiceToFirestore();
-                        // Check if payment is successful (you can replace this with your actual logic)
-                        //bool paymentSuccessful = true;
-                      });
-                    },
+                      checkForServiceConflict(
+                                  widget.service.selectedStartDate,
+                                  widget.service.selectedEndDate,
+                                  widget.service.selectedTimeSlot);
+                              //addServiceToFirestore();
+                              // Check if payment is successful (you can replace this with your actual logic)
+                              //bool paymentSuccessful = true;
+                            });
+                          },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(255, 59, 138, 207),
                       onPrimary: Colors.white,

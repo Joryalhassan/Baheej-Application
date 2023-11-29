@@ -67,6 +67,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         'fname': _FnameTextController.text.trim(),
         'lname': _LnameTextController.text.trim(),
         'email': _emailTextController.text.trim(),
+        'selectedGender':selectedGender,
         'type': 'guardian',
         'phonenumber': _PhoneNumTextController.text.trim(),
       });
