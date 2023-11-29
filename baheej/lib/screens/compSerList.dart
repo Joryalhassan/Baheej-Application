@@ -228,9 +228,10 @@ class _compSerListScreenState extends State<compSerListScreen> {
   }
 
   void navigateToSignInScreen() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
     );
   }
 

@@ -1,62 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/*class StarRating extends StatefulWidget {
-  final int initialRating;
-  final String serviceDocumentId; // Add the service document ID
-  final void Function(int) onRatingChanged;
-
-  StarRating({
-    required this.initialRating,
-    required this.serviceDocumentId,
-    required this.onRatingChanged,
-  });
-
-  @override
-  _StarRatingState createState() => _StarRatingState();
-}
-
-class _StarRatingState extends State<StarRating> {
-  late int currentRating;
-
-  @override
-  void initState() {
-    super.initState();
-    currentRating = widget.initialRating;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(
-        5,
-        (index) => IconButton(
-          onPressed: () async {
-            double newRating = index + 1.0;
-            setState(() {
-              currentRating = newRating;
-            });
-
-            // Update Firestore with the new rating
-            await FirebaseFirestore.instance
-                .collection('ServiceBook')
-                .doc(widget.serviceDocumentId)
-                .update({'starsrate': newRating});
-
-            widget.onRatingChanged(newRating);
-          },
-          icon: Icon(
-            index < currentRating ? Icons.star : Icons.star_border,
-            color: Colors.amber,
-          ),
-        ),
-      ),
-    );
-  }
-}*/
-// Import necessary packages and libraries
-
 class StarRating extends StatefulWidget {
   final String serviceDocumentId;
   final void Function(int) onRatingChanged;
@@ -74,6 +18,8 @@ class StarRating extends StatefulWidget {
 
 class _StarRatingState extends State<StarRating> {
   late int currentRating;
+  bool canEditRating = true;
+  bool ratingSubmitted = false;
 
   @override
   void initState() {
@@ -83,40 +29,120 @@ class _StarRatingState extends State<StarRating> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(
-        5,
-        (index) => IconButton(
-          onPressed: () async {
-            int newRating = index + 1;
-            setState(() {
-              currentRating = newRating;
-            });
-
-            try {
-              // Update Firestore with the new rating
-              await FirebaseFirestore.instance
-                  .collection('ServiceBook')
-                  .doc(widget.serviceDocumentId)
-                  .update({'starsrate': newRating}).then((_) {
-                print('Document ID: ${widget.serviceDocumentId}');
-              }).catchError((error) {
-                print('Error updating rating: $error');
-              });
-
-              widget.onRatingChanged(newRating);
-            } catch (e) {
-              // Handle Firestore update error
-              print('Error updating rating: $e');
-            }
-          },
-          icon: Icon(
-            index < currentRating ? Icons.star : Icons.star_border,
-            color: Colors.amber,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(
+            5,
+            (index) => IconButton(
+              onPressed: canEditRating
+                  ? () {
+                      int newRating = index + 1;
+                      setState(() {
+                        currentRating = newRating;
+                      });
+                    }
+                  : null,
+              icon: Icon(
+                index < currentRating ? Icons.star : Icons.star_border,
+                color: Colors.amber,
+              ),
+            ),
           ),
         ),
-      ),
+        SizedBox(height: 16),
+        Center(
+          child: ElevatedButton(
+            onPressed: canEditRating
+                ? () {
+                    // Show confirmation dialog
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Confirm Rating'),
+                          content: Text('Do you want to save your rating?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                // Update Firestore with the new rating
+                                try {
+                                  await FirebaseFirestore.instance
+                                      .collection('ServiceBook')
+                                      .doc(widget.serviceDocumentId)
+                                      .update({'starsrate': currentRating});
+
+                                  widget.onRatingChanged(currentRating);
+
+                                  // Close the confirmation dialog
+                                  Navigator.of(context).pop();
+
+                                  // Disable further rating changes
+                                  setState(() {
+                                    canEditRating = false;
+                                  });
+
+                                  // Show a thank-you message
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Thank You!'),
+                                        content: Text(
+                                            'Your feedback has been saved.'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('OK'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                } catch (e) {
+                                  // Handle Firestore update error
+                                  print('Error updating rating: $e');
+                                }
+                              },
+                              child: Text(
+                                'Save',
+                                style: TextStyle(
+                                    fontSize:
+                                        16.0), // Adjust the font size here
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                : null,
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(
+                  Color.fromARGB(255, 59, 138, 207)),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+              ),
+            ),
+            child: Text(
+              'Submit Rating',
+              style: TextStyle(fontSize: 15.0), // Adjust the font size here
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

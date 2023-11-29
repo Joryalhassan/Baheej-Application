@@ -7,9 +7,14 @@ import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'dart:async';
-//import 'package:baheej/screens/LocalNotificationHandler.dart';
+import 'package:baheej/screens/NotificationsPage.dart';
+import 'package:baheej/screens/LocalNotificationHandler.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 //import 'package:baheej/screens/NotificationsPage.dart';
 import 'package:baheej/screens/GProfileScreen.dart';
+//import 'package:baheej/screens/LocalNotificationHandler.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -26,16 +31,22 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   TextEditingController _searchController = TextEditingController();
   Timer? _pollingTimer; // The timer for polling
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  //LocalNotificationHandler _notificationHandler = LocalNotificationHandler();
+
   final Set<String> notifiedDocumentIds = Set<String>();
   StreamSubscription<QuerySnapshot>?
       _subscription; // To manage the subscription
   //final String? payload;
 
-  bool hasNewNotification = false;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
+  @override
   void initState() {
     super.initState();
+    initializeNotifications();
+    startPollingNotifications();
+    requestNotificationPermission();
+
     fetchDataFromFirebase().then((services) {
       setState(() {
         _allServices = services;
@@ -43,69 +54,83 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       });
     });
     fetchName(); // Call fetchName to fetch the user's first name
-
-    _pollingTimer = Timer.periodic(
-        Duration(seconds: 30), (timer) => checkForNotifications());
+    ;
   }
 
-  void checkForNotifications() {
-    final User? user = _auth.currentUser;
-    if (user != null) {
-      final String currentUserId = user.uid;
-      final firestore = FirebaseFirestore.instance;
-
-      // Cancel any existing subscription before starting a new one
-      _subscription?.cancel();
-
-      _subscription = firestore
-          .collection('notifications')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .snapshots()
-          .listen((querySnapshot) {
-        for (var doc in querySnapshot.docs) {
-          if (!notifiedDocumentIds.contains(doc.id)) {
-            final String? message = doc.data()?['message'];
-            if (message != null) {
-              //   _notificationHandler.showNotification('Baheej App', message);
-              notifiedDocumentIds.add(doc.id);
-              doc.reference.update({
-                'seenBy': FieldValue.arrayUnion([currentUserId])
-              });
-
-              // Set hasNewNotification to true when a new notification is received
-              setState(() {
-                hasNewNotification = true;
-              });
-            }
-          }
-        }
-      });
+  Future<void> requestNotificationPermission() async {
+    if (await Permission.notification.request().isGranted) {
+      print('Local notification permission granted');
     } else {
-      // Handle the scenario where the user is not logged in, if needed.
+      print('Local notification permission denied');
     }
   }
 
-  void stopListening() {
-    _subscription?.cancel();
-    _subscription = null;
-  }
-
-  void _showLocalNotification(String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Bheej App'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Close'),
-          ),
-        ],
-      ),
+  void initializeNotifications() async {
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+      iOS: initializationSettingsIOS,
+    );
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
     );
   }
+
+  // void initializeNotifications() async {
+  //   const DarwinInitializationSettings initializationSettingsIOS =
+  //       DarwinInitializationSettings();
+  //   final InitializationSettings initializationSettings =
+  //       InitializationSettings(
+  //     iOS: initializationSettingsIOS,
+  //   );
+  //   await flutterLocalNotificationsPlugin.initialize(
+  //     initializationSettings,
+  //   );
+  // }
+
+  Future<void> startPollingNotifications() async {
+    _pollingTimer = Timer.periodic(Duration(seconds: 15), (_) {
+      checkNewNotification();
+    });
+  }
+
+  Future<void> checkNewNotification() async {
+    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance.collection('notification2').get();
+
+    querySnapshot.docs.forEach((doc) {
+      final String message = doc.data()['message'] ?? '';
+      if (!notifiedDocumentIds.contains(doc.id)) {
+        notifiedDocumentIds.add(doc.id);
+        showNotification(message);
+      }
+    });
+  }
+
+  Future<void> showNotification(String message) async {
+    const DarwinNotificationDetails iosPlatformChannelSpecifics =
+        DarwinNotificationDetails();
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(iOS: iosPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Advertisement',
+      message,
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
+  }
+
+// Future<void> onDidReceiveNotificationResponse(String? payload) async {
+//   // Handle notification click event if needed
+
+//onDidReceiveNotificationResponse: onDidReceiveNotificationResponse 000
+// }
 
   @override
   void dispose() {
@@ -318,13 +343,20 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                     children: [
                       Icon(
                         Icons.notifications_active, // Bell icon
-                        color: Colors.white, // Set icon color to yellow
+                        color: Colors.white,
+                        // Set icon color to yellow
                       ),
-                      // Indicator code here...
                     ],
                   ),
-                  onPressed: navigateToNotificationsPage,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NotificationsPage()),
+                    );
+                  },
                 ),
+
                 SizedBox(width: 8), // Add some space between the icons and text
               ],
             ),
@@ -434,11 +466,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                                     TextDecoration.underline,
                                               ),
                                             ),
-                                            // Icon(
-                                            //   Icons.arrow_forward_ios,
-                                            //   size: 14,
-                                            //   color: Colors.grey,
-                                            // ),
                                           ],
                                         ),
                                       ),

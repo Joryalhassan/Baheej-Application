@@ -103,6 +103,7 @@ class _SignInScreenState extends State<SignInScreen> {
           "Sign In",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
+        // automaticallyImplyLeading: false, // This line will hide the back arrow
       ),
       body: Stack(
         children: [

@@ -1,59 +1,187 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class NotificationService1 {
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
+// class LocalNotificationHandler {
+
+//   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+
+//       FlutterLocalNotificationsPlugin();
+
+//   LocalNotificationHandler() {
+
+//     var initializationSettingsAndroid =
+
+//         AndroidInitializationSettings('app_icon');
+
+//     var initializationSettingsIOS = DarwinInitializationSettings(
+
+//       requestAlertPermission: true,
+
+//       requestBadgePermission: true,
+
+//       requestSoundPermission: true,
+
+//     );
+
+//     var initializationSettings = InitializationSettings(
+
+//         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+//     flutterLocalNotificationsPlugin.initialize(
+
+//       initializationSettings,
+
+//       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+
+//     );
+
+//   }
+
+//   // Update the callback method to match the expected signature
+
+//   void onDidReceiveNotificationResponse(
+
+//       NotificationResponse notificationResponse) {
+
+//     // Handle your notification selected action here
+
+//     // Since NotificationResponse is not a String, you need to handle it accordingly
+
+//   }
+
+//   Future<void> showNotification(String title, String body) async {
+
+//     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+
+//       'channel_ID',
+
+//       'channel_name',
+
+//       importance: Importance.max,
+
+//       priority: Priority.high,
+
+//     );
+
+//     var iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+
+//     var platformChannelSpecifics = NotificationDetails(
+
+//         android: androidPlatformChannelSpecifics,
+
+//         iOS: iOSPlatformChannelSpecifics);
+
+//     await flutterLocalNotificationsPlugin.show(
+
+//       0,
+
+//       title,
+
+//       body,
+
+//       platformChannelSpecifics,
+
+//     );
+
+//   }
+
+//   Future<void> showNotificationWithCustomMessage(
+
+//       String title, String body) async {
+
+//     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+
+//       'channel_ID',
+
+//       'channel_name',
+
+//       importance: Importance.max,
+
+//       priority: Priority.high,
+
+//     );
+
+//     var iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+
+//     var platformChannelSpecifics = NotificationDetails(
+
+//         android: androidPlatformChannelSpecifics,
+
+//         iOS: iOSPlatformChannelSpecifics);
+
+//     await flutterLocalNotificationsPlugin.show(
+
+//       0,
+
+//       title,
+
+//       body,
+
+//       platformChannelSpecifics,
+
+//     );
+
+//   }
+
+// }
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+class LocalNotificationHandler {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> initNotification() async {
-    AndroidInitializationSettings initializationSettingsAndroid =
-        const AndroidInitializationSettings('flutter_logo');
+  LocalNotificationHandler() {
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    var initializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        onDidReceiveLocalNotification:
-            (int id, String? title, String? body, String? payload) async {});
+    var initializationSettingsIOS = DarwinInitializationSettings();
 
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    await notificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse:
-            (NotificationResponse notificationResponse) async {});
+
+    flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+    );
   }
 
-  notificationDetails() {
-    return const NotificationDetails(
-        android: AndroidNotificationDetails('channelId', 'channelName',
-            importance: Importance.max),
-        iOS: DarwinNotificationDetails());
+  Future<void> showNotification(String title, String body) async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'channel_ID',
+
+      'channel_name',
+
+      // 'channel_description',
+
+      importance: Importance.max,
+
+      priority: Priority.high,
+    );
+
+    var iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+
+    var platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+    );
   }
 
-  Future showNotification(
-      {int id = 0, String? title, String? body, String? payLoad}) async {
-    return notificationsPlugin.show(
-        id, title, body, await notificationDetails());
-  }
+  Future<void> onDidReceiveNotificationResponse(
+      NotificationResponse? response) async {
+    if (response?.payload != null) {
+      debugPrint('Notification payload: ${response?.payload}');
+    }
 
-  Future scheduleNotification(
-      {int id = 0,
-      String? title,
-      String? body,
-      String? payLoad,
-      required DateTime scheduledNotificationDateTime}) async {
-    return notificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(
-          scheduledNotificationDateTime,
-          tz.local,
-        ),
-        await notificationDetails(),
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
+    // Navigate to a particular screen when the notification is tapped
+
+    // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => YourScreen()));
   }
 }

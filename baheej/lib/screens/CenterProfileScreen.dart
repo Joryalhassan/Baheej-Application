@@ -223,6 +223,14 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     );
   }
 
+  void navigateToSignInScreen() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
+    );
+  }
+
   Future<void> _handleLogout() async {
     showDialog(
       context: context,
@@ -284,13 +292,6 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
           ],
         );
       },
-    );
-  }
-
-  void navigateToSignInScreen() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => SignInScreen()),
     );
   }
 

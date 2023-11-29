@@ -242,9 +242,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   }
 
   void navigateToSignInScreen() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
     );
   }
 
@@ -389,7 +390,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "You don't have any programs yet.",
+                                  "You don't have any services yet.",
                                   style: TextStyle(
                                       fontSize: 16, color: Colors.grey),
                                 ),
@@ -573,33 +574,34 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        EditService(
-                                                      service: service,
-                                                      onUpdateService:
-                                                          updateService,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
+                                              // onTap: () {
+                                              //   Navigator.push(
+                                              //     context,
+                                              //     MaterialPageRoute(
+                                              //       builder: (context) =>
+                                              //       //     EditService(
+                                              //       //   service: service,
+                                              //       //   onUpdateService:
+                                              //       //       updateService,
+                                              //       // ),
+                                              //     //),
+                                              //   );
+                                              // },
                                               child: Row(
                                                 children: [
                                                   Text(
                                                     'Edit Program',
                                                     style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        decoration:
-                                                            TextDecoration
-                                                                .underline,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 59, 138, 207)),
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              255,
+                                                              158,
+                                                              158,
+                                                              158),
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -616,8 +618,6 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      decoration: TextDecoration
-                                                          .underline,
                                                       color: Colors.red,
                                                     ),
                                                   ),

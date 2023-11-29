@@ -272,9 +272,10 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
   }
 
   void navigateToSignInScreen() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
     );
   }
 
