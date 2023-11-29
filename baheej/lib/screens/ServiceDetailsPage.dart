@@ -334,7 +334,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 height: 400,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage("assets/images/family.png"),
+                        image: AssetImage("assets/images/newkids.png"),
                         fit: BoxFit.cover)),
               ),
             ),
@@ -799,7 +799,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             primary: Color.fromARGB(255, 59, 138, 207),
-                            onPrimary: const Color.fromARGB(255, 0, 0, 0),
+                            onPrimary: Color.fromARGB(255, 255, 255, 255),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.0),
                             ),
