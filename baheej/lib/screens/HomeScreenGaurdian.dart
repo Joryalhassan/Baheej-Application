@@ -94,7 +94,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   // }
 
   Future<void> startPollingNotifications() async {
-    _pollingTimer = Timer.periodic(Duration(seconds: 15), (_) {
+    _pollingTimer = Timer.periodic(Duration(seconds: 5), (_) {
       checkNewNotification();
     });
   }
@@ -119,7 +119,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         NotificationDetails(iOS: iosPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
       0,
-      'New Advertisement',
+      'Baheej App',
       message,
       platformChannelSpecifics,
       payload: 'item x',

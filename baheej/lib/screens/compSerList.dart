@@ -46,6 +46,9 @@ class _compSerListScreenState extends State<compSerListScreen> {
     }
   }
 
+  void _dummyServiceAddedFunction() {
+    // This function intentionally left blank.
+  }
 // Fetch the number of booked services for the specified center
   Future<int> getBookedServicesCount(String centerName) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -400,15 +403,17 @@ class _compSerListScreenState extends State<compSerListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.home_filled),
+                  icon: Icon(Icons.home),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            HomeScreenCenter(centerName: centerName),
+                        builder: (context) => HomeScreenCenter(
+                          centerName: centerName,
+                        ),
                       ),
+                      (route) => false,
                     );
                   },
                 ),
@@ -451,6 +456,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
                         builder: (context) => CenterProfileViewScreen(),
                       ),
                     );
+
                     // Handle profile button tap
                   },
                 ),
@@ -471,10 +477,11 @@ class _compSerListScreenState extends State<compSerListScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
+              builder: (context) =>
+                  ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
             ),
           );
         },

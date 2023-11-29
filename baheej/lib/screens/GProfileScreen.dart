@@ -114,13 +114,35 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
 
       // Navigate to the login or welcome screen after deletion
       // Replace with your app's navigation logic
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => SignInScreen()),
-      );
+      showDeleteSuccessDialog();
+      // Navigator.of(context).pushReplacement(
+      //  MaterialPageRoute(builder: (context) => SignInScreen()),
+      //);
     } catch (e) {
       // Handle errors, e.g., show an error message
       print("Error deleting account: $e");
     }
+  }
+
+  void showDeleteSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Account deleted Successfully'),
+          content: Text('You have successfully Deleted your account.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _confirmDeleteAccount() async {
@@ -293,7 +315,7 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the AppBar
       appBar: AppBar(
-        title: Text('$FirstName Profile'), // Title for the AppBar
+        title: Text("${_fnameController.text} Profile"), // Title for the AppBar
         backgroundColor: Colors.transparent, // Transparent AppBar background
         elevation: 0, // No shadow
         leading: IconButton(

@@ -28,7 +28,8 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
 
   String? _selectedDistrict;
   bool _isLoading = true;
-  String? centerName; // New field to track loading state
+  String? centerName = '';
+  // String centerName = '';// New field to track loading state
 
   @override
   void initState() {
@@ -36,6 +37,10 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     fetchCenterName();
     _loadUserData();
     // Fetch the center name
+  }
+
+  void _dummyServiceAddedFunction() {
+    // This function intentionally left blank.
   }
 
   void fetchCenterName() async {
@@ -119,13 +124,32 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
 
       // Navigate to the login or welcome screen after deletion
       // Replace with your app's navigation logic
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => SignInScreen()),
-      );
+      showDeleteSuccessDialog();
     } catch (e) {
       // Handle errors, e.g., show an error message
       print("Error deleting account: $e");
     }
+  }
+
+  void showDeleteSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Account deleted Successfully'),
+          content: Text('You have successfully Deleted your account.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _confirmDeleteAccount() async {
@@ -395,15 +419,16 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.home_filled),
+                  icon: Icon(Icons.home),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => HomeScreenCenter(
                             centerName: _userNameTextController.text),
                       ),
+                      (route) => false,
                     );
                   },
                 ),
@@ -427,7 +452,8 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
+              builder: (context) =>
+                  ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
             ),
           );
         },

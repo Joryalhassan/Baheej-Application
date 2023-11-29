@@ -3,13 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: ServiceFormScreen(),
-  ));
-}
-
 class ServiceFormScreen extends StatefulWidget {
+  final Function onServiceAdded;
+  ServiceFormScreen({required this.onServiceAdded});
   @override
   _ServiceFormScreenState createState() => _ServiceFormScreenState();
 }
@@ -294,18 +290,23 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     }
   }
 
-  void _showSuccessDialog() {
-    showDialog(
+  Future<void> _showSuccessDialog() async {
+    return showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Success'),
-          content: Text('Service added successfully!'),
+          content: Text('Program added successfully!'),
           actions: [
             TextButton(
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
+                widget.onServiceAdded();
+                // Call the callback to refresh services
+                Navigator.pop(context);
+                (route) => false; // Go back to HomeScreenCenter
               },
             ),
           ],
@@ -351,7 +352,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           ),
           SizedBox(height: 4),
           TextFormField(
-            keyboardType: label == 'Service Capacity'
+            keyboardType: label == 'Program Capacity'
                 ? TextInputType.number
                 : TextInputType.text,
             decoration: InputDecoration(
@@ -372,7 +373,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
             ),
             validator:
-                label == 'Service Capacity' ? validateCapacity : validator,
+                label == 'Program Capacity' ? validateCapacity : validator,
             onChanged: (value) {
               setState(() {
                 if (label == 'Program Name') {
@@ -711,7 +712,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         Padding(
                           padding: EdgeInsets.only(right: 130.0),
                           child: Text(
-                            'Add Service',
+                            'Add Program',
                             style: TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.w700,
@@ -867,7 +868,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                               'You must select both start and end dates!');
                         } else if (selectedTimeSlot == null) {
                           _showDialog(
-                              'Warning', 'You must select the service time!');
+                              'Warning', 'You must select the Program time!');
                         } else {
                           sendDataToFirebase();
                         }

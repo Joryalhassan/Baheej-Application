@@ -47,11 +47,24 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Create Advertisement'),
-          content: TextField(
-            controller: adMessageController,
-            decoration: InputDecoration(
-              hintText: 'Enter your advertisement message',
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: adMessageController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your advertisement message',
+                ),
+                maxLength: 100, // Maximum characters allowed
+                maxLines: null, // Allow multiple lines
+              ),
+              SizedBox(height: 10),
+              // Text(
+              //   'Minimum 15 characters required',
+              //   style: TextStyle(color: Colors.red),
+              // ),
+            ],
           ),
           actions: <Widget>[
             TextButton(
@@ -64,7 +77,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
               child: Text('Submit'),
               onPressed: () async {
                 String adMessage = adMessageController.text.trim();
-                if (adMessage.isNotEmpty) {
+                if (adMessage.isNotEmpty && adMessage.length >= 15) {
                   // Store ad message in Firestore under 'notification2' collection
                   await FirebaseFirestore.instance
                       .collection('notification2')
@@ -72,8 +85,30 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                     'message': adMessage,
                     'timestamp': DateTime.now(),
                   });
+
+                  // Show a SnackBar to indicate successful notification sent
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Notification sent successfully!'),
+                      backgroundColor:
+                          Colors.green, // Set background color to green
+                    ),
+                  );
+
                   adMessageController.clear(); // Clear the text field
                   Navigator.of(context).pop(); // Close the dialog
+                } else {
+                  // Show an error message if the entered text is invalid
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Please enter at least 15 characters!',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 255, 255, 255)),
+                      ),
+                      backgroundColor: Color.fromARGB(255, 249, 0, 0),
+                    ),
+                  );
                 }
               },
             ),
@@ -176,6 +211,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         filteredServices = loadedServices;
       });
     }
+  }
+
+  void reloadServices() async {
+    await loadServices();
   }
 
   Future<void> _handleLogout() async {
@@ -327,27 +366,28 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         actions: [
           SizedBox(width: 10), // Add space to the left of the first icon
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: Icon(Icons.notification_add),
             onPressed: () {
               _showAdMessageDialog();
             },
           ),
-          SizedBox(width: 10), // Add space between the icons and the text
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 4), // Adjust the height to move the text down
-              Text(
-                'Welcome ${widget.centerName}',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          SizedBox(width: 60), // Add space between the icons and the text
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Welcome ${widget.centerName}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-          SizedBox(width: 70), // Add space between the text and the last icon
+          SizedBox(width: 10), // Add space between the text and the last icon
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -574,34 +614,33 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                              // onTap: () {
-                                              //   Navigator.push(
-                                              //     context,
-                                              //     MaterialPageRoute(
-                                              //       builder: (context) =>
-                                              //       //     EditService(
-                                              //       //   service: service,
-                                              //       //   onUpdateService:
-                                              //       //       updateService,
-                                              //       // ),
-                                              //     //),
-                                              //   );
-                                              // },
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditService(
+                                                      service: service,
+                                                      onUpdateService:
+                                                          updateService,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                               child: Row(
                                                 children: [
                                                   Text(
                                                     'Edit Program',
                                                     style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              158,
-                                                              158,
-                                                              158),
-                                                    ),
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 59, 138, 207),
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline),
                                                   ),
                                                 ],
                                               ),
@@ -615,11 +654,13 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                                   Text(
                                                     'Delete Program',
                                                     style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.red,
-                                                    ),
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.red,
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline),
                                                   ),
                                                 ],
                                               ),
@@ -726,7 +767,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
+              builder: (context) =>
+                  ServiceFormScreen(onServiceAdded: reloadServices),
             ),
           );
         },

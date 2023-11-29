@@ -374,7 +374,13 @@ class _EditServiceState extends State<EditService> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
+              builder: (context) => ServiceFormScreen(
+                onServiceAdded: (Service newService) {
+                  // Dummy implementation for testing
+                  print("New service added: ${newService.serviceName}");
+                  // You can add more dummy actions here as needed
+                },
+              ),
             ),
           );
         },
