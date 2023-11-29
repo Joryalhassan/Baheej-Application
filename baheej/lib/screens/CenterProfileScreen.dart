@@ -37,6 +37,10 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     _loadUserData();
     // Fetch the center name
   }
+  void _dummyServiceAddedFunction() {
+  // This function intentionally left blank.
+}//add by jo to fix serviceadding
+
 
   void fetchCenterName() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -443,11 +447,11 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
-            ),
-          );
+      context,
+      MaterialPageRoute(
+        builder: (context) => ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
+      ),
+    );
         },
         child: Icon(
           Icons.add,

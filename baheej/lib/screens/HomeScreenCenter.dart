@@ -1,4 +1,5 @@
 import 'package:baheej/screens/EditService.dart';
+//import 'package:baheej/screens/compSerList.dart';jorycom
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,7 +9,10 @@ import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
-
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';jorycom
+//import 'package:timezone/data/latest.dart' as tz;jorycom
+//import 'package:timezone/timezone.dart' as tz;jorycom
+// import 'package:baheej/screens/NotificationService1.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -23,135 +27,86 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   List<Service> services = [];
   List<Service> filteredServices = [];
   TextEditingController _searchController = TextEditingController();
-
-  String userName = ''; // Initialize userName
+  String centerName = ''; // Declare centerName here
   String? userRole;
-
   TextEditingController notificationMessageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     loadServices();
-    fetchUserName();
-    fetchUserRoleAndName();
   }
 
-// notification
-  Future<void> sendNotification(String message) async {
-    final firestore = FirebaseFirestore.instance;
+  ///0000000
 
-    // Add the notification to Firestore
-    await firestore.collection('notifications').add({
-      'message': '$userName: $message', // Update the format here
-      'timestamp': FieldValue.serverTimestamp(),
-      'seenBy': [], // Initialize the seenBy field as an empty list
-      'centerName': userName,
-    });
+  TextEditingController adMessageController = TextEditingController();
 
-    //normal message
-
-    // final scaffold = ScaffoldMessenger.of(context);
-    // scaffold.showSnackBar(
-    //   SnackBar(
-    //     content: Text('Notification sent successfully!'),
-    //     backgroundColor: Colors.green, // Set the background color to green
-    //   ),
-    // );
-
-    // pop up message
-
+  void _showAdMessageDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Success'),
-          content: Text('Notification sent successfully!'),
+          title: Text('Create Advertisement'),
+          content: TextField(
+            controller: adMessageController,
+            decoration: InputDecoration(
+              hintText: 'Enter your advertisement message',
+            ),
+          ),
           actions: <Widget>[
             TextButton(
+              child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+            ),
+            TextButton(
+              child: Text('Submit'),
+              onPressed: () async {
+                String adMessage = adMessageController.text.trim();
+                if (adMessage.isNotEmpty) {
+                  // Store ad message in Firestore under 'notification2' collection
+                  await FirebaseFirestore.instance
+                      .collection('notification2')
+                      .add({
+                    'message': adMessage,
+                    'timestamp': DateTime.now(),
+                  });
+                  adMessageController.clear(); // Clear the text field
+                  Navigator.of(context).pop(); // Close the dialog
+                }
+              },
             ),
           ],
         );
       },
     );
-
-    // Fetch the user's type
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-      final userDoc = await firestore.collection('users').doc(userId).get();
-      if (userDoc.exists) {
-        final userType = userDoc['type'];
-        if (userType == 'guardian') {
-          sendNotification(message);
-        }
-      }
-    }
   }
 
-  Future<void> fetchUserRoleAndName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-      final centerDoc = await FirebaseFirestore.instance
-          .collection('center')
-          .doc(userId)
-          .get();
-      if (centerDoc.exists) {
-        userRole = 'center'; // Set user role to center
-        final userData = centerDoc.data() as Map<String, dynamic>;
-        final firstName = userData['username'] ?? '';
-        setState(() {
-          userName = firstName;
-        });
-      } else {
-        final guardianDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .get();
-        if (guardianDoc.exists) {
-          userRole = 'guardian'; // Set user role to guardian
-        }
-      }
+//000000
+
+  double calculatePercentageBooked(int capacity, int participants) {
+    if (capacity <= 0) {
+      return 0.0; // Return 0 if capacity is invalid
     }
+
+    return (participants / capacity) * 100; // Calculate percentage booked
   }
-
-  void fetchUserName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userId = user.uid;
-      final userDoc = await FirebaseFirestore.instance
-          .collection('center')
-          .doc(userId)
-          .get();
-      if (userDoc.exists) {
-        final userData = userDoc.data() as Map<String, dynamic>;
-        final firstName = userData['username'] ?? '';
-        setState(() {
-          userName = firstName;
-        });
-      }
-    }
-  }
-
-  // void onTabTapped(int index) {
-  //   setState(() {
-  //     _currentIndex = index;
-  //   });
-
-  //   if (index == 1) {
-  //     navigateToServiceFormScreen();
-  //   }
-  // }
 
   Future<void> loadServices() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
+
+      // Fetch user center data
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        // Now you can use centerDoc.data() to access the data
+        centerName = centerDoc.data()!['username'];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('center-service')
@@ -180,10 +135,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             } else {
               selectedEndDate = DateTime.now();
             }
+            final participantNo = data['participateNo'] ?? 0;
 
             // Check if the start date is today or earlier
-            if (!selectedStartDate.isBefore(currentDate)&& 
-              (data['participateNo'] as int? ?? 0) < (data['serviceCapacity'] as int? ?? 0)) {
+            if (!selectedStartDate.isBefore(currentDate)) {
               return Service(
                 id: doc.id,
                 serviceName:
@@ -204,8 +159,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         : 0.0),
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-                    participateNo: data['participateNo'] as int? ?? 0,
-                    starsrate: data['starsrate'] as int? ??0,
+                participateNo: participantNo,
+                starsrate: data['starsrate'] as int? ?? 0,
               );
             } else {
               // Return null for services with start dates in the past or today
@@ -222,6 +177,11 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       });
     }
   }
+  void reloadServices() async {
+  await loadServices();
+}//add by jo
+
+
 
   Future<void> _handleLogout() async {
     showDialog(
@@ -287,9 +247,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   }
 
   void navigateToSignInScreen() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
     );
   }
 
@@ -310,7 +271,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Service'),
+          title: Text('Delete Program'),
           content: Text('Are you sure you want to delete this service?'),
           actions: <Widget>[
             TextButton(
@@ -366,54 +327,32 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Welcome ${widget.centerName}'),
-        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          if (userRole == 'center') // Only show the bell icon for center users
-            IconButton(
-              icon: Icon(Icons.notifications),
-              // You can replace this with your custom bell icon
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text('Send Notification'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          TextField(
-                            controller: notificationMessageController,
-                            decoration: InputDecoration(
-                              labelText: 'Notification Message',
-                            ),
-                          ),
-                        ],
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text('Done'),
-                          onPressed: () {
-                            sendNotification(
-                                notificationMessageController.text);
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              color: Colors.yellow,
-            ),
+          SizedBox(width: 10), // Add space to the left of the first icon
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              _showAdMessageDialog();
+            },
+          ),
+          SizedBox(width: 10), // Add space between the icons and the text
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 4), // Adjust the height to move the text down
+              Text(
+                'Welcome ${widget.centerName}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 70), // Add space between the text and the last icon
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -434,13 +373,16 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             padding: EdgeInsets.only(top: 160, left: 16, right: 16),
             child: Column(
               children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                ),
                 TextField(
                   controller: _searchController,
                   onChanged: (value) {
                     _handleSearch(value);
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search services...',
+                    hintText: 'Search Programs...',
                     prefixIcon: Icon(Icons.search),
                   ),
                   toolbarOptions: null,
@@ -483,7 +425,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Name: ',
+                                              'Program name: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -536,7 +478,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Time: ',
+                                              'Program Time: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -617,7 +559,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Price: ',
+                                              'Program Price: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -637,23 +579,23 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
+                                               onTap: () {
+                                              Navigator.push(
+                                                   context,
+                                                   MaterialPageRoute(
+                                                     builder: (context) =>
                                                         EditService(
-                                                      service: service,
+                                                       service: service,
                                                       onUpdateService:
-                                                          updateService,
-                                                    ),
+                                                         updateService,
+                                                   ),
                                                   ),
-                                                );
-                                              },
+                                                 );
+                                               },
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    'Edit Service',
+                                                    'Edit Program',
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -676,7 +618,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    'Delete Service',
+                                                    'Delete Program',
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -717,11 +659,18 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   icon: Icon(Icons.history),
                   color: Colors.white,
                   onPressed: () {
-                    // Handle booking history button tap
+                  //  Navigator.push(jorycom
+                     // context,jorycom
+                      //MaterialPageRoute(jorycom
+                       // builder: (context) =>jorycom
+                        //    compSerListScreen(centerName: centerName),jorycom
+                     // ),jorycom
+                   // );jorycom
+                    // Handle profile button tap
                   },
                 ),
                 Text(
-                  'Booking Service',
+                  'Booked Programs',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -736,7 +685,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 Padding(
                   padding: EdgeInsets.only(top: 50),
                   child: Text(
-                    'Add Service',
+                    'Add Program',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -780,11 +729,11 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
-            ),
-          );
+      context,
+      MaterialPageRoute(
+        builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
+      ),
+    );
         },
         child: Icon(
           Icons.add,

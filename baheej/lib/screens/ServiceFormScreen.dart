@@ -3,13 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: ServiceFormScreen(),
-  ));
-}
+
 
 class ServiceFormScreen extends StatefulWidget {
+    final Function onServiceAdded;
+    ServiceFormScreen({required this.onServiceAdded});
   @override
   _ServiceFormScreenState createState() => _ServiceFormScreenState();
 }
@@ -294,25 +292,28 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     }
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Success'),
-          content: Text('Service added successfully!'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  Future<void> _showSuccessDialog() async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Success'),
+        content: Text('Program added successfully!'),
+        actions: [
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              widget.onServiceAdded(); // Call the callback to refresh services
+              Navigator.pop(context); // Go back to HomeScreenCenter
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _showDialog(String title, String content) {
     showDialog(
@@ -351,7 +352,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           ),
           SizedBox(height: 4),
           TextFormField(
-            keyboardType: label == 'Service Capacity'
+            keyboardType: label == 'Program Capacity'
                 ? TextInputType.number
                 : TextInputType.text,
             decoration: InputDecoration(
@@ -372,19 +373,19 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
               ),
             ),
             validator:
-                label == 'Service Capacity' ? validateCapacity : validator,
+                label == 'Program Capacity' ? validateCapacity : validator,
             onChanged: (value) {
               setState(() {
-                if (label == 'Service Name') {
+                if (label == 'Program Name') {
                   serviceName = value;
                 } //else if (label == 'Center Name') {
                 //centerName = value; // Update centerName here
                 //} / commented this to store centername(jo)
-                else if (label == 'Service Price') {
+                else if (label == 'Program Price') {
                   selectedPrice = double.tryParse(value);
-                } else if (label == 'Service Capacity') {
+                } else if (label == 'Program Capacity') {
                   capacityValue = int.tryParse(value) ?? 0;
-                } else if (label == 'Service Description') {
+                } else if (label == 'Program Description') {
                   selectedDescription = value;
                 } else if (label == 'Min Age') {
                   minAge = int.tryParse(value) ?? 0;
@@ -711,7 +712,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         Padding(
                           padding: EdgeInsets.only(right: 130.0),
                           child: Text(
-                            'Add Service',
+                            'Add Program',
                             style: TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.w700,
@@ -722,11 +723,11 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                       ],
                     ),
                     SizedBox(height: 20.0),
-                    buildTextField('Service Name', validateServiceName,
+                    buildTextField('Program Name', validateServiceName,
                         maxLength: 20),
                     // buildTextField('Center Name', validateServiceName,
                     //   maxLength: 20),/ commented this to store centername(jo)
-                    buildTextField('Service Price', validatePrice),
+                    buildTextField('Program Price', validatePrice),
                     Row(
                       mainAxisAlignment: MainAxisAlignment
                           .spaceBetween, // Adjust this as needed
@@ -776,7 +777,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
 // max age
 
                     buildIncrementDecrementField(
-                      'Service Capacity',
+                      'Program Capacity',
                       capacityValue,
                       () {
                         setState(() {
@@ -791,7 +792,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         });
                       },
                     ), // capacity
-                    buildTextField('Service Description', validateDescription,
+                    buildTextField('Program Description', validateDescription,
                         maxLength: 225),
                     SizedBox(height: 2.0),
                     Row(
@@ -809,7 +810,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     ),
                     SizedBox(height: 0),
                     Text(
-                      'Service Period Time',
+                      'Program Period Time',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -867,7 +868,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                               'You must select both start and end dates!');
                         } else if (selectedTimeSlot == null) {
                           _showDialog(
-                              'Warning', 'You must select the service time!');
+                              'Warning', 'You must select the Program time!');
                         } else {
                           sendDataToFirebase();
                         }

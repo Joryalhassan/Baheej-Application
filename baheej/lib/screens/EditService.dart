@@ -365,11 +365,17 @@ class _EditServiceState extends State<EditService> {
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
-            ),
-          );
+  context,
+  MaterialPageRoute(
+    builder: (context) => ServiceFormScreen(
+      onServiceAdded: (Service newService) {
+        // Dummy implementation for testing
+        print("New service added: ${newService.serviceName}");
+        // You can add more dummy actions here as needed
+      },
+    ),
+  ),
+);
         },
         child: Icon(
           Icons.add,
