@@ -324,10 +324,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 'Home',
                 Color.fromARGB(255, 249, 194, 212),
                 () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                         builder: (context) => HomeScreenGaurdian()),
+                    (route) => false,
                   );
                 },
               ),
@@ -336,11 +337,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 'view Kids',
                 Color.fromARGB(255, 249, 194, 212),
                 () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder: (context) => AddKidsPage(),
                     ),
+                    (route) => false,
                   );
                 },
               ),

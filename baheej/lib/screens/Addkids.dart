@@ -372,10 +372,11 @@ class _AddKidsPageState extends State<AddKidsPage> {
                 'Home',
                 Color.fromARGB(255, 249, 194, 212),
                 () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                         builder: (context) => HomeScreenGaurdian()),
+                    (route) => false,
                   );
                 },
               ),

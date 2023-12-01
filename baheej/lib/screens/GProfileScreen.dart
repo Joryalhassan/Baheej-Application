@@ -315,20 +315,27 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the AppBar
       appBar: AppBar(
-        title: Text("${_fnameController.text} Profile"), // Title for the AppBar
-        backgroundColor: Colors.transparent, // Transparent AppBar background
-        elevation: 0, // No shadow
+        title: Text(
+          "${_fnameController.text} Profile",
+          style: TextStyle(
+              fontFamily: '5yearsoldfont',
+              fontSize: 25 // Apply the custom font family
+              ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(), // Navigate back
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: _handleLogout, // Call the logout function
+            onPressed: _handleLogout,
           ),
         ],
       ),
+
       body: Stack(
         children: [
           // Background image or content
@@ -378,10 +385,11 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
                 'Home',
                 Color.fromARGB(255, 249, 194, 212),
                 () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                         builder: (context) => HomeScreenGaurdian()),
+                    (route) => false,
                   );
                 },
               ),
@@ -418,16 +426,16 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          _handleAddKids();
-        },
-        child: Icon(
-          Icons.add_reaction_outlined,
-          color: Colors.white,
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: Color.fromARGB(255, 174, 207, 250),
+      //   onPressed: () {
+      //     _handleAddKids();
+      //   },
+      //   child: Icon(
+      //     Icons.add_reaction_outlined,
+      //     color: Colors.white,
+      //   ),
+      // ),
     );
   }
 
