@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:intl/intl.dart';
-
 import 'package:baheej/screens/Addkids.dart';
-
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
-
 import 'package:baheej/screens/GProfileScreen.dart';
-import 'package:baheej/screens/SignInScreen.dart';
+import 'dart:math';
 
+import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/star_rating.dart'; // Replace with the actual path to your StarRating file
 
 class HistoryScreen extends StatefulWidget {
@@ -170,7 +165,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Cannot Cancel Service'),
+            title: Text('Cannot Cancel Program'),
             content: Text(
                 'You cannot cancel this program now because the program start.'),
             actions: <Widget>[
@@ -187,12 +182,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 210, 229, 245),
+    const Color.fromARGB(255, 255, 242, 123),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
+  }
+
   @override
   Widget build(BuildContext context) {
+    Color randomColor = _getRandomColor();
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("Booked Programs"),
+        title: Text(
+          "Booked Programs",
+          style: TextStyle(
+            fontFamily: '5yearsoldfont', // Use the defined font family
+            fontSize: 24, // Adjust the font size as needed
+            fontWeight: FontWeight.bold, // Add other desired styles
+            // Add more styles as required
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -206,7 +222,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backG.png',
+              'assets/images/blueWaves.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -229,7 +245,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   return Text('Error: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
-                    child: Text('No booked services found'),
+                    child: Text('No booked program found'),
                   );
                 } else {
                   final bookedServices = snapshot.data!.docs;
@@ -238,6 +254,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     itemCount: bookedServices.length,
                     itemBuilder: (context, index) {
                       final serviceDocument = bookedServices[index];
+                      final randomColor =
+                          _getRandomColor(); // Here's the updated line
 
                       final data =
                           serviceDocument.data() as Map<String, dynamic>;
@@ -288,94 +306,92 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.home),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreenGaurdian(),
-                      ),
-                      (route) => false,
-                    );
-                  },
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Text(
-                    'Home',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.history,
+                'Bookings',
+                Color.fromARGB(255, 210, 229, 245),
+                () {},
+              ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreenGaurdian()),
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.child_care,
+                'view Kids',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddKidsPage(),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(50, 50, 17, 1),
-                  child: Text(
-                    'View Kids',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  String currentUserEmail =
+                      FirebaseAuth.instance.currentUser?.email ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GProfileViewScreen(),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GProfileViewScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: _handleAddKids,
-        child: Icon(
-          Icons.add_reaction_outlined,
-          color: Colors.white,
+    );
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
         ),
-      ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 
@@ -395,34 +411,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
         DateFormat('yyyy-MM-dd').format(selectedStartDate);
 
     final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
-
+    final randomColor = _getRandomColor();
     return Card(
       elevation: 3,
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 26),
+      color: randomColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
         padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 239, 249, 254),
-              const Color.fromARGB(255, 239, 249, 254),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               serviceName,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontSize: 25,
+                fontFamily: '5yearsoldfont',
                 color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
@@ -432,6 +438,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(
                 fontSize: 16,
                 color: Color.fromARGB(255, 24, 24, 24),
+                fontWeight: FontWeight.bold, // Set the font weight to bold
               ),
             ),
             Text(
@@ -439,6 +446,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(
                 fontSize: 16,
                 color: Color.fromARGB(255, 0, 0, 0),
+                fontWeight: FontWeight.bold, // Set the font weight to bold
               ),
             ),
             Text(
@@ -446,6 +454,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(
                 fontSize: 16,
                 color: const Color.fromARGB(255, 0, 0, 0),
+                fontWeight: FontWeight.bold, // Set the font weight to bold
               ),
             ),
             Text(
@@ -453,6 +462,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(
                 fontSize: 16,
                 color: Color.fromARGB(255, 2, 2, 2),
+                fontWeight: FontWeight.bold, // Set the font weight to bold
               ),
             ),
             Text(
@@ -460,6 +470,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(
                 fontSize: 16,
                 color: Color.fromARGB(255, 0, 0, 0),
+                fontWeight: FontWeight.bold, // Set the font weight to bold
               ),
             ),
             StarRating(

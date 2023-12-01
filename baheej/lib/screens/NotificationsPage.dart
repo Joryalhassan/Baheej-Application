@@ -36,7 +36,7 @@ class CardListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream:
-          FirebaseFirestore.instance.collection('notifications').snapshots(),
+          FirebaseFirestore.instance.collection('notification2').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return CircularProgressIndicator();
@@ -72,7 +72,7 @@ class CardListView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Center Name: $centerName',
+                      'Center Name: fun for kids',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

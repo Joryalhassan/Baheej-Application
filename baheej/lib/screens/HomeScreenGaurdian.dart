@@ -1,4 +1,5 @@
 import 'package:baheej/screens/HistoryScreen.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,14 +8,12 @@ import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'dart:async';
+// import math , create random colors card
+import 'dart:math';
 import 'package:baheej/screens/NotificationsPage.dart';
-import 'package:baheej/screens/LocalNotificationHandler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-//import 'package:baheej/screens/NotificationsPage.dart';
 import 'package:baheej/screens/GProfileScreen.dart';
-//import 'package:baheej/screens/LocalNotificationHandler.dart';
 
 class HomeScreenGaurdian extends StatefulWidget {
   const HomeScreenGaurdian({Key? key}) : super(key: key);
@@ -81,18 +80,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 
-  // void initializeNotifications() async {
-  //   const DarwinInitializationSettings initializationSettingsIOS =
-  //       DarwinInitializationSettings();
-  //   final InitializationSettings initializationSettings =
-  //       InitializationSettings(
-  //     iOS: initializationSettingsIOS,
-  //   );
-  //   await flutterLocalNotificationsPlugin.initialize(
-  //     initializationSettings,
-  //   );
-  // }
-
   Future<void> startPollingNotifications() async {
     _pollingTimer = Timer.periodic(Duration(seconds: 5), (_) {
       checkNewNotification();
@@ -125,12 +112,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       payload: 'item x',
     );
   }
-
-// Future<void> onDidReceiveNotificationResponse(String? payload) async {
-//   // Handle notification click event if needed
-
-//onDidReceiveNotificationResponse: onDidReceiveNotificationResponse 000
-// }
 
   @override
   void dispose() {
@@ -285,13 +266,6 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Fetch the user's name from Firestore when the screen initializes
-  //   fetchName();
-  // }
-
   void fetchName() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -316,12 +290,25 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
 
   // view the notification
   void navigateToNotificationsPage() {
-    // Navigator.push(
-    //context,
-    //MaterialPageRoute(
-    //   builder: (context) => NotificationsPage(),
-    //  ),
-    //);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NotificationsPage(),
+      ),
+    );
+  }
+
+//function to create random colors of card
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 210, 229, 245),
+    const Color.fromARGB(255, 255, 242, 123),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
   }
 
   @override
@@ -360,7 +347,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                 SizedBox(width: 8), // Add some space between the icons and text
               ],
             ),
-            Text('Welcome $FirstName'),
+            Text(
+              'Welcome $FirstName',
+              style: TextStyle(
+                fontSize: 30,
+                fontFamily:
+                    '5yearsoldfont', // Use the font family name declared in pubspec.yaml
+              ),
+            ),
             Row(
               children: [
                 SizedBox(width: 8), // Add some space between the text and icon
@@ -376,13 +370,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       body: Stack(
         children: [
           Positioned.fill(
+            top: 0,
             child: Image.asset(
-              'assets/images/backG.png',
+              'assets/images/kidsAndwaves.png',
               fit: BoxFit.cover,
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+            padding: EdgeInsets.only(top: 170, left: 16, right: 16),
             child: Column(
               children: [
                 TextField(
@@ -402,27 +397,39 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                     itemCount: _filteredServices.length,
                     itemBuilder: (context, index) {
                       final service = _filteredServices[index];
+                      // defined the random color
+                      final randomColor =
+                          _getRandomColor(); // Get a random color for each card
+
                       return GestureDetector(
                         onTap: () {
                           // Handle tapping on a service
                         },
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(35),
+                          borderRadius: BorderRadius.circular(20),
                           child: Card(
                             elevation: 3,
+
                             margin: EdgeInsets.symmetric(
                                 vertical: 8, horizontal: 16),
-                            color: Color.fromARGB(255, 239, 249, 254),
+                            //here call randomColor to call the function
+                            color: randomColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20), // Adjust the circular shape here
+                            ), // Use the random color here
+
                             child: Container(
                               padding: EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  SizedBox(height: 12),
                                   Text(
                                     service.serviceName,
                                     style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25,
+                                      fontFamily: '5yearsoldfont',
                                     ),
                                   ),
                                   SizedBox(height: 8),
@@ -430,6 +437,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                     'center name: ${service.centerName}',
                                     style: TextStyle(
                                       fontSize: 16,
+                                      fontWeight: FontWeight
+                                          .bold, // Set the font weight to bold
                                     ),
                                   ),
                                   SizedBox(height: 4),
@@ -441,6 +450,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                         'Program Time: ${service.selectedTimeSlot}',
                                         style: TextStyle(
                                           fontSize: 16,
+                                          fontWeight: FontWeight
+                                              .bold, // Set the font weight to bold
                                         ),
                                       ),
                                       InkWell(
@@ -486,102 +497,97 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.history), // Home Icon
-
-                  color: Colors.white, // Set icon color to white
-
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HistoryScreen()),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 5), // Add margin to the top
-
-                  child: Text(
-                    'Booked Programs ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.history,
+                'Bookings',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HistoryScreen()),
+                  );
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                  // Handle onPressed action
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.child_care,
+                'view Kids',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  _handleAddKids();
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  String currentUserEmail =
+                      FirebaseAuth.instance.currentUser?.email ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GProfileViewScreen(),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      1, 50, 17, 1), // Add margin to the top
-
-                  child: Text(
-                    'View Kids',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person), // Profile Icon
-
-                  color: Colors.white, // Set icon color to white
-
-                  onPressed: () {
-                    String currentUserEmail =
-                        FirebaseAuth.instance.currentUser?.email ?? '';
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => GProfileViewScreen()),
-                    );
-                  },
-                ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          onPressed:
-          _handleAddKids();
-        },
-        child: Icon(
-          Icons.add_reaction_outlined,
-          color: Colors.white,
+    );
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
         ),
-      ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }

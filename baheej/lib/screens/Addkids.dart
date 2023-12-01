@@ -3,16 +3,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
+import 'package:baheej/screens/GProfileScreen.dart';
 import 'package:baheej/screens/HistoryScreen.dart';
+import 'dart:math';
 
 class KidCard extends StatelessWidget {
   final String name;
   final int age;
 
   KidCard({required this.name, required this.age});
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 210, 229, 245),
+    const Color.fromARGB(255, 255, 242, 123),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
+  }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    Color randomColor = _getRandomColor();
+
     return GestureDetector(
       onTap: () {
         // Handle tapping on a kid card
@@ -20,7 +36,10 @@ class KidCard extends StatelessWidget {
       child: Card(
         elevation: 3,
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        color: Color.fromARGB(255, 239, 249, 254),
+        color: randomColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Container(
           padding: EdgeInsets.all(16),
           child: Column(
@@ -29,8 +48,9 @@ class KidCard extends StatelessWidget {
               Text(
                 'Name: $name',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                  // fontWeight: FontWeight.bold,
+                  fontFamily: '5yearsoldfont',
                 ),
               ),
               SizedBox(height: 8),
@@ -38,6 +58,7 @@ class KidCard extends StatelessWidget {
                 'Age: $age',
                 style: TextStyle(
                   fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 4),
@@ -137,7 +158,7 @@ class _AddKidsPageState extends State<AddKidsPage> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/backG.png'),
+            image: AssetImage('assets/images/childWaves.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -148,8 +169,9 @@ class _AddKidsPageState extends State<AddKidsPage> {
               child: Text(
                 'My Kids',
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 35,
+                  fontFamily: '5yearsoldfont',
+                  // fontWeight: FontWeight.bold,
                   color: const Color.fromARGB(
                       255, 255, 255, 255), // Change the text color to blue
                 ),
@@ -318,65 +340,98 @@ class _AddKidsPageState extends State<AddKidsPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround, // Center the icons
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.history),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HistoryScreen()),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Text(
-                    'Booked Service',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.history,
+                'Bookings',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HistoryScreen()),
+                  );
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreenGaurdian()),
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.child_care,
+                'view Kids',
+                Color.fromARGB(255, 210, 229, 245),
+                () {},
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  String currentUserEmail =
+                      FirebaseAuth.instance.currentUser?.email ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GProfileViewScreen(),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.home),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => HomeScreenGaurdian()),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Text(
-                    'Home',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }
