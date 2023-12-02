@@ -31,6 +31,35 @@ class _compSerListScreenState extends State<compSerListScreen> {
     loadCompletedServices();
   }
 
+
+
+
+// Define a function to create a gradient for the progress bar
+LinearGradient _buildProgressBarGradient() {
+  return LinearGradient(
+    colors: [
+      Colors.pink,
+      Colors.blue,
+      Colors.green,
+      Colors.yellow,
+      Colors.orange,
+      Colors.purple,
+    ],
+    stops: [
+      0.0,
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1.0,
+    ],
+  );
+}
+
+
+
+
+
   Future<double> calculateBookingRatio(Service service) async {
     if (service.capacityValue > 0) {
       // Fetch the booked services for the logged-in center
@@ -319,54 +348,100 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                     //   ],
                                     // ),
                                     Divider(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Booked Capacity Percentage: ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                                   
+
+                                   Row(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Booked Capacity Percentage: ',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            '(${service.participateNo} / ${service.capacityValue})',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Expanded(
+                                        child: LinearProgressIndicator(
+                                          value: calculatePercentageBooked(
+                                            service.capacityValue,
+                                            service.participateNo,
+                                          ) / 100.0,
+                                          backgroundColor: Colors.grey,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            Colors.blue, // Default color if the gradient cannot be applied
                                           ),
                                         ),
-                                        Text(
-                                          '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
+                                        style: TextStyle(
+                                          fontSize: 16,
                                         ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Average Rating: ',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                      ),
+                                    ],
+                                  ),
+
+
+
+                                Row(
+                                    children: [
+                                      Text(
+                                        'Average Rating: ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                        FutureBuilder<double>(
-                                          future: calculateAverageRating(
-                                              service.serviceName),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return CircularProgressIndicator(); // Show loading indicator
-                                            } else if (snapshot.hasError) {
-                                              return Text(
-                                                  'Error'); // Show error message
-                                            } else {
-                                              return Text(
-                                                '${snapshot.data!.toStringAsFixed(2)}',
-                                                style: TextStyle(
-                                                  fontSize: 16,
+                                      ),
+                                      FutureBuilder<double>(
+                                        future: calculateAverageRating(service.serviceName),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return CircularProgressIndicator(); // Show loading indicator
+                                          } else if (snapshot.hasError) {
+                                            return Text('Error'); // Show error message
+                                          } else {
+                                            double averageRating = snapshot.data!;
+                                        
+                                            return Row(
+                                              children: [
+                                                Text(
+                                                  '(${calculateTotalRatedServices(service.serviceName)})',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                  ),
                                                 ),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
+                                                SizedBox(width: 5), 
+                                                Text(
+                                                  '${averageRating.toStringAsFixed(2)}',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5), // Add spacing between rating and star icon
+                                                Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber,
+                                                  size: 20,
+                                                ),
+                                              ],
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+
 
                                     TextButton(
                                       onPressed: () {
@@ -393,86 +468,84 @@ class _compSerListScreenState extends State<compSerListScreen> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  shape: CircularNotchedRectangle(),
+  color: Color.fromARGB(255, 245, 198, 239),
+  child: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(width: 24),
+        _buildIconButtonWithLabel(
+          Icons.home,
+          'Home',
+          Colors.white,
+          () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreenCenter(
+                  centerName: centerName,
+                ),
+              ),
+              (route) => false,
+            );
+          },
+        ),
+        SizedBox(),
+        Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.home),
+            Padding(
+              padding: EdgeInsets.only(top: 12), // Add some padding for spacing
+              child: Text(
+                'Add Programs',
+                style: TextStyle(
                   color: Colors.white,
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreenCenter(
-                          centerName: centerName,
-                        ),
-                      ),
-                      (route) => false,
-                    );
-                  },
+                  fontSize: 14,
                 ),
-                Text(
-                  'Home',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+              ),
             ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Text(
-                    '        Add Programs',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CenterProfileViewScreen(),
-                      ),
-                    );
-
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
           ],
         ),
-      ),
+        SizedBox(width: 25),
+        _buildIconButtonWithLabel(
+          Icons.person,
+          'Profile',
+          Colors.white,
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CenterProfileViewScreen(),
+              ),
+            );
+            // Handle profile button tap
+          },
+        ),
+        SizedBox(width: 32),
+      ],
+    ),
+  ),
+  floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+ floatingActionButton: FloatingActionButton(
+    backgroundColor: Color.fromARGB(255, 174, 207, 250),
+    onPressed: () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
+        ),
+      );
+    },
+    child: Icon(
+      Icons.add,
+      color: Colors.white,
+    ),
+  ),
+)
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
@@ -492,6 +565,34 @@ class _compSerListScreenState extends State<compSerListScreen> {
       ),
     );
   }
+
+            Widget _buildIconButtonWithLabel(
+              IconData iconData,
+              String label,
+              Color iconColor,
+              VoidCallback onPressed,
+            ) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      iconData,
+                      size: 35,
+                    ),
+                    color: iconColor,
+                    onPressed: onPressed,
+                  ),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              );
+            }
 
 // Outside the build method, create the method to show detailed information in a pop-up
   void _showServiceDetails(Service service) {
@@ -589,5 +690,35 @@ Future<double> calculateAverageRating(String serviceName) async {
   } catch (e) {
     print('Error calculating average rating: $e');
     return 0.0;
+  }
+}
+
+Future<int> calculateTotalRatedServices(String serviceName) async {
+  try {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('ServiceBook')
+        .where('serviceName', isEqualTo: serviceName)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      return 0;
+    }
+
+    int totalServices = 0;
+
+    snapshot.docs.forEach((doc) {
+      final data = doc.data() as Map<String, dynamic>?;
+
+      final starsRate = data?['starsrate'];
+
+      if (starsRate != null && starsRate is int) {
+        totalServices++;
+      }
+    });
+
+    return totalServices;
+  } catch (e) {
+    print('Error calculating total services: $e');
+    return 0;
   }
 }

@@ -298,7 +298,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   //   );
   // }
 
-//function to create random colors of card
+ //function to create random colors of card
   final _random = Random();
   final List<Color> _randomColors = [
     Color.fromARGB(255, 249, 194, 212),
