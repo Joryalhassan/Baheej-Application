@@ -1,32 +1,206 @@
 import 'package:flutter/material.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:intl/intl.dart';
+
 import 'package:baheej/screens/Addkids.dart';
-import 'package:baheej/screens/star_rating.dart'; // Replace with the actual path to your StarRating file
-import 'package:baheej/screens/GProfileScreen.dart';
+
 import 'package:baheej/screens/HomeScreenGaurdian.dart';
 
-class HistoryScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+import 'package:baheej/screens/GProfileScreen.dart';
+import 'package:baheej/screens/SignInScreen.dart';
 
-    void _handleAddKids() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AddKidsPage(),
-        ),
+import 'package:baheej/screens/star_rating.dart'; // Replace with the actual path to your StarRating file
+
+class HistoryScreen extends StatefulWidget {
+  @override
+  _HistoryScreenState createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  late final currentUserEmail;
+
+  @override
+  void initState() {
+    super.initState();
+
+    currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+  }
+
+  void _handleAddKids() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddKidsPage(),
+      ),
+    );
+  }
+
+  Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  showLogoutSuccessDialog();
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showLogoutSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void navigateToSignInScreen() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
+    );
+  }
+
+  Future<void> cancelService(DocumentSnapshot serviceDocument) async {
+    final currentDate = DateTime.now();
+
+    final selectedStartDate =
+        (serviceDocument['selectedStartDate'] as Timestamp).toDate();
+
+    final canCancel = currentDate.isBefore(selectedStartDate);
+
+    if (canCancel) {
+      try {
+        bool confirmCancel = await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Confirmation'),
+              content: Text('Are you sure you want to cancel your service?'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancel Program'),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pop(false); // Return false when canceled
+                  },
+                ),
+                TextButton(
+                  child: Text('Yes'),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pop(true); // Return true when confirmed
+                  },
+                ),
+              ],
+            );
+          },
+        );
+
+        if (confirmCancel == true) {
+          await FirebaseFirestore.instance
+              .collection('ServiceBook')
+              .doc(serviceDocument.id)
+              .delete();
+
+          showDialog<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Program Canceled Successfully!'),
+                content: Text('Your program has been canceled.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+
+          setState(() {});
+        }
+      } catch (error) {
+        print('Error canceling service: $error');
+      }
+    } else {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Cannot Cancel Service'),
+            content: Text(
+                'You cannot cancel this program now because the program start.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
       );
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("Booked Service"),
+        title: Text("Booked Programs"),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _handleLogout,
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -59,24 +233,34 @@ class HistoryScreen extends StatelessWidget {
                   );
                 } else {
                   final bookedServices = snapshot.data!.docs;
+
                   return ListView.builder(
                     itemCount: bookedServices.length,
                     itemBuilder: (context, index) {
                       final serviceDocument = bookedServices[index];
+
                       final data =
                           serviceDocument.data() as Map<String, dynamic>;
 
                       final centerName = data['centerName'];
+
                       final serviceName = data['serviceName'];
+
                       final selectedKidsMap =
                           data['selectedKidsNames'] as Map<String, dynamic>?;
+
                       final selectedStartDate =
                           data['selectedStartDate'] as Timestamp;
+
                       final selectedEndDate =
                           data['selectedEndDate'] as Timestamp;
+
                       final totalPrice = data['totalPrice'] as double;
+
                       final selectedTimeSlot = data['selectedTimeSlot'];
+
                       final starsrate = data['starsrate'];
+
                       String selectedKidsString = '';
 
                       if (selectedKidsMap != null) {
@@ -84,6 +268,7 @@ class HistoryScreen extends StatelessWidget {
                       }
 
                       return buildServiceCard(
+                        context,
                         centerName,
                         serviceName,
                         selectedKidsString,
@@ -92,6 +277,7 @@ class HistoryScreen extends StatelessWidget {
                         selectedTimeSlot,
                         totalPrice,
                         serviceDocument,
+                        starsrate,
                       );
                     },
                   );
@@ -127,7 +313,7 @@ class HistoryScreen extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(top: 5),
                   child: Text(
-                    '         Home        ',
+                    'Home',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -141,7 +327,7 @@ class HistoryScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(1, 50, 17, 1),
+                  padding: EdgeInsets.fromLTRB(50, 50, 17, 1),
                   child: Text(
                     'View Kids',
                     style: TextStyle(
@@ -160,8 +346,6 @@ class HistoryScreen extends StatelessWidget {
                   icon: Icon(Icons.person),
                   color: Colors.white,
                   onPressed: () {
-                    String currentUserEmail =
-                        FirebaseAuth.instance.currentUser?.email ?? '';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -186,9 +370,7 @@ class HistoryScreen extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          _handleAddKids();
-        },
+        onPressed: _handleAddKids,
         child: Icon(
           Icons.add_reaction_outlined,
           color: Colors.white,
@@ -198,6 +380,7 @@ class HistoryScreen extends StatelessWidget {
   }
 
   Widget buildServiceCard(
+    BuildContext context,
     String centerName,
     String serviceName,
     String selectedKidsString,
@@ -206,15 +389,12 @@ class HistoryScreen extends StatelessWidget {
     String selectedTimeSlot,
     double totalPrice,
     DocumentSnapshot serviceDocument,
+    int? starsrate,
   ) {
     final startDateFormatted =
         DateFormat('yyyy-MM-dd').format(selectedStartDate);
-    final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
 
-    final cardMargin = EdgeInsets.fromLTRB(20, 10, 16, 0);
-    final isStartDateInPast = selectedStartDate.isBefore(DateTime.now());
-    final data = serviceDocument.data() as Map<String, dynamic>;
-    final starsrate = data['starsrate'] ?? 0;
+    final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
 
     return Card(
       elevation: 3,
@@ -262,7 +442,7 @@ class HistoryScreen extends StatelessWidget {
               ),
             ),
             Text(
-              'From: $startDateFormatted' '     To: $endDateFormatted ',
+              'From: $startDateFormatted   To: $endDateFormatted ',
               style: TextStyle(
                 fontSize: 16,
                 color: const Color.fromARGB(255, 0, 0, 0),
@@ -276,30 +456,34 @@ class HistoryScreen extends StatelessWidget {
               ),
             ),
             Text(
-              'Total Price: $totalPrice' ' SAR',
+              'Total Price: $totalPrice SAR',
               style: TextStyle(
                 fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0),
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Rate the service:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             StarRating(
-              serviceDocumentId: serviceDocument.id, // Pass the document ID
-              initialRating: starsrate ?? 0,
-              onRatingChanged: (newRating) {
-                print(
-                    "you rated with $newRating stars for ${serviceDocument.id}");
-                // You can handle the new rating as needed
+  serviceDocumentId: serviceDocument.id,
+  initialRating: (starsrate ?? 0).toInt(), // Cast to int
+  onRatingChanged: (newRating) {
+    print(
+        "you rated with $newRating stars for ${serviceDocument.id}");
+                // Handle the new rating as needed
               },
-            )
+            ),
+            TextButton(
+              onPressed: () {
+                cancelService(serviceDocument);
+              },
+              child: Text(
+                'Cancel booking',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
           ],
         ),
       ),

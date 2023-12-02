@@ -1,5 +1,5 @@
 import 'package:baheej/screens/EditService.dart';
-//import 'package:baheej/screens/compSerList.dart';jorycom
+//import 'package:baheej/screens/compSerList.dart';comJo
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,10 +9,11 @@ import 'package:baheej/screens/Service.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';jorycom
-//import 'package:timezone/data/latest.dart' as tz;jorycom
-//import 'package:timezone/timezone.dart' as tz;jorycom
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';comJo
+//import 'package:timezone/data/latest.dart' as tz;comJo
+//import 'package:timezone/timezone.dart' as tz;comJo
 // import 'package:baheej/screens/NotificationService1.dart';
+import 'package:baheej/screens/CserviceDetails.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -47,11 +48,24 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Create Advertisement'),
-          content: TextField(
-            controller: adMessageController,
-            decoration: InputDecoration(
-              hintText: 'Enter your advertisement message',
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: adMessageController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your advertisement message',
+                ),
+                maxLength: 100, // Maximum characters allowed
+                maxLines: null, // Allow multiple lines
+              ),
+              SizedBox(height: 10),
+              // Text(
+              //   'Minimum 15 characters required',
+              //   style: TextStyle(color: Colors.red),
+              // ),
+            ],
           ),
           actions: <Widget>[
             TextButton(
@@ -64,7 +78,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
               child: Text('Submit'),
               onPressed: () async {
                 String adMessage = adMessageController.text.trim();
-                if (adMessage.isNotEmpty) {
+                if (adMessage.isNotEmpty && adMessage.length >= 15) {
                   // Store ad message in Firestore under 'notification2' collection
                   await FirebaseFirestore.instance
                       .collection('notification2')
@@ -72,8 +86,30 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                     'message': adMessage,
                     'timestamp': DateTime.now(),
                   });
+
+                  // Show a SnackBar to indicate successful notification sent
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Notification sent successfully!'),
+                      backgroundColor:
+                          Colors.green, // Set background color to green
+                    ),
+                  );
+
                   adMessageController.clear(); // Clear the text field
                   Navigator.of(context).pop(); // Close the dialog
+                } else {
+                  // Show an error message if the entered text is invalid
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Please enter at least 15 characters!',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 255, 255, 255)),
+                      ),
+                      backgroundColor: Color.fromARGB(255, 249, 0, 0),
+                    ),
+                  );
                 }
               },
             ),
@@ -177,11 +213,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       });
     }
   }
+
   void reloadServices() async {
-  await loadServices();
-}//add by jo
-
-
+    await loadServices();
+  }
 
   Future<void> _handleLogout() async {
     showDialog(
@@ -330,77 +365,53 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          SizedBox(width: 10), // Add space to the left of the first icon
           IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              _showAdMessageDialog();
-            },
+            icon: Icon(Icons.notification_add),
+            onPressed: _showAdMessageDialog,
           ),
-          SizedBox(width: 10), // Add space between the icons and the text
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 4), // Adjust the height to move the text down
-              Text(
-                'Welcome ${widget.centerName}',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          SizedBox(width: 60),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Welcome ${widget.centerName}',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
-            ],
+            ),
           ),
-          SizedBox(width: 70), // Add space between the text and the last icon
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: () {
-              _handleLogout();
-            },
+            onPressed: _handleLogout,
           ),
         ],
       ),
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/backG.png',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/backG.png', fit: BoxFit.cover),
           ),
           Padding(
             padding: EdgeInsets.only(top: 160, left: 16, right: 16),
             child: Column(
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ),
                 TextField(
                   controller: _searchController,
-                  onChanged: (value) {
-                    _handleSearch(value);
-                  },
+                  onChanged: _handleSearch,
                   decoration: InputDecoration(
                     hintText: 'Search Programs...',
                     prefixIcon: Icon(Icons.search),
                   ),
-                  toolbarOptions: null,
                 ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: filteredServices.isEmpty
                         ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "You don't have any services yet.",
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.grey),
-                                ),
-                                SizedBox(height: 20), // Add some spacing
-                              ],
+                            child: Text(
+                              "You don't have any services yet.",
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
                             ),
                           )
                         : Column(
@@ -411,81 +422,61 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                 },
                                 child: Card(
                                   elevation: 3,
-                                  margin: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 16,
-                                  ),
+                                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                                   color: Color.fromARGB(255, 239, 249, 254),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Program name: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
+                                        Align(
+                                          alignment: Alignment.topRight,
+                                          child: PopupMenuButton<String>(
+                                            icon: Icon(Icons.more_horiz), // Horizontal dots icon
+                                            onSelected: (String value) {
+                                              if (value == 'edit') {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => EditService(
+                                                      service: service,
+                                                      onUpdateService: updateService,
+                                                    ),
+                                                  ),
+                                                );
+                                              } else if (value == 'delete') {
+                                                deleteService(service);
+                                              }
+                                            },
+                                            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                              const PopupMenuItem<String>(
+                                                value: 'edit',
+                                                child: Text('Edit Program'),
                                               ),
-                                            ),
-                                            Text(
-                                              service.serviceName,
-                                              style: TextStyle(
-                                                fontSize: 16,
+                                              const PopupMenuItem<String>(
+                                                value: 'delete',
+                                                child: Text('Delete Program'),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Start Date: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              DateFormat('MM/dd/yyyy').format(
-                                                  service.selectedStartDate),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
+                                        Text(
+                                          service.serviceName,
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        Row(
+                                        
+                                  Row(
                                           children: [
                                             Text(
-                                              'End Date: ',
+                                              'Number of Participant : ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             Text(
-                                              DateFormat('MM/dd/yyyy').format(
-                                                  service.selectedEndDate),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Program Time: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.selectedTimeSlot,
+                                              service.capacityValue.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -505,138 +496,41 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             fontSize: 16,
                                           ),
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Minimum Age: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.minAge.toString(),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
+                                        
+                                       
+                                      
+                                          
+                                          SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => CserviceDetails(service: service)
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        'View Details',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          decoration: TextDecoration.underline,
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Maximum Age: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.maxAge.toString(),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Capacity : ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.capacityValue.toString(),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Program Price: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              '${service.servicePrice.toStringAsFixed(2)}',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            GestureDetector(
-                                               onTap: () {
-                                              Navigator.push(
-                                                   context,
-                                                   MaterialPageRoute(
-                                                     builder: (context) =>
-                                                        EditService(
-                                                       service: service,
-                                                      onUpdateService:
-                                                         updateService,
-                                                   ),
-                                                  ),
-                                                 );
-                                               },
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Edit Program',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              158,
-                                                              158,
-                                                              158),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                deleteService(service);
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Delete Program',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.red,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              );
-                            }).toList(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                           ),
                   ),
                 ),
@@ -659,13 +553,13 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   icon: Icon(Icons.history),
                   color: Colors.white,
                   onPressed: () {
-                  //  Navigator.push(jorycom
-                     // context,jorycom
-                      //MaterialPageRoute(jorycom
-                       // builder: (context) =>jorycom
-                        //    compSerListScreen(centerName: centerName),jorycom
-                     // ),jorycom
-                   // );jorycom
+                   // Navigator.push(
+                     // context,
+                     // MaterialPageRoute(
+                     //   builder: (context) =>
+                    //        compSerListScreen(centerName: centerName),
+                    //  ),
+                    //);comJo
                     // Handle profile button tap
                   },
                 ),
@@ -729,11 +623,12 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         backgroundColor: Color.fromARGB(255, 174, 207, 250),
         onPressed: () {
           Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
-      ),
-    );
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  ServiceFormScreen(onServiceAdded: reloadServices),
+            ),
+          );
         },
         child: Icon(
           Icons.add,

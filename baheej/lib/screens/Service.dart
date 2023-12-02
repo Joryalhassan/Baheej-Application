@@ -2,19 +2,19 @@
 
 class Service {
   final String id;
-  final String serviceName;
-  final String description;
+  final String serviceName; // done
+  final String description; // done
   final String centerName;
-  final String selectedTimeSlot;
+  final String selectedTimeSlot; //done
   final int capacityValue;
-  final double servicePrice;
-  final DateTime selectedStartDate; // Make it nullable
-  final DateTime selectedEndDate;
+  final double servicePrice; //done
+  final DateTime selectedStartDate; // Make it nullable // done
+  final DateTime selectedEndDate; //done
   final int minAge;
   final int maxAge;
   // final Map<String, String> selectedKidsNames; // Define the property
   final int participateNo;
-  final int starsrate;
+  final int starsrate; // Define the starsrate property
 
   Service({
     required this.id,
