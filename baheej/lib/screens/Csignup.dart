@@ -24,11 +24,10 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _userNameTextController = TextEditingController();
   TextEditingController _PhoneNumTextController = TextEditingController();
-  TextEditingController _DistrictTextController = TextEditingController();
   TextEditingController _ComRegTextController = TextEditingController();
   TextEditingController _DescriptionTextController = TextEditingController();
-  String type = "center";
   String? _selectedDistrict;
+  String type = "center";
 
   UserCredential? resultaccount;
   Future<void> signUp() async {
@@ -70,7 +69,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           .doc(resultaccount!.user!.uid)
           .set({
         'username': _userNameTextController.text.trim(),
-        'addres': _DistrictTextController.text.trim(),
+        'addres': _selectedDistrict,
         'email': _emailTextController.text.trim(),
         'comReg': _ComRegTextController.text.trim(),
         'type': 'center',
@@ -212,7 +211,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
       return 'Center Name is required';
     }
     if (value.length < 4 || value.length > 25) {
-      return 'Center Name must be between 4 and 25 characters';
+      return 'Center Name must be between 4 and 25 letters';
     }
     if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
       return 'Center Name can only contain letters and spaces';
@@ -246,14 +245,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
     }
     return null;
   }
-
-  //String? _validateAddress(String? value) {
-  //if (_selectedDistrict == null || _selectedDistrict == 'Select a District') {
-  // return 'Please select a valid district from the dropdown menu';
-  //}
-
-  // return null;
-  //}
 
   String? _validateCommercialRegister(String? value) {
     if (value == null || value.isEmpty) {
@@ -340,23 +331,25 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
+      resizeToAvoidBottomInset: false,
       body: Stack(children: [
         // Background image
         Image.asset(
-          'assets/images/back3.png',
+          'assets/images/blueWaves.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
-          //color: Colors.white,
         ),
-        // body: Container(
-        //   // Set a white background color
-        //   color: Colors.white,
-        //   width: MediaQuery.of(context).size.width,
-        //   height: MediaQuery.of(context).size.height,
-        SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+        // Transparent container
+        Container(
+          margin: EdgeInsets.only(top: kToolbarHeight + 80),
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color:
+                Colors.white.withOpacity(0.8), // Adjust the opacity as needed
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
             child: Form(
               key: _formKey,
               child: Column(
@@ -504,7 +497,6 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                   ),
 
                   //4
-                  //4
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -538,7 +530,8 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         ],
                         onChanged: (String? newValue) {
                           setState(() {
-                            _selectedDistrict = newValue;
+                            _selectedDistrict =
+                                newValue; // Update the selected district when the user makes a choice
                           });
                         },
                         decoration: InputDecoration(

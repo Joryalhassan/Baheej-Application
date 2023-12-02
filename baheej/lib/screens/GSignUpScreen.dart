@@ -21,7 +21,6 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
   final TextEditingController _PhoneNumTextController = TextEditingController();
   final TextEditingController _confirmPasswordTextController =
       TextEditingController();
-
   String? selectedGender;
   String type = "guardian";
 
@@ -69,6 +68,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         'email': _emailTextController.text.trim(),
         'type': 'guardian',
         'phonenumber': _PhoneNumTextController.text.trim(),
+        'selectedGender': selectedGender,
       });
 
       Navigator.pushAndRemoveUntil(
@@ -173,28 +173,29 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign Up As Guardian",
+          "Sign Up As guardian",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
+      resizeToAvoidBottomInset: false,
       body: Stack(children: [
         // Background image
         Image.asset(
-          'assets/images/back3.png',
+          'assets/images/blueWaves.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
-          //color: Colors.white,
         ),
-        //   body: Container(
-        // width: MediaQuery.of(context).size.width,
-        // height: MediaQuery.of(context).size.height,
-        // decoration: BoxDecoration(
-        //   color: Colors.white, // Change the background color to white
-        // ),
-        SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+        // Transparent container
+        Container(
+          margin: EdgeInsets.only(top: kToolbarHeight + 80),
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color:
+                Colors.white.withOpacity(0.8), // Adjust the opacity as needed
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
             child: Form(
               key: _formKey,
               child: Column(
