@@ -3,24 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: ServiceFormScreen(),
-  ));
-}
-
 class ServiceFormScreen extends StatefulWidget {
+  final Function onServiceAdded;
+  ServiceFormScreen({required this.onServiceAdded});
   @override
   _ServiceFormScreenState createState() => _ServiceFormScreenState();
 }
 
 class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
-String userName = '';// add this to store centername(jo)
+  String userName = ''; // add this to store centername(jo)
   // TextField Declarations
   String? serviceName;
   String? serviceCenter;
- // String? centerName;
+  // String? centerName;
   String? selectedTimeSlot;
   double? selectedPrice;
   String? selectedDescription;
@@ -31,14 +27,18 @@ String userName = '';// add this to store centername(jo)
   bool timeSlotSelected = false;
   int minAge = 4;
   int maxAge = 17;
-   @override
-  void initState() {// add this to store centername(jo)
+  int participantNo = 0;
+  int starsrate = 0;
+  @override
+  void initState() {
+    // add this to store centername(jo)
     super.initState();
     // Fetch the user's name from Firestore when the screen initializes
     fetchUserName();
   }
 
-  void fetchUserName() async {// add this to store centername(jo)
+  void fetchUserName() async {
+    // add this to store centername(jo)
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
@@ -265,7 +265,6 @@ String userName = '';// add this to store centername(jo)
 
     CollectionReference serviceCollection =
         FirebaseFirestore.instance.collection('center-service');
-        
 
     try {
       await serviceCollection.add({
@@ -276,9 +275,11 @@ String userName = '';// add this to store centername(jo)
         'serviceDesc': selectedDescription,
         'startDate': selectedStartDate!.toIso8601String(),
         'endDate': selectedEndDate!.toIso8601String(),
-        'centerName': userName,// change this to store centername(jo)
+        'centerName': userName, // change this to store centername(jo)
         'minAge': minAge,
-        'maxAge': maxAge
+        'maxAge': maxAge,
+        'participateNo': participantNo,
+        'starsrate': starsrate,
       });
 
       // Data has been successfully added to Firestore.
@@ -289,18 +290,23 @@ String userName = '';// add this to store centername(jo)
     }
   }
 
-  void _showSuccessDialog() {
-    showDialog(
+  Future<void> _showSuccessDialog() async {
+    return showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Success'),
-          content: Text('Service added successfully!'),
+          content: Text('Program added successfully!'),
           actions: [
             TextButton(
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
+                widget.onServiceAdded();
+                // Call the callback to refresh services
+                Navigator.pop(context);
+                (route) => false; // Go back to HomeScreenCenter
               },
             ),
           ],
@@ -346,7 +352,7 @@ String userName = '';// add this to store centername(jo)
           ),
           SizedBox(height: 4),
           TextFormField(
-            keyboardType: label == 'Service Capacity'
+            keyboardType: label == 'Program Capacity'
                 ? TextInputType.number
                 : TextInputType.text,
             decoration: InputDecoration(
@@ -367,19 +373,19 @@ String userName = '';// add this to store centername(jo)
               ),
             ),
             validator:
-                label == 'Service Capacity' ? validateCapacity : validator,
+                label == 'Program Capacity' ? validateCapacity : validator,
             onChanged: (value) {
               setState(() {
-                if (label == 'Service Name') {
+                if (label == 'Program Name') {
                   serviceName = value;
                 } //else if (label == 'Center Name') {
-                  //centerName = value; // Update centerName here
+                //centerName = value; // Update centerName here
                 //} / commented this to store centername(jo)
-                else if (label == 'Service Price') {
+                else if (label == 'Program Price') {
                   selectedPrice = double.tryParse(value);
-                } else if (label == 'Service Capacity') {
+                } else if (label == 'Program Capacity') {
                   capacityValue = int.tryParse(value) ?? 0;
-                } else if (label == 'Service Description') {
+                } else if (label == 'Program Description') {
                   selectedDescription = value;
                 } else if (label == 'Min Age') {
                   minAge = int.tryParse(value) ?? 0;
@@ -706,7 +712,7 @@ String userName = '';// add this to store centername(jo)
                         Padding(
                           padding: EdgeInsets.only(right: 130.0),
                           child: Text(
-                            'Add Service',
+                            'Add Program',
                             style: TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.w700,
@@ -717,11 +723,11 @@ String userName = '';// add this to store centername(jo)
                       ],
                     ),
                     SizedBox(height: 20.0),
-                    buildTextField('Service Name', validateServiceName,
+                    buildTextField('Program Name', validateServiceName,
                         maxLength: 20),
-                   // buildTextField('Center Name', validateServiceName,
-                     //   maxLength: 20),/ commented this to store centername(jo)
-                    buildTextField('Service Price', validatePrice),
+                    // buildTextField('Center Name', validateServiceName,
+                    //   maxLength: 20),/ commented this to store centername(jo)
+                    buildTextField('Program Price', validatePrice),
                     Row(
                       mainAxisAlignment: MainAxisAlignment
                           .spaceBetween, // Adjust this as needed
@@ -771,7 +777,7 @@ String userName = '';// add this to store centername(jo)
 // max age
 
                     buildIncrementDecrementField(
-                      'Service Capacity',
+                      'Program Capacity',
                       capacityValue,
                       () {
                         setState(() {
@@ -786,7 +792,7 @@ String userName = '';// add this to store centername(jo)
                         });
                       },
                     ), // capacity
-                    buildTextField('Service Description', validateDescription,
+                    buildTextField('Program Description', validateDescription,
                         maxLength: 225),
                     SizedBox(height: 2.0),
                     Row(
@@ -804,7 +810,7 @@ String userName = '';// add this to store centername(jo)
                     ),
                     SizedBox(height: 0),
                     Text(
-                      'Service Period Time',
+                      'Program Period Time',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -862,7 +868,7 @@ String userName = '';// add this to store centername(jo)
                               'You must select both start and end dates!');
                         } else if (selectedTimeSlot == null) {
                           _showDialog(
-                              'Warning', 'You must select the service time!');
+                              'Warning', 'You must select the Program time!');
                         } else {
                           sendDataToFirebase();
                         }
@@ -891,9 +897,13 @@ String userName = '';// add this to store centername(jo)
     final DateTime picked = (await showDatePicker(
       context: context,
       initialDate: isStartDate
-          ? selectedStartDate ?? DateTime.now()
+          ? selectedStartDate ??
+              DateTime.now().add(Duration(days: 1)) // Adjusted here
           : selectedEndDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: isStartDate
+          ? DateTime.now().add(Duration(
+              days: 1)) // Prevent selecting today's date for start date
+          : DateTime.now(), // Keep as is for end date
       lastDate: DateTime(2101),
     ))!;
 

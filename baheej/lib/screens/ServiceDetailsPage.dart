@@ -1,4 +1,5 @@
 import 'dart:convert';
+//import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baheej/screens/Service.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 //import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:ui' as ui; // Import dart:ui with an alias
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -22,6 +24,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   Map<String, String> selectedKidsNames = {};
   Map<String, dynamic>? paymentIntent;
   String? userEmail; //for gaurdian kids display
+  // Tracks the selected kid
 
   @override
   void initState() {
@@ -29,6 +32,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     // Fetch the current user's email when the widget is initialized
     final user = FirebaseAuth.instance.currentUser;
     userEmail = user?.email;
+    // fetchUserKids();
   }
 
   //store info in firebase
@@ -85,18 +89,39 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
   Future<void> updateServiceParticipantNo() async {
     try {
-      int newparticipantNo =
-          widget.service.participantNo + (selectedKids.length);
       await FirebaseFirestore.instance
           .collection('center-service')
           .doc(widget.service.id)
           .update({
-        'participateNo': newparticipantNo,
+        'participateNo': calculateparticipant(widget.service),
       });
     } catch (error) {
       print('Error updating service participant number: $error');
     }
   } //add it to update part (jory)
+
+  Future<void> succPayment() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // ignore: prefer_const_constructors
+          title: Text('Payment Successful'),
+          // ignore: prefer_const_constructors
+          content: Text('Your payment was successful!'),
+          actions: <Widget>[
+            TextButton(
+              // ignore: prefer_const_constructors
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); //  the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 //validation conflict service
   Future<void> checkForServiceConflict(
@@ -128,6 +153,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       } //if
     } //for
     if (conflict) {
+      print('step1');
       // ignore: use_build_context_synchronously
       showDialog(
         context: context,
@@ -140,96 +166,100 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               TextButton(
                 child: Text('No'), // User chooses not to proceed
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); //  the dialog
                 },
               ),
               TextButton(
-                child: Text('Yes'), // User chooses to proceed with payment
-                onPressed: () async {
-                  Navigator.of(context).pop(); // Close the dialog
-                  makePayment(context);
+                child: Text('Yes'),
+                onPressed: () {
+                //  makePayment(context);
+                 // Navigator.of(context).pop();
+                  // showDialog(
+                  // Make the payment
                 },
-              ),
+              )
             ],
           );
         },
       );
     } else {
+    //  makePayment(context);
       // ignore: use_build_context_synchronously
-      makePayment(context);
     } // No conflict found
   }
 
-// create payment
-  void makePayment(BuildContext context) async {
-    try {
-      double totalPrice = calculateTotalPrice(widget.service);
-      paymentIntent = await createPaymentIntent(totalPrice);
+// // create payment
+//   void makePayment(BuildContext context) async {
+//     try {
+//       double totalPrice = calculateTotalPrice(widget.service);
+//       paymentIntent = await createPaymentIntent(totalPrice);
 
-      // ignore: prefer_const_constructors
-      // var gpay = PaymentSheetGooglePay(
-      //  merchantCountryCode: "US",
-      //  currencyCode: 'SAR',
-      // testEnv: true,
-      // );//make it comment(jory)
+//       // ignore: prefer_const_constructors
+//       var gpay = PaymentSheetGooglePay(
+//         merchantCountryCode: "US",
+//         currencyCode: 'SAR',
+//         testEnv: true,
+//       );
 
-      String formattedPrice =
-          NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
+//       String formattedPrice =
+//           NumberFormat.currency(locale: 'en_US', symbol: '').format(totalPrice);
 
-      //  Stripe.instance.initPaymentSheet(
-      //   paymentSheetParameters: SetupPaymentSheetParameters(
-      //    paymentIntentClientSecret: paymentIntent!["client_secret"],
-      //    style: ThemeMode.dark,
-      //    merchantDisplayName: "baheej",
-      //    googlePay: gpay,
-//),
-      // );//make it comment(jory)
+//       Stripe.instance.initPaymentSheet(
+//         paymentSheetParameters: SetupPaymentSheetParameters(
+//           paymentIntentClientSecret: paymentIntent!["client_secret"],
+//           style: ThemeMode.dark,
+//           merchantDisplayName: "baheej",
+//           googlePay: gpay,
+//         ),
+//       );
 
-      await displayPaymentSheet(context); // Always display payment sheet
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
+//       await displayPaymentSheet(context);
+//       // Always display payment sheet
+//     } catch (e) {
+//       print("Error: $e");
+//     }
+//   }
 
-  displayPaymentSheet(BuildContext context) async {
-    try {
-      print('before await');
-      // await Stripe.instance.presentPaymentSheet();//make it comment(jory)
-      print('after await');
-      // Show a success message
-      // ignore: use_build_context_synchronously
+  // displayPaymentSheet(BuildContext context) async {
+  //   try {
+  //     print('before await');
+  //     await Stripe.instance.presentPaymentSheet();
 
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            // ignore: prefer_const_constructors
-            title: Text('Payment Successful'),
-            // ignore: prefer_const_constructors
-            content: Text('Your payment was successful!'),
-            actions: <Widget>[
-              TextButton(
-                // ignore: prefer_const_constructors
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
+  //     print('after await');
+  //     succPayment();
+  //     // Show a success message
+  //     // ignore: use_build_context_synchronously
+  //     // showDialog(
+  //     //   context: context,
+  //     //   builder: (BuildContext context) {
+  //     //     return AlertDialog(
+  //     //       // ignore: prefer_const_constructors
+  //     //       title: Text('Payment Successful'),
+  //     //       // ignore: prefer_const_constructors
+  //     //       content: Text('Your payment was successful!'),
+  //     //       actions: <Widget>[
+  //     //         TextButton(
+  //     //           // ignore: prefer_const_constructors
+  //     //           child: Text('OK'),
+  //     //           onPressed: () {
+  //     //             Navigator.of(context).pop(); //  the dialog
+  //     //           },
+  //     //         ),
+  //     //       ],
+  //     //     );
+  //     //   },
+  //     // );
 
-      final user = FirebaseAuth
-          .instance.currentUser; //use it for display kids for this gaurd
-      final userEmail = user?.email;
-      await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
+  //     final user = FirebaseAuth
+  //         .instance.currentUser; //use it for display kids for this gaurd
+  //     final userEmail = user?.email;
+  //     await addServiceToFirestore(widget.service.selectedTimeSlot, userEmail);
 
-      print("Done");
-    } catch (e) {
-      print("Payment failed or was canceled: $e");
-    }
-  }
+  //     print("Done");
+  //   } catch (e) {
+  //     print("Payment failed or was canceled: $e");
+  //   }
+  // }
 
   Future<Map<String, dynamic>> createPaymentIntent(double totalPrice) async {
     try {
@@ -290,549 +320,509 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     final double ffem = 1.0;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: OverflowBox(
-          maxWidth: double.infinity,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            "Service details",
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        backgroundColor: Color.fromARGB(0, 255, 255, 255),
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          Image.asset(
-            'assets/images/backasf.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 16, top: 55), //16 the arraw
-                ),
-                SizedBox(height: 70),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10 * fem, 0, 16 * fem, 22 * fem),
-                  padding: EdgeInsets.fromLTRB(
-                      0, 0, 0, 5 * fem), //5 size of the card
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    border:
-                        //Color.fromARGB(255, 229, 226, 226)
-                        Border.all(color: Color.fromARGB(255, 250, 249, 249)),
-                    borderRadius: BorderRadius.circular(20 * fem),
-                    gradient: LinearGradient(
-                      begin: Alignment(0, -1),
-                      end: Alignment(0, 1),
-                      colors: <Color>[
-                        Color.fromARGB(255, 239, 249, 254),
-                        Color.fromARGB(255, 239, 249, 254),
-                        Color.fromARGB(255, 239, 249, 254)
-
-                        // Color.fromARGB(255, 255, 231, 231),
-                        // Color.fromARGB(255, 238, 184, 233),
-                        // Color.fromARGB(237, 214, 240, 254),
-                      ],
-                      stops: <double>[0, 0, 1],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        //Color.fromARGB(62, 212, 208, 214),
-                        color: Color.fromARGB(60, 173, 170, 174),
-                        offset: Offset(
-                          8 * fem,
-                          8 * fem,
-                        ),
-                        blurRadius: 4 * fem,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(
-                            right: 100 * fem, left: 0 * fem, bottom: 10 * fem),
-                        width: 400 * fem,
-                        height: 80 * fem,
-                        child: Center(
-                          child: Column(
+      body: Container(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              //bottom: 0,
+              child: Container(
+                width: double.maxFinite,
+                height: 400,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/images/newkids.png"),
+                        fit: BoxFit.cover)),
+              ),
+            ),
+            Positioned(
+              top: 330,
+              child: Container(
+                padding: const EdgeInsets.only(left: 20, right: 10, top: 25),
+                //color: Colors.black,
+                width: MediaQuery.of(context).size.width,
+                height: 900,
+                decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 239, 245, 254),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30))),
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context)
+                            .pop(); // Replace '.pop()' with your navigation logic
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                widget.service
-                                    .serviceName, // Display service name
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 25 * ffem,
-                                  //fontWeight: FontWeight.w200,
-                                  fontWeight: FontWeight.bold,
-                                  height: 3 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      Container(
-                        margin: EdgeInsets.fromLTRB(
-                            20 * fem, 0, 200 * fem, 20 * fem),
-                        width: double.infinity,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Center(
-                              child: Container(
-                                margin: EdgeInsets.only(
-                                    right: 0 * fem, left: 0 * fem, bottom: 0),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      widget.service
-                                          .centerName, // Display center name
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: 'Imprima',
-                                        fontSize: 20 * ffem,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1 * ffem / fem,
-                                        color: Color(0xff000000),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 20 * fem,
-                        ),
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Start Date : ${DateFormat('MM/dd/yyyy').format(widget.service.selectedStartDate)}', // Display selected start date
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 20 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    ],
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.cancel,
+                                    color: Colors.red,
+                                    size: 20,
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Center(
-                                  child: Column(),
-                                ),
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'End Date : ${DateFormat('MM/dd/yyyy').format(widget.service.selectedEndDate)}', // Display selected end date
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Imprima',
-                                          fontSize: 20 * ffem,
-                                          fontWeight: FontWeight.w400,
-                                          height: 2 * ffem / fem,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    ],
+                                  SizedBox(
+                                    width: 8,
                                   ),
-                                ),
-                              ],
-                            ),
-
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      right: 6,
-                                      top: 5 *
-                                          fem), // Adjust the value as needed
-                                  child: Text(
-                                    "Age range: ",
+                                  Text(
+                                    'Close',
                                     style: TextStyle(
-                                      fontFamily: 'Imprima',
-                                      fontSize: 20 * ffem,
-                                      fontWeight: FontWeight.w400,
-                                      height: 1 * ffem / fem,
-                                      color: Color(0xff000000),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
                                     ),
                                   ),
-                                ),
-                                Text(
-                                  '${widget.service.minAge} - ${widget.service.maxAge}',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Imprima',
-                                    fontSize: 20 * ffem,
-                                    fontWeight: FontWeight.w400,
-                                    height: 2 * ffem / fem,
-                                    color: Color(0xff000000),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            //end row
-                          ],
-                        ),
-                      ),
-                      // service time
-                      Center(
-                        child: Container(
-                          margin: EdgeInsets.only(
-                            right: 160 * fem,
-                            top: 10 * fem,
-                            left: 15,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                ' Time: ',
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                              Text(
-                                widget.service.selectedTimeSlot,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
+                                ],
                               ),
                             ],
-                          ),
-                        ),
+                          )
+                        ],
                       ),
-
-                      Container(
-                        margin: EdgeInsets.only(
-                            right: 180 * fem,
-                            left: 15 * fem,
-                            bottom: 10 * fem,
-                            top: 15 * fem),
-                        width: double.infinity,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              ' Price: ',
-                              style: TextStyle(
-                                fontFamily: 'Imprima',
-                                fontSize: 20 * ffem,
-                                fontWeight: FontWeight.w400,
-                                height: 1 * ffem / fem,
-                                color: Color(0xff000000),
-                              ),
-                            ),
-                            Text(
-                              ' ${widget.service.servicePrice.toStringAsFixed(2)}\ SAR', // Display service price
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Imprima',
-                                fontSize: 20 * ffem,
-                                fontWeight: FontWeight.w400,
-                                height: 1 * ffem / fem,
-                                color: Color(0xff000000),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Center(
-                        child: Container(
-                          margin: EdgeInsets.only(
-                              bottom: 35 * fem,
-                              top: 8 * fem,
-                              right: 230 * fem,
-                              left: 16 * fem),
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              Text(
-                                "Description",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 24 * ffem,
-                                  fontWeight: FontWeight.w300,
-                                  height: 1 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                              Text(
-                                widget.service
-                                    .description, // Display service description
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Imprima',
-                                  fontSize: 20 * ffem,
-                                  fontWeight: FontWeight.w200,
-                                  height: 1 * ffem / fem,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Display Kids selection panel
-                      Container(
-                        margin: EdgeInsets.fromLTRB(
-                            20 * fem, 0, 71 * fem, 40 * fem),
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isKidsPanelExpanded = !isKidsPanelExpanded;
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 255, 255,
-                                    255), //primary: Color.fromARGB(255, 213, 214, 214),
-                                onPrimary: Color.fromARGB(255, 217, 231,
-                                    253), // Change text color when pressed
-                                // shape: RoundedRectangleBorder(
-                                // borderRadius: BorderRadius.circular(30.0),
-                                // ),
-                                ///shadowColor: Color(black),
-                                minimumSize: Size(100, 48), // Set button size
-                              ),
-                              child: Text(
-                                'Select Your Kids',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  fontSize: 20, // Change the text color
-                                  height: 1 * ffem / fem,
-                                  fontFamily: 'Imprima',
-                                  fontWeight:
-                                      FontWeight.w400, // the title place
-                                ),
-                              ),
-                            ),
-                            if (isKidsPanelExpanded)
-                              StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('Kids')
-                                    .where('userEmail',
-                                        isEqualTo:
-                                            userEmail) // Filter by user email
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return CircularProgressIndicator();
-                                  }
-
-                                  // Calculate the minimum and maximum allowed ages
-                                  final minAge = widget.service.minAge as int;
-                                  final maxAge = widget.service.maxAge as int;
-
-                                  final kids = snapshot.data!.docs;
-
-                                  List<Widget> checkboxes = [];
-                                  bool hasKidsWithinAgeRange = false;
-
-                                  for (var kid in kids) {
-                                    final kidData =
-                                        kid.data() as Map<String, dynamic>;
-                                    final kidName = kidData['name'] as String;
-                                    final kidAge = kidData['age'] as int;
-
-                                    // Check if the kid's age is within the allowed range
-                                    if (kidAge >= minAge && kidAge <= maxAge) {
-                                      checkboxes.add(
-                                        CheckboxListTile(
-                                          title: Text(kidName),
-                                          value: selectedKids.contains(kid.id),
-                                          onChanged: (bool? value) {
-                                            setState(() {
-                                              if (value != null && value) {
-                                                selectedKids.add(kid.id);
-
-                                                // selectedKidsNames[kid.id] =
-                                                // kidName;
-                                              } else {
-                                                selectedKids.remove(kid.id);
-                                                selectedKidsNames
-                                                    .remove(kidName);
-
-                                                // selectedKidsNames
-                                                // .remove(kid.id);
-                                              }
-                                            });
-                                          },
-                                        ),
-                                      );
-                                      hasKidsWithinAgeRange = true;
-                                    }
-                                  }
-
-                                  if (!hasKidsWithinAgeRange) {
-                                    checkboxes.add(
-                                      Text(
-                                          "You do not have any kids within the age range."),
-                                    );
-                                  }
-
-                                  // Add the "Done" button at the end
-                                  checkboxes.add(
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          isKidsPanelExpanded = false;
-                                        });
-                                      },
-                                      child: Text('Done'),
-                                    ),
-                                  );
-
-                                  return Column(
-                                    children: checkboxes,
-                                  );
-                                },
-                              )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(40 * fem, 0, 57, 20 * fem),
-                  //80 change the size
-                  padding: EdgeInsets.fromLTRB(35 * fem, 0, 27 * fem, 0),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    //borderRadius: BorderRadius.circular(30 * fem),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 6 * fem),
-                        child: Text(
-                          'Total Price',
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          widget.service.serviceName,
                           style: TextStyle(
-                            fontFamily: 'Imprima',
-                            fontSize: 20 * ffem,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            height: 1.6666666667 * ffem / fem,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(
+                            width: 20), // Adjust the width between the texts
+
+                        Text(
+                          '${widget.service.servicePrice} SAR',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          right: 300,
+                          top: 0), // Adjust the left padding value as needed
+                      child: Text(
+                        widget.service.centerName,
+                        style: TextStyle(
+                          fontSize: 20,
+                          //fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              right: 10,
+                              top:
+                                  0), // Adjust the left padding value as needed
+                        ),
+                        Icon(
+                          Icons.calendar_today_sharp,
+                          color: Colors.blue,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          'Start at:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 20,
+                            // Add other desired properties like fontSize, fontFamily, etc.
+                          ),
+                        ),
+                        Text(
+                          DateFormat('MM/dd/yy')
+                              .format(widget.service.selectedStartDate),
+                          style: TextStyle(
+                            fontSize:
+                                20, // Change this to the desired font size
+                            // fontWeight:
+                            //     20, // Adjust the font weight if needed
                             color: Color.fromARGB(255, 0, 0, 0),
                           ),
                         ),
+                        SizedBox(width: 5),
+                        Text(
+                          'End at:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 20,
+                            // Add other desired properties like fontSize, fontFamily, etc.
+                          ),
+                        ),
+                        Text(
+                          DateFormat('MM/dd/yy')
+                              .format(widget.service.selectedEndDate),
+                          style: TextStyle(
+                            fontSize:
+                                20, // Change this to the desired font size
+                            fontWeight: FontWeight
+                                .normal, // Adjust the font weight if needed
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              right: 10,
+                              top:
+                                  0), // Adjust the left padding value as needed
+                        ),
+                        Icon(
+                          Icons.access_time,
+                          color: Colors.blue,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          widget.service.selectedTimeSlot,
+                          style: TextStyle(
+                            fontSize:
+                                20, // Change this to the desired font size
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            fontWeight: FontWeight.bold,
+                            // Other text style properties can be added here
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              right: 15,
+                              top:
+                                  0), // Adjust the left padding value as needed
+                        ),
+                        Text(
+                          'kids range:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 20,
+                            // Add other desired properties like fontSize, fontFamily, etc.
+                          ),
+                        ),
+                        Text(
+                          widget.service.minAge.toString(),
+                          style: TextStyle(
+                            fontSize:
+                                20, // Change this to the desired font size
+                            // fontWeight: FontWeight
+                            //     .bold, // If you want the text to be bold
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                        Text(
+                          "-",
+                          style: TextStyle(
+                            fontSize:
+                                20, // Change this to the desired font size
+                            // fontWeight: FontWeight
+                            //     .bold, // If you want the text to be bold
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                        Text(
+                          widget.service.maxAge.toString(),
+                          style: TextStyle(
+                            fontSize:
+                                20, // Change this to the desired font size
+                            // fontWeight: FontWeight
+                            //     .bold, // If you want the text to be bold
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      margin:
+                          EdgeInsets.fromLTRB(0 * fem, 10, 71 * fem, 40 * fem),
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isKidsPanelExpanded = !isKidsPanelExpanded;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Color.fromARGB(255, 255, 255,
+                                  255), //primary: Color.fromARGB(255, 213, 214, 214),
+                              onPrimary: Color.fromARGB(255, 217, 231,
+                                  253), // Change text color when pressed
+
+                              minimumSize: ui.Size(150, 50), // Set button size
+                            ),
+                            child: Text(
+                              'Select Your Kids',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                fontSize: 20, // Change the text color
+                                height: 1 * ffem / fem,
+                                fontFamily: 'Imprima',
+                                fontWeight: FontWeight.w400, // the title place
+                              ),
+                            ),
+                          ),
+                          if (isKidsPanelExpanded)
+                            StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Kids')
+                                  .where('userEmail',
+                                      isEqualTo:
+                                          userEmail) // Filter by user email
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return CircularProgressIndicator();
+                                }
+
+                                final minAge = widget.service.minAge as int;
+                                final maxAge = widget.service.maxAge as int;
+
+                                final kids = snapshot.data!.docs;
+
+                                List<Widget> checkboxes = [];
+                                bool hasKidsWithinAgeRange = false;
+
+                                for (var kid in kids) {
+                                  final kidData =
+                                      kid.data() as Map<String, dynamic>;
+                                  final kidName = kidData['name'] as String;
+                                  final kidAge = kidData['age'] as int;
+                                  if (kidAge >= minAge && kidAge <= maxAge) {
+                                    checkboxes.add(
+                                      CheckboxListTile(
+                                        title: Text(kidName),
+                                        value: selectedKids.contains(kid.id),
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            if (value != null && value) {
+                                              selectedKids.add(kid.id);
+
+                                              // selectedKidsNames[kid.id] =
+                                              // kidName;
+                                            } else {
+                                              selectedKids.remove(kid.id);
+                                              selectedKidsNames.remove(kidName);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    );
+                                    hasKidsWithinAgeRange = true;
+                                  }
+                                }
+                                if (!hasKidsWithinAgeRange) {
+                                  checkboxes.add(
+                                    Text(
+                                        "You do not have any kids within the age range."),
+                                  );
+                                }
+                                checkboxes.add(ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isKidsPanelExpanded = false;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.blue,
+                                  ),
+                                  child: Text('Done'),
+                                ));
+                                return Column(
+                                  children: checkboxes,
+                                );
+                              },
+                            )
+                        ],
                       ),
-                      Container(
-                        margin: EdgeInsets.only(right: 29 * fem),
-                        width: 1 * fem,
-                        height: 46 * fem,
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 6, 6, 6),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              top: 0), // Adjust the top padding value as needed
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Your existing content...
+                            ],
+                          ),
+                        ),
+                        Text(
+                          'Description:',
+                          style: TextStyle(
+                            fontFamily: 'Imprima',
+                            fontSize: 18, // Adjust the font size as needed
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                  right: 0 * fem, left: 0 * fem),
+                              width: 1 * fem,
+                              height: 0 * fem,
+                            ),
+                            SizedBox(height: 0),
+                            Text(
+                              widget.service.description,
+                              style: TextStyle(
+                                fontFamily: 'Imprima',
+                                fontSize: 20 * ffem,
+                                //fontWeight: FontWeight.bold,
+                                height: 1.6666666667 * ffem / fem,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                  right: 0 * fem, left: 0 * fem),
+                              width: 1 * fem,
+                              height: 20 * fem,
+                            ),
+                            Text(
+                              '-----------------------------------------',
+                              style: TextStyle(
+                                fontFamily: 'Imprima',
+                                fontSize: 20 * ffem,
+                                //fontWeight: FontWeight.bold,
+                                height: 1.6666666667 * ffem / fem,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(right: 6 * fem),
+                              child: Text(
+                                'Total Price',
+                                style: TextStyle(
+                                  fontFamily: 'Imprima',
+                                  fontSize: 20 * ffem,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.6666666667 * ffem / fem,
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(right: 29 * fem),
+                              width: 1 * fem,
+                              height: 25 * fem,
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 6, 6, 6),
+                              ),
+                            ),
+                            Text(
+                              ' ${calculateTotalPrice(widget.service)}\ SAR', // Calculate and display total price
+                              style: TextStyle(
+                                fontFamily: 'Imprima',
+                                fontSize: 20 * ffem,
+                                fontWeight: FontWeight.bold,
+                                height: 1.6666666667 * ffem / fem,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(100 * fem, 0, 100 * fem, 0),
+                      width: double.infinity,
+                      height: 60 * fem,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15 * fem),
+                      ),
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            bookService(() {
+                              // Simulate a successful payment, then trigger fireworks
+                              checkForServiceConflict(
+                                  widget.service.selectedStartDate,
+                                  widget.service.selectedEndDate,
+                                  widget.service.selectedTimeSlot);
+                              //addServiceToFirestore();
+                              // Check if payment is successful (you can replace this with your actual logic)
+                              //bool paymentSuccessful = true;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Color.fromARGB(255, 59, 138, 207),
+                            onPrimary: Color.fromARGB(255, 255, 255, 255),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            minimumSize: ui.Size(150, 50),
+                          ),
+                          child: Text(
+                            'Pay to Book',
+                            style: TextStyle(
+                              fontFamily: 'Imprima',
+                              fontSize: 25 * ffem,
+                              fontWeight: FontWeight.w400,
+                              height: 1 * ffem / fem,
+                            ),
+                          ),
                         ),
                       ),
-                      Text(
-                        ' ${calculateTotalPrice(widget.service)}\ SAR', // Calculate and display total price
-                        style: TextStyle(
-                          fontFamily: 'Imprima',
-                          fontSize: 20 * ffem,
-                          fontWeight: FontWeight.bold,
-                          height: 1.6666666667 * ffem / fem,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(74 * fem, 0, 123 * fem, 0),
-                  width: double.infinity,
-                  height: 70 * fem,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20 * fem),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      bookService(() {
-                        makePayment(context);
-                        // Simulate a successful payment, then trigger fireworks
-                        //  checkForServiceConflict(
-                        //    widget.service.selectedStartDate,
-                        //    widget.service.selectedEndDate,
-                        //   widget.service.selectedTimeSlot);
-                        //addServiceToFirestore();
-                        // Check if payment is successful (you can replace this with your actual logic)
-                        //bool paymentSuccessful = true;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      minimumSize: Size(120, 48),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'pay to book',
-                        style: TextStyle(
-                          fontFamily: 'Imprima',
-                          fontSize: 25 * ffem,
-                          fontWeight: FontWeight.w400,
-                          height: 1 * ffem / fem,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -841,5 +831,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   double calculateTotalPrice(Service service) {
     double totalPrice = service.servicePrice * (selectedKids.length);
     return totalPrice;
+  }
+
+  int calculateparticipant(Service service) {
+    // Update the participant number(jory)
+    int newParticipantNo = widget.service.participateNo + (selectedKids.length);
+    print(widget.service.participateNo);
+    print('calculated kids and add new');
+    print(newParticipantNo);
+    return newParticipantNo;
   }
 }

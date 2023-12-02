@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart';
-//import 'package:baheej/screens/ServiceDetailsPage.dart';
+import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:timezone/data/latest.dart' as tz;
+//import 'package:timezone/timezone.dart' as tz;
+ //import 'package:baheej/screens/NotificationService1.dart';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -24,12 +28,97 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   List<Service> filteredServices = [];
   TextEditingController _searchController = TextEditingController();
   String centerName = ''; // Declare centerName here
+  String? userRole;
+  TextEditingController notificationMessageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     loadServices();
   }
+
+  ///0000000
+
+  TextEditingController adMessageController = TextEditingController();
+
+  void _showAdMessageDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create Advertisement'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: adMessageController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your advertisement message',
+                ),
+                maxLength: 100, // Maximum characters allowed
+                maxLines: null, // Allow multiple lines
+              ),
+              SizedBox(height: 10),
+              // Text(
+              //   'Minimum 15 characters required',
+              //   style: TextStyle(color: Colors.red),
+              // ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Submit'),
+              onPressed: () async {
+                String adMessage = adMessageController.text.trim();
+                if (adMessage.isNotEmpty && adMessage.length >= 15) {
+                  // Store ad message in Firestore under 'notification2' collection
+                  await FirebaseFirestore.instance
+                      .collection('notification2')
+                      .add({
+                    'message': adMessage,
+                    'timestamp': DateTime.now(),
+                  });
+
+                  // Show a SnackBar to indicate successful notification sent
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Notification sent successfully!'),
+                      backgroundColor:
+                          Colors.green, // Set background color to green
+                    ),
+                  );
+
+                  adMessageController.clear(); // Clear the text field
+                  Navigator.of(context).pop(); // Close the dialog
+                } else {
+                  // Show an error message if the entered text is invalid
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Please enter at least 15 characters!',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 255, 255, 255)),
+                      ),
+                      backgroundColor: Color.fromARGB(255, 249, 0, 0),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+//000000
 
   double calculatePercentageBooked(int capacity, int participants) {
     if (capacity <= 0) {
@@ -82,8 +171,6 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
               selectedEndDate = DateTime.now();
             }
             final participantNo = data['participateNo'] ?? 0;
-              final starsrate = data['starsrate'] as int? ?? 0;
-
 
             // Check if the start date is today or earlier
             if (!selectedStartDate.isBefore(currentDate)) {
@@ -107,9 +194,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         : 0.0),
                 selectedTimeSlot:
                     data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
-                participantNo: participantNo,
-              starsrate: starsrate,
-
+                participateNo: participantNo,
+                starsrate: data['starsrate'] as int? ?? 0,
               );
             } else {
               // Return null for services with start dates in the past or today
@@ -125,6 +211,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         filteredServices = loadedServices;
       });
     }
+  }
+
+  void reloadServices() async {
+    await loadServices();
   }
 
   Future<void> _handleLogout() async {
@@ -191,9 +281,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   }
 
   void navigateToSignInScreen() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
     );
   }
 
@@ -214,7 +305,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Service'),
+          title: Text('Delete Program'),
           content: Text('Are you sure you want to delete this service?'),
           actions: <Widget>[
             TextButton(
@@ -270,10 +361,33 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Welcome ${widget.centerName}'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          SizedBox(width: 10), // Add space to the left of the first icon
+          IconButton(
+            icon: Icon(Icons.notification_add),
+            onPressed: () {
+              _showAdMessageDialog();
+            },
+          ),
+          SizedBox(width: 60), // Add space between the icons and the text
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Welcome ${widget.centerName}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10), // Add space between the text and the last icon
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -294,13 +408,16 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
             padding: EdgeInsets.only(top: 160, left: 16, right: 16),
             child: Column(
               children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                ),
                 TextField(
                   controller: _searchController,
                   onChanged: (value) {
                     _handleSearch(value);
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search services...',
+                    hintText: 'Search Programs...',
                     prefixIcon: Icon(Icons.search),
                   ),
                   toolbarOptions: null,
@@ -343,7 +460,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Name: ',
+                                              'Program name: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -357,23 +474,6 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             ),
                                           ],
                                         ),
-                                        // Row(
-                                        //   children: [
-                                        //     Text(
-                                        //       'Percentage Booked: ',
-                                        //       style: TextStyle(
-                                        //         fontSize: 16,
-                                        //         fontWeight: FontWeight.bold,
-                                        //       ),
-                                        //     ),
-                                        //     Text(
-                                        //       '${calculatePercentageBooked(service.capacityValue, service.participantNo).toStringAsFixed(2)}%',
-                                        //       style: TextStyle(
-                                        //         fontSize: 16,
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
                                         Row(
                                           children: [
                                             Text(
@@ -413,7 +513,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Time: ',
+                                              'Program Time: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -494,7 +594,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                         Row(
                                           children: [
                                             Text(
-                                              'Service Price: ',
+                                              'Program Price: ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -514,34 +614,33 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
-                                            //  onTap: () {
-                                             //   Navigator.push(
-                                              //    context,
-                                                 // MaterialPageRoute(
-                                                   // builder: (context) =>
-                                                      //  EditService(
-                                                     // service: service,
-                                                    //  onUpdateService:
-                                                     //     updateService,
-                                                    //),
-                                               //   ),
-                                               // );
-                                            //  },
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditService(
+                                                      service: service,
+                                                      onUpdateService:
+                                                          updateService,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    'Edit Service',
+                                                    'Edit Program',
                                                     style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              158,
-                                                              158,
-                                                              158),
-                                                    ),
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 59, 138, 207),
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline),
                                                   ),
                                                 ],
                                               ),
@@ -553,13 +652,15 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    'Delete Service',
+                                                    'Delete Program',
                                                     style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.red,
-                                                    ),
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.red,
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline),
                                                   ),
                                                 ],
                                               ),
@@ -605,7 +706,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                   },
                 ),
                 Text(
-                  'Booking Service',
+                  'Booked Programs',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -620,7 +721,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 Padding(
                   padding: EdgeInsets.only(top: 50),
                   child: Text(
-                    'Add Service',
+                    'Add Program',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -666,7 +767,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ServiceFormScreen(),
+              builder: (context) =>
+                  ServiceFormScreen(onServiceAdded: reloadServices),
             ),
           );
         },
