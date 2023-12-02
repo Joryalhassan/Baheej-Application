@@ -348,50 +348,45 @@ LinearGradient _buildProgressBarGradient() {
                                     //   ],
                                     // ),
                                     Divider(),
-                                   
-
-                                   Row(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Booked Capacity Percentage: ',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                    Row(
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Booked Capacity Percentage: ',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                          Text(
-                                            '(${service.participateNo} / ${service.capacityValue})',
-                                            style: TextStyle(
-                                              fontSize: 16,
+                                            Text(
+                                              '(${service.participateNo} / ${service.capacityValue})',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      Expanded(
-                                        child: LinearProgressIndicator(
-                                          value: calculatePercentageBooked(
-                                            service.capacityValue,
-                                            service.participateNo,
-                                          ) / 100.0,
-                                          backgroundColor: Colors.grey,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            Colors.blue, // Default color if the gradient cannot be applied
+                                          ],
+                                        ),
+                                        Expanded(
+                                          child: LinearProgressIndicator(
+                                            value: calculatePercentageBooked(
+                                              service.capacityValue,
+                                              service.participateNo,
+                                            ) / 100.0,
+                                            backgroundColor: Colors.grey,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
-                                        style: TextStyle(
-                                          fontSize: 16,
+                                        SizedBox(width: 8),
+                                        Text(
+                                          '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-
+                                      ],
+                                    ),
 
 
                                 Row(
