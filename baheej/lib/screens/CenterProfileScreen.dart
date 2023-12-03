@@ -6,6 +6,7 @@ import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Addkids.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/HomeScreenCenter.dart';
+import 'package:baheej/screens/compSerList.dart';
 
 class CenterProfileViewScreen extends StatefulWidget {
   const CenterProfileViewScreen({Key? key}) : super(key: key);
@@ -331,7 +332,13 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the AppBar
       appBar: AppBar(
-        title: Text('$centerName profile'), // Title for the AppBar
+        title: Text('$centerName profile', 
+        style: TextStyle(
+        fontSize: 30,
+        fontFamily:'5yearsoldfont', // Use the font family name declared in pubspec.yaml
+        color: Color.fromARGB(255, 255, 255, 255),
+          ),
+          ), // Title for the AppBar
         backgroundColor: Colors.transparent, // Transparent AppBar background
         elevation: 0, // No shadow
         leading: IconButton(
@@ -349,7 +356,7 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
         children: [
           // Background image or content
           Image.asset(
-            'assets/images/backG.png',
+            'assets/images/Centerprof.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -370,101 +377,112 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
         ],
       ),
 
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.history),
-                  color: Colors.white,
-                  onPressed: () {
-                    // Handle booking history button tap
-                  },
-                ),
-                Text(
-                  'Booking Program',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Text(
-                    'Add Program',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.home_filled),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.pushReplacement(
+     bottomNavigationBar: BottomAppBar(
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.query_stats,
+                'Program Statistics',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => compSerListScreen(centerName: _userNameTextController.text),),
+                  );
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => HomeScreenCenter(
                             centerName: _userNameTextController.text),
                       ),
                     );
-                  },
-                ),
-                Text(
-                  'Home',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
-          ],
+
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.add,
+                'Add Program',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                             builder: (context) => ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
+      ),
+
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                
+                 
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
-      ),
     );
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
         ),
-      ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildEditableView() {
     return SingleChildScrollView(
       padding: EdgeInsets.only(
-        top: 70,
+        top: 120,
         left: 16.0,
         right: 16.0,
         bottom: 16.0,

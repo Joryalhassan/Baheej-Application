@@ -1,5 +1,5 @@
 import 'package:baheej/screens/EditService.dart';
-//import 'package:baheej/screens/compSerList.dart';comJo
+import 'package:baheej/screens/compSerList.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +14,8 @@ import 'package:baheej/screens/CenterProfileScreen.dart';
 //import 'package:timezone/timezone.dart' as tz;comJo
 // import 'package:baheej/screens/NotificationService1.dart';
 import 'package:baheej/screens/CserviceDetails.dart';
+// import math , create random colors card
+import 'dart:math';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -356,6 +358,19 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       filteredServices.remove(service);
     });
   }
+  //function to create random colors of card
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 252, 222, 233),
+    Color.fromARGB(255, 210, 229, 245),
+    Color.fromARGB(255, 251, 242, 212),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +392,10 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Welcome ${widget.centerName}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                   style: TextStyle(
+                fontSize: 30,
+                fontFamily:'5yearsoldfont', // Use the font family name declared in pubspec.yaml
+              ),
                 ),
               ),
             ),
@@ -391,10 +409,11 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset('assets/images/backG.png', fit: BoxFit.cover),
+              top: 0,
+            child: Image.asset('assets/images/HomeCenterback.png', fit: BoxFit.cover),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+            padding: EdgeInsets.only(top: 200, left: 16, right: 16),
             child: Column(
               children: [
                 TextField(
@@ -416,6 +435,8 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                           )
                         : Column(
                             children: filteredServices.map((service) {
+                               final randomColor =
+                          _getRandomColor(); // Get a random color for each card
                               return GestureDetector(
                                 onTap: () {
                                   // Handle tapping on a service
@@ -423,46 +444,27 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                 child: Card(
                                   elevation: 3,
                                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                                  color: Color.fromARGB(255, 239, 249, 254),
+                                  color: randomColor,
+                              
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Align(
-                                          alignment: Alignment.topRight,
-                                          child: PopupMenuButton<String>(
-                                            icon: Icon(Icons.more_horiz), // Horizontal dots icon
-                                            onSelected: (String value) {
-                                              if (value == 'edit') {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => EditService(
-                                                      service: service,
-                                                      onUpdateService: updateService,
-                                                    ),
-                                                  ),
-                                                );
-                                              } else if (value == 'delete') {
-                                                deleteService(service);
-                                              }
-                                            },
-                                            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                                              const PopupMenuItem<String>(
-                                                value: 'edit',
-                                                child: Text('Edit Program'),
-                                              ),
-                                              const PopupMenuItem<String>(
-                                                value: 'delete',
-                                                child: Text('Delete Program'),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                     //   Align(
+                                     // alignment: Alignment.topRight,
+                                     // child: GestureDetector(
+                                       // onTap: () {
+                                       //   deleteService(service);
+                                      //  },
+                                     //   child: Icon(Icons.delete), // Delete icon in red
+                                     // ),
+                                    //),
+                                        
                                         Text(
                                           service.serviceName,
-                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, 
+                                      fontFamily: '5yearsoldfont',),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         
@@ -500,35 +502,50 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                        
                                       
                                           
-                                          SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => CserviceDetails(service: service)
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        'View Details',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                                         SizedBox(height: 16),
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    GestureDetector(
+      onTap: () {
+        // Navigation logic for editing service
+       deleteService(service);
+      },
+      child: Icon(Icons.delete), // Edit icon on the left
+    ),
+    ElevatedButton(
+      onPressed: () {
+        // Navigation logic for viewing service details
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CserviceDetails(service: service),
+          ),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        primary: Color.fromARGB(255, 198, 88, 152),
+                      onPrimary: Color.fromARGB(255, 255, 255, 255),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(33.0),
+         
+        ),
+      ),
+      child: Text(
+        'View Details',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+    ),
+  ],
+),
+      ],
+    ),
+  ),
+),
                       );
                     }).toList(),
                           ),
@@ -539,102 +556,102 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.history),
-                  color: Colors.white,
-                  onPressed: () {
-                   // Navigator.push(
-                     // context,
-                     // MaterialPageRoute(
-                     //   builder: (context) =>
-                    //        compSerListScreen(centerName: centerName),
-                    //  ),
-                    //);comJo
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Booked Programs',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Text(
-                    'Add Program',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
+         bottomNavigationBar: BottomAppBar(
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.query_stats,
+                'Program Statistics',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => compSerListScreen(centerName: centerName),),
+                  );
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                  // Handle onPressed action
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.add,
+                'Add Program',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CenterProfileViewScreen(),
-                      ),
-                    );
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
-          ],
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CenterProfileViewScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  ServiceFormScreen(onServiceAdded: reloadServices),
-            ),
-          );
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
+    );
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
         ),
-      ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }

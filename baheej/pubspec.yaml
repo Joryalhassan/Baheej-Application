@@ -74,7 +74,12 @@ flutter:
     - assets/images/backLo.png
     - assets/images/logo2.png
     - assets/images/backasf.png
-
+    - assets/images/kidsAndwaves.png
+    - assets/images/HomeCenterback.png
+    - assets/images/Viewcwntwerser.png
+    - assets/images/Editservice.png
+    - assets/images/statistics.png
+    - assets/images/Centerprof.png
 
   #   - images/a_dot_ham.jpeg
 
@@ -88,18 +93,16 @@ flutter:
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: Inspiration
+      fonts:
+        - asset: fonts\Inspiration-Regular.ttf
+    - family: ButterflyKids
+      fonts:
+        - asset: fonts\ButterflyKids-Regular.ttf
+    - family: 5yearsoldfont
+      fonts:
+        - asset: fonts\5yearsoldfont.ttf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

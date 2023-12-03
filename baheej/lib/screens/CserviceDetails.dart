@@ -7,7 +7,9 @@ import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/EditService.dart';
-
+import 'package:baheej/screens/compSerList.dart';
+// import math , create random colors card
+import 'dart:math';
 
 class CserviceDetails extends StatefulWidget {
   final Service service;
@@ -20,6 +22,19 @@ class CserviceDetails extends StatefulWidget {
 }
 
 class _CserviceDetailsState extends State<CserviceDetails> {
+   late Service _serviceDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    _serviceDetails = widget.service;
+  }
+
+  void _updateServiceDetails(Service updatedService) {
+    setState(() {
+      _serviceDetails = updatedService;
+    });
+  }
    //void _showAdMessageDialog() {//comJo
     //showDialog(
       //context: context,
@@ -120,6 +135,22 @@ class _CserviceDetailsState extends State<CserviceDetails> {
       (route) => false, // Remove all routes in the stack
     );
   }
+  void _dummyServiceAddedFunction() {
+  // This function intentionally left blank.
+}//add by jo to fix serviceadding
+ 
+  //function to create random colors of card
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 252, 222, 233),
+    Color.fromARGB(255, 210, 229, 245),
+    Color.fromARGB(255, 251, 242, 212),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
+  }
 
  
 
@@ -139,10 +170,10 @@ class _CserviceDetailsState extends State<CserviceDetails> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Welcome ${widget.service.serviceName}',
+                  '${ _serviceDetails.serviceName} Details',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                     fontSize: 30,
+                fontFamily:'5yearsoldfont', // Use the font family name declared in pubspec.yaml
                   ),
                 ),
               ),
@@ -161,16 +192,19 @@ class _CserviceDetailsState extends State<CserviceDetails> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backG.png',
+              'assets/images/Viewcwntwerser.png',
               fit: BoxFit.cover,
             ),
           ),
            Padding(
-          padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+          padding: EdgeInsets.only(top: 250, left: 16, right: 16),
           child: Column(
+              
             children: [
               Expanded(
+                
                 child: SingleChildScrollView(
+                    
                   child: GestureDetector(
                     onTap: () {
                       // Handle tapping on a service
@@ -178,7 +212,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                     child: Card(
                       elevation: 3,
                       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      color: Color.fromARGB(255, 239, 249, 254),
+                      color: _getRandomColor(),// Get a random color for each card
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -194,7 +228,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                              widget.service.serviceName,
+                                               _serviceDetails.serviceName,
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -212,7 +246,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                             ),
                                             Text(
                                               DateFormat('MM/dd/yyyy').format(
-                                                  widget.service.selectedStartDate),
+                                                  _serviceDetails.selectedStartDate),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -230,7 +264,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                             ),
                                             Text(
                                               DateFormat('MM/dd/yyyy').format(
-                                                  widget.service.selectedEndDate),
+                                                  _serviceDetails.selectedEndDate),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -247,7 +281,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                               widget.service.selectedTimeSlot,
+                                             _serviceDetails.selectedTimeSlot,
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -262,7 +296,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                           ),
                                         ),
                                         Text(
-                                           widget.service.description,
+                                           _serviceDetails.description,
                                           style: TextStyle(
                                             fontSize: 16,
                                           ),
@@ -277,7 +311,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                               widget.service.minAge.toString(),
+                                               _serviceDetails.minAge.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -294,7 +328,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                               widget.service.maxAge.toString(),
+                                               _serviceDetails.maxAge.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -311,7 +345,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                               widget.service.capacityValue.toString(),
+                                              _serviceDetails.capacityValue.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -328,7 +362,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                               widget.service.participateNo.toString(),
+                                               _serviceDetails.participateNo.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -345,7 +379,7 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                               ),
                                             ),
                                             Text(
-                                              '${ widget.service.servicePrice.toStringAsFixed(2)}',
+                                              '${ _serviceDetails.servicePrice.toStringAsFixed(2)}',
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -353,8 +387,22 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                                           ],
                                         ),
                                         SizedBox(height: 16),
-                                        
-                                     ],
+                                GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditService(
+          service: _serviceDetails,
+          onUpdateService: _updateServiceDetails,
+        ),
+      ),
+    );
+  },
+  child: Icon(Icons.edit), // Edit icon on the left
+),
+
+            ],
                         ),
                       ),
                     ),
@@ -367,95 +415,102 @@ class _CserviceDetailsState extends State<CserviceDetails> {
       ],
     ),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.history),
-                  color: Colors.white,
-                  onPressed: () {
-                   // Navigator.push(
-                     // context,
-                     // MaterialPageRoute(
-                      //  builder: (context) =>
-                          //  compSerListScreen(centerName: centerName),
-                      //),
-                   // );//comJo
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Booked Programs',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Text(
-                    'Add Program',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.query_stats,
+                'Program Statistics',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => compSerListScreen(centerName: widget.service.centerName),),
+                  );
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                  // Handle onPressed action
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.add,
+                'Add Program',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CenterProfileViewScreen(),
-                      ),
-                    );
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
-          ],
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CenterProfileViewScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-     floatingActionButton: FloatingActionButton(
-  backgroundColor: Color.fromARGB(255, 174, 207, 250),
-  onPressed: () {
-    // Define the action to take when the button is pressed
-  },
-  child: Icon(
-    Icons.add,
-    color: Colors.white,
-  ),
-),
     );
   }
-}
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+    
+  }
