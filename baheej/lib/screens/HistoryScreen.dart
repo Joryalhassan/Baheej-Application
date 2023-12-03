@@ -183,9 +183,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   final _random = Random();
   final List<Color> _randomColors = [
-    Color.fromARGB(255, 250, 207, 221),
+    Color.fromARGB(255, 252, 222, 233),
     Color.fromARGB(255, 210, 229, 245),
-    Color.fromARGB(255, 246, 241, 201),
+    Color.fromARGB(255, 251, 242, 212),
     // Add more colors if needed
   ];
 
@@ -446,9 +446,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             buildLabelAndValue('At:', selectedTimeSlot),
             buildLabelAndValue('Total Price:', '$totalPrice SAR'),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 0.0),
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
               child: Text(
-                'Rate the program:',
+                'Rate the Program:',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -468,20 +468,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
             Center(
-              child: TextButton(
-                onPressed: () {
-                  cancelService(serviceDocument);
-                },
-                child: Text(
-                  'Cancel booking',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    // Remove the underline
+              child: Container(
+                margin: EdgeInsets.only(top: 20),
+                width: 120.0,
+                height: 26.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    cancelService(serviceDocument);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: const Color.fromARGB(255, 226, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                      side: BorderSide(
+                          color: Color.fromARGB(
+                              255, 226, 0, 0)), // Border color here
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel Booking',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
-            ),
+            )
           ],
         ),
       ),

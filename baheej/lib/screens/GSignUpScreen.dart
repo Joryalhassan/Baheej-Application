@@ -173,7 +173,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign Up As guardian",
+          "Sign Up As Guardian",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
@@ -181,7 +181,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
       body: Stack(children: [
         // Background image
         Image.asset(
-          'assets/images/blueWaves.png',
+          'assets/images/yellowave.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
@@ -211,7 +211,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         child: Text(
                           "First Name",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       TextFormField(
@@ -220,7 +222,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.person_outline),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -277,7 +279,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         child: Text(
                           "Last Name",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       TextFormField(
@@ -286,7 +290,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.person_outline),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -341,9 +345,11 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Email Id",
+                          "Email ID",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       TextFormField(
@@ -352,7 +358,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                           //   labelText: "Enter Email Id",
                           prefixIcon: Icon(Icons.email),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -397,7 +403,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         child: Text(
                           "Phone Number",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       TextFormField(
@@ -413,7 +421,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                           // labelText: "Enter Phone Number",
                           prefixIcon: Icon(Icons.phone),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -457,7 +465,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         child: Text(
                           "Select Gender",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       DropdownButtonFormField<String>(
@@ -479,7 +489,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                           // labelText: "Select Gender",
                           prefixIcon: Icon(Icons.person),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -519,7 +529,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         child: Text(
                           "Password",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       TextFormField(
@@ -530,7 +542,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                           // labelText: "Enter Password",
                           prefixIcon: Icon(Icons.lock_outlined),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -574,7 +586,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                     child: RichText(
                       text: TextSpan(
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: Color.fromARGB(255, 72, 71, 71),
                           fontSize: 12,
                         ),
                         children: [
@@ -611,7 +623,9 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         child: Text(
                           "Confirm Password",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: '5yearsoldfont'),
                         ),
                       ),
                       TextFormField(
@@ -621,7 +635,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock_outlined),
                           filled: true,
-                          fillColor: Colors.grey[300],
+                          fillColor: Color.fromARGB(255, 251, 242, 212),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -655,13 +669,13 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      onPrimary: Colors.white,
+                      primary: Color.fromARGB(255, 198, 88, 152),
+                      onPrimary: Color.fromARGB(255, 255, 255, 255),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             33.0), // Increase the border radius
                       ),
-                      minimumSize: Size(150, 54), // Increase the button size
+                      minimumSize: Size(200, 40), // Increase the button size
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -670,7 +684,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
                     },
                     child: Text(
                       'Sign Up',
-                      style: TextStyle(fontSize: 18), // Increase the font size
+                      style: TextStyle(fontSize: 20), // Increase the font size
                     ),
                   ),
                 ],
