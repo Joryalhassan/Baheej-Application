@@ -1,281 +1,136 @@
-import 'package:baheej/screens/HomeScreenGaurdian.dart';
-import 'package:baheej/screens/SignInScreen.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baheej/screens/HistoryScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
+import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/Addkids.dart';
-
+import 'package:baheej/screens/HistoryScreen.dart';
+import 'package:baheej/screens/HomeScreenGaurdian.dart';
 
 class GProfileViewScreen extends StatefulWidget {
+  const GProfileViewScreen({Key? key}) : super(key: key);
+
   @override
   _GProfileViewScreenState createState() => _GProfileViewScreenState();
 }
 
 class _GProfileViewScreenState extends State<GProfileViewScreen> {
-  GuardianProfile? _guardianProfile;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isEditing = false;
+  String FirstName = '';
+  String? type;
+
+  // Initialize controllers directly instead of using 'late'
+  TextEditingController _fnameController = TextEditingController();
+  TextEditingController _lnameController = TextEditingController();
+  TextEditingController _PhoneNumTextController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  String? selectedGender;
+  bool _isLoading = true; // New field to track loading state
 
   @override
   void initState() {
     super.initState();
-    fetchGuardianData().then((guardianData) {
-      setState(() {
-        _guardianProfile = guardianData;
-      });
-    });
+    fetchName();
+    _loadUserData();
   }
 
-  Future<GuardianProfile> fetchGuardianData() async {
-    final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
-
-    if (currentUserEmail != null) {
-      final querySnapshot = await FirebaseFirestore.instance
+  void fetchName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: currentUserEmail)
+          .doc(userId)
           .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs[0];
-        final data = doc.data() as Map<String, dynamic>;
-
-        return GuardianProfile(
-          firstName: data['fname'] ?? '',
-          lastName: data['lname'] ?? '',
-          email: data['email'] ?? '',
-          phoneNumber: data['phonenumber'] ?? '',
-          selectedGender: data['selectedGender'] ?? '',
-        );
-      }
-    }
-
-    
-
-    return GuardianProfile(
-      firstName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
-      selectedGender: '',
-    );
-  }
-
-
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Guardian Profile'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              _handleLogout();
-            },
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Image.asset(
-            'assets/images/back3.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 150),
-                _buildProfileData('First Name', _guardianProfile?.firstName),
-                _buildProfileData('Last Name', _guardianProfile?.lastName),
-                _buildProfileData('Email', _guardianProfile?.email),
-                _buildProfileData('Phone Number', _guardianProfile?.phoneNumber),
-                _buildProfileData('Gender', _guardianProfile?.selectedGender),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: 200,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 160,
-                  child: ElevatedButton(
-                    onPressed: _editProfile,
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text('Edit Profile', style: TextStyle(fontSize: 17, color: Colors.white)),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Container(
-                  width: 160,
-                  child: ElevatedButton(
-                    onPressed: _deleteAccount,
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 59, 138, 207),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text('Delete Account',
-                        style: TextStyle(fontSize: 16, color: Colors.white)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileData(String label, String? value) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '$label:',
-              style: TextStyle(fontSize: 20),
-            ),
-            Text(
-              value ?? '',
-              style: TextStyle(fontSize: 20),
-            ),
-          ],
-        ),
-        Divider(),
-      ],
-    );
-  }
-
-   void _editProfile() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) {
-        return GProfileEditScreen(_guardianProfile);
-      }),
-    );
-  }
-
-  void _deleteAccount() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete your account? This action is irreversible.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  fontSize: 17,
-                  color: Color.fromARGB(255, 59, 138, 207),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                _deleteUserAndNavigateToSignIn();
-              },
-              child: Text(
-                'Delete',
-                style: TextStyle(
-                  fontSize: 17,
-                  color: Colors.red,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _deleteUserAndNavigateToSignIn() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser != null) {
-      try {
-        // Delete user data from Firestore
-        await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).delete();
-
-        // Delete the user's account
-        await currentUser.delete();
-
-        // Navigate to SignInScreen
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-          return SignInScreen();
-        }));
-      } catch (e) {
-        // Handle errors, e.g., user not found or deletion failed
-        print('Error while deleting user: $e');
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final firstName = userData['fname'] ?? '';
+        final userRole = userData[
+            'userType']; // Assuming userType is a field in the Firestore document
+        print('Fetched first name: $firstName');
+        setState(() {
+          FirstName = firstName;
+          type = userRole;
+        });
       }
     }
   }
 
-  Future<void> _handleLogout() async {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white, // Set background color to white
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
-        ),
-        title: Text('Are You Sure?'),
-        content: Text('Do you want to log out?'),
-        actions: <Widget>[
-          TextButton(
-            child: Text('No', style: TextStyle(color: Color.fromARGB(255, 59, 138, 207)),),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text('Yes', style: TextStyle(color: Color.fromARGB(255, 59, 138, 207)),),
-            onPressed: () async {
-              Navigator.of(context).pop();
-              try {
-                await FirebaseAuth.instance.signOut();
-                showLogoutSuccessDialog();
-              } catch (e) {
-                print("Error signing out: $e");
-              }
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  Future<void> _loadUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    var userData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
 
-  void showLogoutSuccessDialog() {
+    // Check if the userData exists before setting the state
+    if (userData.data() != null) {
+      setState(() {
+        _fnameController.text = userData.data()!['fname'] ?? '';
+        _lnameController.text = userData.data()!['lname'] ?? '';
+        _PhoneNumTextController.text = userData.data()!['phonenumber'] ?? '';
+        _emailController.text = user.email ?? ''; // Set email in the controller
+        selectedGender = userData.data()!['selectedGender'];
+        _isLoading = false; // Update loading state
+      });
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    if (_formKey.currentState!.validate()) {
+      // Update data in Firestore
+      User? user = FirebaseAuth.instance.currentUser;
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .update({
+        'fname': _fnameController.text,
+        'lname': _lnameController.text,
+        'phonenumber': _PhoneNumTextController.text,
+        'selectedGender': selectedGender,
+        // ... Add other fields
+      });
+      // Show success popup
+      await _showSuccessDialog();
+
+      setState(() {
+        _isEditing = false; // Turn off editing mode
+      });
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Delete user data from Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .delete();
+
+      // Delete user from FirebaseAuth
+      await user.delete();
+
+      // Navigate to the login or welcome screen after deletion
+      // Replace with your app's navigation logic
+      showDeleteSuccessDialog();
+      // Navigator.of(context).pushReplacement(
+      //  MaterialPageRoute(builder: (context) => SignInScreen()),
+      //);
+    } catch (e) {
+      // Handle errors, e.g., show an error message
+      print("Error deleting account: $e");
+    }
+  }
+
+  void showDeleteSuccessDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Logout Successful'),
-          content: Text('You have successfully logged out.'),
+          title: Text('Account deleted Successfully'),
+          content: Text('You have successfully Deleted your account.'),
           actions: <Widget>[
             TextButton(
               child: Text('OK'),
@@ -289,326 +144,103 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
       },
     );
   }
-void navigateToSignInScreen() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => SignInScreen()),
+
+  Future<void> _confirmDeleteAccount() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap a button to close the dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Account'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete your account?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                _deleteAccount();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
-}
 
-class GuardianProfile {
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String phoneNumber;
-  final String selectedGender;
-
-  GuardianProfile({
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.phoneNumber,
-    required this.selectedGender,
-  });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class GProfileEditScreen extends StatefulWidget {
-  final GuardianProfile? initialProfile;
-
-  GProfileEditScreen(this.initialProfile);
-
-  @override
-  _GProfileEditScreenState createState() => _GProfileEditScreenState();
-}
-
-class _GProfileEditScreenState extends State<GProfileEditScreen> {
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  late TextEditingController _phoneNumberController;
-  late TextEditingController _selectedGenderController;
-
-  // Add variables to track changes in each field
-  bool _hasEdits = false;
-
-  // Define error variables for each field
-  String? _firstNameError;
-  String? _lastNameError;
-  String? _phoneNumberError;
-  String? _selectedGenderError;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _firstNameController = TextEditingController(text: widget.initialProfile?.firstName);
-    _lastNameController = TextEditingController(text: widget.initialProfile?.lastName);
-    _phoneNumberController = TextEditingController(text: widget.initialProfile?.phoneNumber);
-    _selectedGenderController = TextEditingController(text: widget.initialProfile?.selectedGender);
-
-    // Add listeners to text controllers to track changes
-    _firstNameController.addListener(_handleEdits);
-    _lastNameController.addListener(_handleEdits);
-    _phoneNumberController.addListener(_handleEdits);
-    _selectedGenderController.addListener(_handleEdits);
-  }
-
-  void _handleEdits() {
-    // Set _hasEdits to true if any text field has changed
-    setState(() {
-      _hasEdits = true;
-    });
-
-    // Validate the input and update the error variables
-    _firstNameError = _validateFirstName(_firstNameController.text);
-    _lastNameError = _validateLastName(_lastNameController.text);
-    _phoneNumberError = _validatePhoneNumber(_phoneNumberController.text);
-    _selectedGenderError = _validateSelectedGender(_selectedGenderController.text);
-  }
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneNumberController.dispose();
-    _selectedGenderController.dispose();
-    super.dispose();
-  }
-
-    
-   void _saveChanges() {
-  // Check for validation errors
-  if (_firstNameError != null ||
-              _lastNameError != null ||
-              _phoneNumberError != null ||
-              _selectedGenderError != null) {
-    // Display error messages for each field
-    setState(() {});
-    return;
-  }
-
-  // Show confirmation dialog before saving changes
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        title: Text('Confirm Changes'),
-        content: Text('Are you sure you want to save these changes?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                fontSize: 17,
-                color: Color.fromARGB(255, 59, 138, 207),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Save changes to Firestore
-              final currentUser = FirebaseAuth.instance.currentUser;
-
-              if (currentUser != null) {
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(currentUser.uid)
-                    .update({
-                  'fname': _firstNameController.text.trim(),
-                              'lname': _lastNameController.text.trim(),
-                              'phonenumber': _phoneNumberController.text.trim(),
-                              'selectedGender': _selectedGenderController.text.trim(),
-                            });
-
-                // Pop the edit screen and return to the profile view
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                          return GProfileViewScreen();
-                        }));
-
-                // Show a pop-up message
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      title: Text('Success'),
-                      content: Text('Profile updated successfully!'),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'OK',
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-            },
-            child: Text(
-              'Save',
-              style: TextStyle(
-                fontSize: 17,
-                color: Theme.of(context).primaryColor, // Always blue
-              ),
-            ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-
-
-
-
-
-  String? _validateFirstName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'First Name is required';
-    }
-    if (value.length < 2 || value.length > 12) {
-      return 'First Name must be between 2 and 12 letters';
-    }
-    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-      return 'First Name can only contain letters';
-    }
-    return null;
-  }
-
-  String? _validateLastName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Last Name is required';
-    }
-    if (value.length < 2 || value.length > 12) {
-      return 'Last Name must be between 2 and 12 letters';
-    }
-    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-      return 'Last Name can only contain letters';
-    }
-    return null;
-  }
-
-  String? _validatePhoneNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Phone Number is required';
-    }
-    if (value.length != 10) {
-      return 'Phone Number must be exactly 10 digits';
-    }
-    final phoneRegex = RegExp(r'^05[0-9]{8}$');
-    if (!phoneRegex.hasMatch(value)) {
-      return 'Invalid Phone Number';
-    }
-    return null;
-  }
-
-  String? _validateSelectedGender(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Selected Gender is required';
-    }
-    // Add your validation rules for selected gender here.
-    return null;
-  }
-
- 
-  void _cancel() {
-      if (_hasEdits) {
-        // Show a confirmation dialog before discarding changes
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: Colors.white, // Set background color to white
-              shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
-               ),
-              title: Text('Discard Changes'),
-              content: Text('Are you sure you want to discard changes?'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Discard changes and return to the profile view
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                      return GProfileViewScreen();
-                    }));
-                  },
-                  child: Text(
-                    'Discard',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Color.fromARGB(255, 59, 138, 207), // Use the same color as the buttons below
-                    ),
-                  ),
-                ),
+  Future<void> _confirmSaveChanges() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap a button to close the dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Changes'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to save these changes?'),
               ],
-            );
-          },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _updateProfile(); // Call the update profile method
+              },
+            ),
+          ],
         );
-      } else {
-        // No edits were made, so simply return to the profile view
-        Navigator.of(context).pop();
-      }
- }
- Future<void> _handleLogout() async {
+      },
+    );
+  }
+
+  Future<void> _showSuccessDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap a button to close the dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Profile Updated Successfully'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _handleLogout() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -639,6 +271,7 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
       },
     );
   }
+
   void showLogoutSuccessDialog() {
     showDialog(
       context: context,
@@ -659,15 +292,17 @@ class _GProfileEditScreenState extends State<GProfileEditScreen> {
       },
     );
   }
+
   void navigateToSignInScreen() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
+      (route) => false, // Remove all routes in the stack
     );
   }
 
-void _handleAddKids() {
-    Navigator.push(
+  void _handleAddKids() {
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => AddKidsPage(),
@@ -678,233 +313,466 @@ void _handleAddKids() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  extendBodyBehindAppBar: true,
-  appBar: AppBar(
-    title: null,
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    //leading: IconButton(
-      //icon: Icon(
-       // Icons.arrow_back_ios,
-       // color: Colors.white,
-    //  ),
-    //  onPressed: () {
-       // Navigator.of(context).pop();
-     // },
-  //  ),
-    actions: [
-      IconButton(
-        icon: Icon(Icons.logout),
-        onPressed: () {
-          _handleLogout();
-        },
-      ),
-    ],
-  ),
-  body: Stack(
-    children: [
-      Positioned.fill(
-        child: Image.asset(
-          'assets/images/backG.png',
-          fit: BoxFit.cover,
+      extendBodyBehindAppBar: true, // Extend the body behind the AppBar
+      appBar: AppBar(
+        title: Text(
+          "${_fnameController.text} Profile",
+          style: TextStyle(
+              fontFamily: '5yearsoldfont',
+              fontSize: 25 // Apply the custom font family
+              ),
         ),
-      ),
-      SingleChildScrollView(
-        child: Container(
-          margin: EdgeInsets.only(top: 20),
-          padding: EdgeInsets.all(16.0),
-          child: Form(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // The "Edit Profile" text is now part of the body, below the AppBar
-                Padding(
-                  padding: EdgeInsets.only(top: 80.0), // Padding adjusted for AppBar
-                  child: Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center, // Center the text if needed
-                  ),
-                ),
-                SizedBox(height: 20.0),
-           TextField(
-              controller: _firstNameController,
-              maxLength: 12,
-              decoration: InputDecoration(
-                labelText: 'First Name',
-                errorText: _firstNameError,
-              ),
-              style: TextStyle(fontSize: 18), // Adjust the font size as needed
-            ),
-            TextField(
-              controller: _lastNameController,
-              maxLength: 12,
-              decoration: InputDecoration(
-                labelText: 'Last Name',
-                errorText: _lastNameError,
-              ),
-              style: TextStyle(fontSize: 18), // Adjust the font size as needed
-            ),
-            TextField(
-              controller: _phoneNumberController,
-              maxLength: 10,
-              decoration: InputDecoration(
-                labelText: 'Phone Number',
-                errorText: _phoneNumberError,
-              ),
-              style: TextStyle(fontSize: 18), // Adjust the font size as needed
-            ),
-            DropdownButtonFormField<String>(
-  value: _selectedGenderController.text,
-  items: ["Male", "Female"].map((String value) {
-    return DropdownMenuItem<String>(
-      value: value,
-      // Ensure the text color contrasts with the dropdown's background color
-      child: Text(value, style: TextStyle(fontSize: 18, color: Colors.black)),
-    );
-  }).toList(),
-  onChanged: (value) {
-    setState(() {
-      _selectedGenderController.text = value ?? "";
-    });
-  },
-  decoration: InputDecoration(
-    labelText: 'Selected Gender',
-    errorText: _selectedGenderError,
-  ),
-  // This style applies to the hint text within the DropdownButtonFormField itself
-  style: TextStyle(fontSize: 18, color: Colors.black), // Adjust the font size and color as needed
-),
-
-            Padding(
-  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Add padding as needed
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Expanded( // Using Expanded to fill the available space evenly
-        child: ElevatedButton(
-          onPressed: _cancel,
-          style: ElevatedButton.styleFrom(
-            primary: Color.fromARGB(255, 59, 138, 207),
-            shape: StadiumBorder(),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _handleLogout,
           ),
-          child: Text('Cancel', style: TextStyle(fontSize: 17, color: Colors.white)),
-        ),
+        ],
       ),
-      SizedBox(width: 16), // This keeps the buttons spaced apart
-      Expanded( // Using Expanded to fill the available space evenly
-        child: ElevatedButton(
-          onPressed:  _saveChanges ,
-          style: ElevatedButton.styleFrom(
-             primary: Theme.of(context).primaryColor, // Always blue
-            shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-          ),
-          child: Text('Save Changes', style: TextStyle(fontSize: 17, color: Colors.white)),
-        ),
-      ),
-    ],
-  ),
-),
-  
-          ],
-        ),
-      ),
-     
-        ),
-      ),
-    ],
-  ),
 
-bottomNavigationBar: BottomAppBar(
-      shape: CircularNotchedRectangle(),
-      color: Color.fromARGB(255, 245, 198, 239),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
         children: [
-          SizedBox(width: 24),
-          Column(
-            mainAxisSize: MainAxisSize.min,
+          // Background image or content
+          Image.asset(
+            'assets/images/blueWaves.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          // Your SingleChildScrollView content
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+                top: kToolbarHeight +
+                    20), // Adjust the padding to account for the AppBar
+            child: _isLoading
+                ? Center(
+                    child:
+                        CircularProgressIndicator()) // Show loading indicator
+                : (_isEditing
+                    ? _buildEditableView()
+                    : _buildEditableView()), // Show actual content
+          ),
+        ],
+      ),
+
+      bottomNavigationBar: BottomAppBar(
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: Icon(Icons.history),
-                color: Colors.white,
-                onPressed: () {
+              _buildIconButtonWithLabel(
+                Icons.history,
+                'Bookings',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => HistoryScreen()),
                   );
                 },
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 5),
-                child: Text(
-                  'Booked Service',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(), // This SizedBox can be removed if it's not necessary
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(1, 50, 17, 1),
-                child: Text(
-                  'View Kids',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 25),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.person),
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.push(
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => GProfileViewScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreenGaurdian()),
+                    (route) => false,
                   );
                 },
               ),
-              Text(
+              _buildIconButtonWithLabel(
+                Icons.child_care,
+                'view Kids',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddKidsPage(),
+                    ),
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
                 'Profile',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                  String currentUserEmail =
+                      FirebaseAuth.instance.currentUser?.email ?? '';
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => GProfileViewScreen(),
+                  //   ),
+                  // );
+                },
               ),
             ],
           ),
-          SizedBox(width: 32),
-        ],
+        ),
       ),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    floatingActionButton: FloatingActionButton(
-      backgroundColor: Color.fromARGB(255, 174, 207, 250),
-      onPressed: _handleAddKids, // Here you should reference the function directly
-      child: Icon(
-        Icons.add_reaction_outlined,
-        color: Colors.white,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: Color.fromARGB(255, 174, 207, 250),
+      //   onPressed: () {
+      //     _handleAddKids();
+      //   },
+      //   child: Icon(
+      //     Icons.add_reaction_outlined,
+      //     color: Colors.white,
+      //   ),
+      // ),
+    );
+  }
+
+  Widget _buildEditableView() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        top: 70,
+        left: 16.0,
+        right: 16.0,
+        bottom: 16.0,
       ),
-    ),
-  );
-}
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Email",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                //   labelText: "Enter Email Id",
+                prefixIcon: Icon(Icons.email),
+                filled: true,
+                fillColor: Colors.grey[300],
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+              ),
+              enabled: false, // This makes the TextFormField non-editable
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "First Name",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextFormField(
+              controller: _fnameController,
+              maxLength: 12, // Limit the input to 12 characters
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person_outline),
+                filled: true,
+                fillColor: Colors.grey[300],
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+              ),
+              onChanged: (text) {
+                // Remove spaces from the input
+                final newText = text.replaceAll(RegExp(r'\s+'), '');
+                if (newText != text) {
+                  _fnameController.value = _fnameController.value.copyWith(
+                    text: newText,
+                    selection: TextSelection(
+                        baseOffset: newText.length,
+                        extentOffset: newText.length),
+                    composing: TextRange.empty,
+                  );
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'First Name is required';
+                }
+                if (value.length < 2 || value.length > 12) {
+                  return 'First Name must be between 2 and 12 letters';
+                }
+                if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                  return 'First Name can only contain letters';
+                }
+                return null;
+              },
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Last Name",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextFormField(
+              controller: _lnameController,
+              maxLength: 12, // Limit the input to 12 characters
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person_outline),
+                filled: true,
+                fillColor: Colors.grey[300],
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+              ),
+              onChanged: (text) {
+                // Remove spaces from the input
+                final newText = text.replaceAll(RegExp(r'\s+'), '');
+                if (newText != text) {
+                  _lnameController.value = _lnameController.value.copyWith(
+                    text: newText,
+                    selection: TextSelection(
+                        baseOffset: newText.length,
+                        extentOffset: newText.length),
+                    composing: TextRange.empty,
+                  );
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Last Name is required';
+                }
+                if (value.length < 2 || value.length > 12) {
+                  return 'Last Name must be between 2 and 12 letters';
+                }
+                if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                  return 'Last Name can only contain letters';
+                }
+                return null;
+              },
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Phone Number",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextFormField(
+              controller: _PhoneNumTextController,
+              maxLength: 10, // Limit the input to exactly 10 digits
+              keyboardType: TextInputType.phone, // Show numeric keyboard
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly, // Allow only digits
+              ],
+              decoration: InputDecoration(
+                // labelText: "Enter Phone Number",
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[300],
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Phone Number is required';
+                }
+                if (value.length != 10) {
+                  return 'Phone Number must be exactly 10 digits';
+                }
+                final phoneRegex = RegExp(r'^05[0-9]{8}$');
+                if (!phoneRegex.hasMatch(value)) {
+                  return 'Invalid Phone Number';
+                }
+                return null;
+              },
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Gender",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            DropdownButtonFormField<String>(
+              value: selectedGender,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedGender = newValue;
+                });
+              },
+              items: <String>["Male", "Female"]
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                // labelText: "Select Gender",
+                prefixIcon: Icon(Icons.person),
+                filled: true,
+                fillColor: Colors.grey[300],
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Gender is required';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 20), // Spacing before the buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Adjusts spacing between buttons
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: _confirmSaveChanges,
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color.fromARGB(255, 59, 138, 207), // Your desired color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    minimumSize: Size(150, 50),
+                  ),
+                  child: Text(
+                    "Save Changes",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _confirmDeleteAccount,
+                  style: ElevatedButton.styleFrom(
+                    primary: Color.fromARGB(255, 242, 12,
+                        12), // Same color as the "Save Changes" button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    minimumSize: Size(150, 50),
+                  ),
+                  child: Text(
+                    "Delete Account",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -10,7 +10,7 @@ import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'dart:async';
 // import math , create random colors card
 import 'dart:math';
-//import 'package:baheej/screens/NotificationsPage.dart';
+import 'package:baheej/screens/NotificationsPage.dart';
 //import 'package:permission_handler/permission_handler.dart';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:baheej/screens/GProfileScreen.dart';
@@ -36,25 +36,25 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
       _subscription; // To manage the subscription
   //final String? payload;
 
-  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  //     FlutterLocalNotificationsPlugin();
+  //FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  // FlutterLocalNotificationsPlugin();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   initializeNotifications();
-  //   startPollingNotifications();
-  //   requestNotificationPermission();
+  @override
+  void initState() {
+    super.initState();
+    //initializeNotifications();
+    //startPollingNotifications();
+    // requestNotificationPermission();
 
-  //   fetchDataFromFirebase().then((services) {
-  //     setState(() {
-  //       _allServices = services;
-  //       _filteredServices = services;
-  //     });
-  //   });
-  //   fetchName(); // Call fetchName to fetch the user's first name
-  //   ;
-  // }
+    fetchDataFromFirebase().then((services) {
+      setState(() {
+        _allServices = services;
+        _filteredServices = services;
+      });
+    });
+    fetchName(); // Call fetchName to fetch the user's first name
+    ;
+  }
 
   // Future<void> requestNotificationPermission() async {
   //   if (await Permission.notification.request().isGranted) {
@@ -289,16 +289,16 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
   }
 
   // view the notification
-  // void navigateToNotificationsPage() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => NotificationsPage(),
-  //     ),
-  //   );
-  // }
+  void navigateToNotificationsPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NotificationsPage(),
+      ),
+    );
+  }
 
- //function to create random colors of card
+//function to create random colors of card
   final _random = Random();
   final List<Color> _randomColors = [
     Color.fromARGB(255, 249, 194, 212),
@@ -334,14 +334,14 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                         // Set icon color to yellow
                       ),
                     ],
-                  ), onPressed: () {  },
-                  // onPressed: () {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => NotificationsPage()),
-                  //   );
-                  // },
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NotificationsPage()),
+                    );
+                  },
                 ),
 
                 SizedBox(width: 8), // Add some space between the icons and text

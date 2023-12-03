@@ -5,8 +5,8 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "baheej" ,  //Baheej 
-            "cwd": "baheej" ,
+            "name": "baheej",
+            "cwd": "baheej",
             "request": "launch",
             "type": "dart"
         },
@@ -23,6 +23,13 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "Flutter (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "baheej",
+            "program": "lib/main.dart"
         }
     ]
 }
