@@ -52,6 +52,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
       ],
     );
   }
+    int _totalRatedServices = 0;
 
   Future<double> calculateBookingRatio(Service service) async {
     if (service.capacityValue > 0) {
@@ -260,6 +261,10 @@ class _compSerListScreenState extends State<compSerListScreen> {
     );
   }
 
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -383,32 +388,23 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
-                                                  height:
-                                                      8), // Add some space between the text and progress bar
+                                              SizedBox(  height: 8), // Add some space between the text and progress bar
+
                                               Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.7,
-                                                child: LinearProgressIndicator(
-                                                  value:
-                                                      calculatePercentageBooked(
-                                                            service
-                                                                .capacityValue,
-                                                            service
-                                                                .participateNo,
-                                                          ) /
-                                                          100.0,
-                                                  backgroundColor: Colors.grey,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                          Color>(
-                                                    const Color.fromARGB(
-                                                        255, 154, 189, 218),
-                                                  ),
+                                              width: MediaQuery.of(context).size.width * 0.7,
+                                              child: LinearProgressIndicator(
+                                                value: calculatePercentageBooked(
+                                                  service.capacityValue,
+                                                  service.participateNo,
+                                                ) / 100.0,
+                                                backgroundColor: Colors.grey,
+                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                  Color.fromARGB(255, 106, 185, 250),
                                                 ),
+                                                minHeight: 8, // Adjust this value to make the progress bar taller
                                               ),
+                                              
+                                            ),
                                             ],
                                           ),
                                         ],
@@ -424,49 +420,59 @@ class _compSerListScreenState extends State<compSerListScreen> {
                                             ),
                                           ),
                                           FutureBuilder<double>(
-                                            future: calculateAverageRating(
-                                                service.serviceName),
+                                            future: calculateAverageRating(service.serviceName),
                                             builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                  ConnectionState.waiting) {
+                                              if (snapshot.connectionState == ConnectionState.waiting) {
                                                 return CircularProgressIndicator(); // Show loading indicator
                                               } else if (snapshot.hasError) {
-                                                return Text(
-                                                    'Error'); // Show error message
+                                                return Text('Error'); // Show error message
                                               } else {
-                                                double averageRating =
-                                                    snapshot.data!;
+                                                double averageRating = snapshot.data!;
 
-                                                return Row(
-                                                  children: [
-                                                    Text(
-                                                      '(${calculateTotalRatedServices(service.serviceName)})',
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Text(
-                                                      '${averageRating.toStringAsFixed(2)}',
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                        width:
-                                                            5), // Add spacing between rating and star icon
-                                                    Icon(
-                                                      Icons.star,
-                                                      color: Colors.amber,
-                                                      size: 20,
-                                                    ),
-                                                  ],
+                                                // Fetch total rated services asynchronously
+                                                return FutureBuilder<int>(
+                                                  future: calculateTotalRatedServices(service.serviceName),
+                                                  builder: (context, totalRatedServicesSnapshot) {
+                                                    if (totalRatedServicesSnapshot.connectionState ==
+                                                        ConnectionState.waiting) {
+                                                      return CircularProgressIndicator(); // Show loading indicator for total rated services
+                                                    } else if (totalRatedServicesSnapshot.hasError) {
+                                                      return Text('Error'); // Show error message for total rated services
+                                                    } else {
+                                                      int totalRatedServices = totalRatedServicesSnapshot.data!;
+
+                                                      return Row(
+                                                        children: [
+                                                          Text(
+                                                            '($totalRatedServices)',
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          Text(
+                                                            '${averageRating.toStringAsFixed(2)}',
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          Icon(
+                                                            Icons.star,
+                                                            color: Colors.amber,
+                                                            size: 20,
+                                                          ),
+                                                        ],
+                                                      );
+                                                    }
+                                                  },
                                                 );
                                               }
                                             },
                                           ),
                                         ],
                                       ),
+
 
                                       TextButton(
                                         onPressed: () {
