@@ -445,7 +445,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                   elevation: 3,
                                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                                   color: randomColor,
-                              
+                              shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
