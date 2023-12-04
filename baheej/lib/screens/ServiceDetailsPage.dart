@@ -390,7 +390,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           widget.service.serviceName,
                           style: TextStyle(
                             fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                            //fontWeight: FontWeight.bold,
+                            fontFamily: '5yearsoldfont',
                             color: Colors.black,
                           ),
                         ),
