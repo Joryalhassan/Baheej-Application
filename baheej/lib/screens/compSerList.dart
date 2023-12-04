@@ -25,6 +25,8 @@ class _compSerListScreenState extends State<compSerListScreen> {
   List<Service> services = []; // Add this line
   List<Service> filteredServices = []; // Add this line
   String centerName = '';
+  
+  
   @override
   void initState() {
     super.initState();
@@ -232,6 +234,96 @@ class _compSerListScreenState extends State<compSerListScreen> {
     );
   }
 
+
+
+   Future<void> loadServices() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+
+      // Fetch user center data
+      final centerDoc = await FirebaseFirestore.instance
+          .collection('center')
+          .doc(userId)
+          .get();
+      if (centerDoc.exists) {
+        // Now you can use centerDoc.data() to access the data
+        centerName = centerDoc.data()!['username'];
+      }
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('center-service')
+          .where('centerName', isEqualTo: widget.centerName)
+          .get();
+      final currentDate = DateTime.now(); // Get the current date
+      final List<Service> loadedServices = snapshot.docs
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            DateTime selectedStartDate;
+            DateTime selectedEndDate;
+
+            // Check if the 'startDate' and 'endDate' are stored as strings or timestamps
+            if (data['startDate'] is String) {
+              selectedStartDate = DateTime.parse(data['startDate'] as String);
+            } else if (data['startDate'] is Timestamp) {
+              selectedStartDate = (data['startDate'] as Timestamp).toDate();
+            } else {
+              selectedStartDate = DateTime.now();
+            }
+
+            if (data['endDate'] is String) {
+              selectedEndDate = DateTime.parse(data['endDate'] as String);
+            } else if (data['endDate'] is Timestamp) {
+              selectedEndDate = (data['endDate'] as Timestamp).toDate();
+            } else {
+              selectedEndDate = DateTime.now();
+            }
+            final participantNo = data['participateNo'] ?? 0;
+
+            // Check if the start date is today or earlier
+            if (!selectedStartDate.isBefore(currentDate)) {
+              return Service(
+                id: doc.id,
+                serviceName:
+                    data['serviceName'] as String? ?? 'Service Name Missing',
+                description:
+                    data['serviceDesc'] as String? ?? 'Description Missing',
+                centerName:
+                    data['centerName'] as String? ?? 'Center Name Missing',
+                selectedStartDate: selectedStartDate,
+                selectedEndDate: selectedEndDate,
+                minAge: data['minAge'] as int? ?? 0,
+                maxAge: data['maxAge'] as int? ?? 0,
+                capacityValue: data['serviceCapacity'] as int? ?? 0,
+                servicePrice: data['servicePrice'] is double
+                    ? data['servicePrice']
+                    : (data['servicePrice'] is int
+                        ? (data['servicePrice'] as int).toDouble()
+                        : 0.0),
+                selectedTimeSlot:
+                    data['selectedTimeSlot'] as String? ?? 'Time Slot Missing',
+                participateNo: participantNo,
+                starsrate: data['starsrate'] as int? ?? 0,
+              );
+            } else {
+              // Return null for services with start dates in the past or today
+              return null;
+            }
+          })
+          .where((service) => service != null) // Filter out null values
+          .cast<Service>() // Cast the list to Service
+          .toList();
+
+      setState(() {
+        services = loadedServices;
+        filteredServices = loadedServices;
+      });
+    }
+  }
+
+ void reloadServices() async {
+    await loadServices();
+  }
   void showLogoutSuccessDialog() {
     showDialog(
       context: context,
@@ -499,106 +591,80 @@ class _compSerListScreenState extends State<compSerListScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: BottomAppBar(
-          shape: CircularNotchedRectangle(),
-          color: Color.fromARGB(255, 245, 198, 239),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(width: 24),
-                _buildIconButtonWithLabel(
-                  Icons.home,
-                  'Home',
-                  Colors.white,
-                  () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreenCenter(
-                          centerName: centerName,
-                        ),
-                      ),
-                      (route) => false,
-                    );
-                  },
-                ),
-                SizedBox(),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                          top: 12), // Add some padding for spacing
-                      child: Text(
-                        'Add Programs',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
+           bottomNavigationBar: BottomAppBar(
+           color:
+           Color.fromARGB(255, 255, 255, 255), // Set background color to white
+           child: Padding(
+           padding: const EdgeInsets.symmetric(horizontal: 16.0),
+           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.query_stats,
+                'Program Statistics',
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                  ////
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HomeScreenCenter(centerName: centerName),
                     ),
-                  ],
-                ),
-                SizedBox(width: 25),
-                _buildIconButtonWithLabel(
-                  Icons.person,
-                  'Profile',
-                  Colors.white,
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CenterProfileViewScreen(),
-                      ),
-                    );
-                    // Handle profile button tap
-                  },
-                ),
-                SizedBox(width: 32),
-              ],
-            ),
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.add,
+                'Add Program',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
+                    ),
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CenterProfileViewScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          // floatingActionButtonLocation:
-          //     FloatingActionButtonLocation.centerDocked,
-          // floatingActionButton: FloatingActionButton(
-          //   backgroundColor: Color.fromARGB(255, 174, 207, 250),
-          //   onPressed: () {
-          //     Navigator.pushReplacement(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => ServiceFormScreen(
-          //             onServiceAdded: _dummyServiceAddedFunction),
-          //       ),
-          //     );
-          //   },
-          //   child: Icon(
-          //     Icons.add,
-          //     color: Colors.white,
-          //   ),
-          // ),
-        )
-
-        // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        // floatingActionButton: FloatingActionButton(
-        //   backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        //   onPressed: () {
-        //     Navigator.pushReplacement(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) =>
-        //             ServiceFormScreen(onServiceAdded: _dummyServiceAddedFunction),
-        //       ),
-        //     );
-        //   },
-        //   child: Icon(
-        //     Icons.add,
-        //     color: Colors.white,
-        //   ),
-        // ),
-        );
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, 
+    );
   }
+
+
 
   Widget _buildIconButtonWithLabel(
     IconData iconData,
@@ -627,6 +693,10 @@ class _compSerListScreenState extends State<compSerListScreen> {
       ],
     );
   }
+
+
+
+
 
 // Outside the build method, create the method to show detailed information in a pop-up
   void _showServiceDetails(Service service) {
@@ -695,6 +765,37 @@ class _compSerListScreenState extends State<compSerListScreen> {
   }
 }
 
+Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
+
 Future<double> calculateAverageRating(String serviceName) async {
   try {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -726,6 +827,8 @@ Future<double> calculateAverageRating(String serviceName) async {
     return 0.0;
   }
 }
+
+
 
 Future<int> calculateTotalRatedServices(String serviceName) async {
   try {
