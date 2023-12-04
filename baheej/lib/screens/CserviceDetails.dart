@@ -213,6 +213,9 @@ class _CserviceDetailsState extends State<CserviceDetails> {
                       elevation: 3,
                       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       color: _getRandomColor(),// Get a random color for each card
+                      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
