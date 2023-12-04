@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart'; // Make sure to import the Cupertino library
+import 'package:flutter/material.dart';
+import 'dart:math';
 
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart'; // Import the Service class if it's in a separate file
@@ -38,11 +40,11 @@ class _compSerListScreenState extends State<compSerListScreen> {
     return LinearGradient(
       colors: [
         Colors.pink,
-        Colors.blue,
         Colors.green,
         Colors.yellow,
         Colors.orange,
         Colors.purple,
+        Colors.blue,
       ],
       stops: [
         0.0,
@@ -53,6 +55,19 @@ class _compSerListScreenState extends State<compSerListScreen> {
         1.0,
       ],
     );
+  }
+
+ //function to create random colors of card
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 252, 222, 233),
+    Color.fromARGB(255, 210, 229, 245),
+    Color.fromARGB(255, 251, 242, 212),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
   }
     int _totalRatedServices = 0;
 
@@ -357,312 +372,301 @@ class _compSerListScreenState extends State<compSerListScreen> {
 
 
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: Text(' Programs Statistics'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          actions: [
-            IconButton(
-              icon: Icon(Icons.logout),
-              onPressed: () {
-                _handleLogout();
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    extendBodyBehindAppBar: true,
+    appBar: AppBar(
+      title: Text('Programs Statistics'),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.logout),
+          onPressed: () {
+            _handleLogout();
+          },
+        ),
+      ],
+    ),
+    body: Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/blueWaves.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: services.length,
+                  itemBuilder: (context, index) {
+                    final service = services[index];
+return Card(
+  elevation: 3,
+  margin: EdgeInsets.symmetric(
+    vertical: 8,
+    horizontal: 16,
+  ),
+  color: _getRandomColor(),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20),
+  ),
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Program Name: ',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              service.serviceName,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        Divider(),
+        Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Booked Capacity Percentage: ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      '(${service.participateNo} / ${service.capacityValue})',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4.0),
+                    child: LinearProgressIndicator(
+                      value: calculatePercentageBooked(
+                        service.capacityValue,
+                        service.participateNo,
+                      ) / 100.0,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        _buildProgressBarGradient().colors.last,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              'Average Rating: ',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            FutureBuilder<double>(
+              future: calculateAverageRating(service.serviceName),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error');
+                } else {
+                  double averageRating = snapshot.data!;
+
+                  return FutureBuilder<int>(
+                    future: calculateTotalRatedServices(service.serviceName),
+                    builder: (context, totalRatedServicesSnapshot) {
+                      if (totalRatedServicesSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (totalRatedServicesSnapshot.hasError) {
+                        return Text('Error');
+                      } else {
+                        int totalRatedServices = totalRatedServicesSnapshot.data!;
+
+                        return Row(
+                          children: [
+                            Text(
+                              '($totalRatedServices)',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              '${averageRating.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 20,
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  );
+                }
               },
             ),
           ],
         ),
-        body: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/blueWaves.png',
-                fit: BoxFit.cover,
+
+        // Add an Align widget to position the button to the bottom right
+        Align(
+          alignment: Alignment.bottomRight,
+          child: TextButton(
+            onPressed: () {
+              _showServiceDetails(service);
+            },
+            style: TextButton.styleFrom(
+              primary: Colors.blue,
+              textStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              backgroundColor: Colors.blue,
+            ),
+            child: Text(
+              'View Details',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(top: 160, left: 16, right: 16),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: services.length,
-                      itemBuilder: (context, index) {
-                        final service = services[index];
-                        // or filteredServices[index]
-
-                        return Card(
-                            elevation: 3,
-                            margin: EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 16),
-                            color: Color.fromARGB(255, 239, 249, 254),
-                            child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'Program Name: ',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            service.serviceName,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      // Row(
-                                      //   children: [
-                                      //     Text(
-                                      //       'Service Price: ',
-                                      //       style: TextStyle(
-                                      //         fontSize: 16,
-                                      //         fontWeight: FontWeight.bold,
-                                      //       ),
-                                      //     ),
-                                      //     Text(
-                                      //       '${service.servicePrice.toStringAsFixed(2)}',
-                                      //       style: TextStyle(
-                                      //         fontSize: 16,
-                                      //       ),
-                                      //     ),
-                                      //   ],
-                                      // ),
-                                      Divider(),
-                                      Row(
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    'Booked Capacity Percentage: ',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 8),
-                                                  Text(
-                                                    '(${service.participateNo} / ${service.capacityValue})',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              // Text(
-                                              //   'Capacity', // Replace this with your desired text for capacity
-                                              //   style: TextStyle(
-                                              //     fontSize: 16,
-                                              //   ),
-                                              // ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    '${calculatePercentageBooked(service.capacityValue, service.participateNo).toStringAsFixed(2)}%',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(  height: 8), // Add some space between the text and progress bar
-
-                                              Container(
-                                              width: MediaQuery.of(context).size.width * 0.7,
-                                              child: LinearProgressIndicator(
-                                                value: calculatePercentageBooked(
-                                                  service.capacityValue,
-                                                  service.participateNo,
-                                                ) / 100.0,
-                                                backgroundColor: Colors.grey,
-                                                valueColor: AlwaysStoppedAnimation<Color>(
-                                                  Color.fromARGB(255, 106, 185, 250),
-                                                ),
-                                                minHeight: 8, // Adjust this value to make the progress bar taller
-                                              ),
-                                              
-                                            ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'Average Rating: ',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          FutureBuilder<double>(
-                                            future: calculateAverageRating(service.serviceName),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                                return CircularProgressIndicator(); // Show loading indicator
-                                              } else if (snapshot.hasError) {
-                                                return Text('Error'); // Show error message
-                                              } else {
-                                                double averageRating = snapshot.data!;
-
-                                                // Fetch total rated services asynchronously
-                                                return FutureBuilder<int>(
-                                                  future: calculateTotalRatedServices(service.serviceName),
-                                                  builder: (context, totalRatedServicesSnapshot) {
-                                                    if (totalRatedServicesSnapshot.connectionState ==
-                                                        ConnectionState.waiting) {
-                                                      return CircularProgressIndicator(); // Show loading indicator for total rated services
-                                                    } else if (totalRatedServicesSnapshot.hasError) {
-                                                      return Text('Error'); // Show error message for total rated services
-                                                    } else {
-                                                      int totalRatedServices = totalRatedServicesSnapshot.data!;
-
-                                                      return Row(
-                                                        children: [
-                                                          Text(
-                                                            '($totalRatedServices)',
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                            ),
-                                                          ),
-                                                          SizedBox(width: 5),
-                                                          Text(
-                                                            '${averageRating.toStringAsFixed(2)}',
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                            ),
-                                                          ),
-                                                          SizedBox(width: 5),
-                                                          Icon(
-                                                            Icons.star,
-                                                            color: Colors.amber,
-                                                            size: 20,
-                                                          ),
-                                                        ],
-                                                      );
-                                                    }
-                                                  },
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-
-
-                                      TextButton(
-                                        onPressed: () {
-                                          _showServiceDetails(
-                                            service,
-                                          ); // Create a method to show details
-                                        },
-                                        child: Text(
-                                          'More Details',
-                                          style: TextStyle(
-                                            color: Color.fromARGB(255, 0, 0, 0),
-                                            fontSize: 16,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          ),
-                                        ),
-                                      ),
-                                    ])));
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
-           bottomNavigationBar: BottomAppBar(
-           color:
-           Color.fromARGB(255, 255, 255, 255), // Set background color to white
-           child: Padding(
-           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildIconButtonWithLabel(
-                Icons.query_stats,
-                'Program Statistics',
-                Color.fromARGB(255, 210, 229, 245),
-                () {
-                  ////
-                },
-              ),
-              //   color: Color.fromARGB(
-              //       255, 249, 194, 212), // Set icon color to black
-              //   onPressed: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
-              //     );
-              //   },
-              // ),
-              _buildIconButtonWithLabel(
-                Icons.home,
-                'Home',
-                Color.fromARGB(255, 249, 194, 212),
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreenCenter(centerName: centerName),
-                    ),
-                  );
-                },
-              ),
-              _buildIconButtonWithLabel(
-                Icons.add,
-                'Add Program',
-                Color.fromARGB(255, 249, 194, 212),
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
-                    ),
-                  );
-                },
-              ),
-              _buildIconButtonWithLabel(
-                Icons.person,
-                'Profile',
-                Color.fromARGB(255, 249, 194, 212),
-                () {
-                
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CenterProfileViewScreen(),
-                    ),
-                  );
-                },
+      ],
+    ),
+  ),
+);
+
+                  },
+                ),
               ),
             ],
           ),
         ),
+      ],
+    ),
+    bottomNavigationBar: BottomAppBar(
+      color: Color.fromARGB(255, 255, 255, 255),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildIconButtonWithLabel(
+              Icons.query_stats,
+              'Statistics',
+              Color.fromARGB(255, 210, 229, 245),
+              () {
+                ////
+              },
+            ),
+            _buildIconButtonWithLabel(
+              Icons.home,
+              'Home',
+              Color.fromARGB(255, 249, 194, 212),
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreenCenter(centerName: centerName),
+                  ),
+                );
+              },
+            ),
+            _buildIconButtonWithLabel(
+              Icons.add,
+              'Add Program',
+              Color.fromARGB(255, 249, 194, 212),
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
+                  ),
+                );
+              },
+            ),
+            _buildIconButtonWithLabel(
+              Icons.person,
+              'Profile',
+              Color.fromARGB(255, 249, 194, 212),
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CenterProfileViewScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, 
-    );
-  }
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+  );
+}
+
+  
 
 
 
@@ -764,6 +768,7 @@ class _compSerListScreenState extends State<compSerListScreen> {
     );
   }
 }
+
 
 Widget _buildIconButtonWithLabel(
     IconData iconData,

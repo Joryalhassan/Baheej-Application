@@ -358,6 +358,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       filteredServices.remove(service);
     });
   }
+
   //function to create random colors of card
   final _random = Random();
   final List<Color> _randomColors = [
@@ -370,7 +371,6 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
   Color _getRandomColor() {
     return _randomColors[_random.nextInt(_randomColors.length)];
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -386,20 +386,25 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
           ),
           SizedBox(width: 60),
           Expanded(
+              child: Center(
+                  child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 0.0),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.centerLeft, // Align the text to the left
                 child: Text(
                   'Welcome ${widget.centerName}',
-                   style: TextStyle(
-                fontSize: 30,
-                fontFamily:'5yearsoldfont', // Use the font family name declared in pubspec.yaml
-              ),
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontFamily:
+                        '5yearsoldfont', // Replace with your font family name
+                  ),
+                  textAlign: TextAlign
+                      .center, // Align the text's content in the center
                 ),
               ),
             ),
-          ),
+          ))),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: _handleLogout,
@@ -409,8 +414,9 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
       body: Stack(
         children: [
           Positioned.fill(
-              top: 0,
-            child: Image.asset('assets/images/HomeCenterback.png', fit: BoxFit.cover),
+            top: 0,
+            child: Image.asset('assets/images/HomeCenterback.png',
+                fit: BoxFit.cover),
           ),
           Padding(
             padding: EdgeInsets.only(top: 200, left: 16, right: 16),
@@ -430,47 +436,53 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                         ? Center(
                             child: Text(
                               "You don't have any services yet.",
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
                             ),
                           )
                         : Column(
                             children: filteredServices.map((service) {
-                               final randomColor =
-                          _getRandomColor(); // Get a random color for each card
+                              final randomColor =
+                                  _getRandomColor(); // Get a random color for each card
                               return GestureDetector(
                                 onTap: () {
                                   // Handle tapping on a service
                                 },
                                 child: Card(
                                   elevation: 3,
-                                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                  margin: EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 16),
                                   color: randomColor,
-                              shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                     //   Align(
-                                     // alignment: Alignment.topRight,
-                                     // child: GestureDetector(
-                                       // onTap: () {
-                                       //   deleteService(service);
-                                      //  },
-                                     //   child: Icon(Icons.delete), // Delete icon in red
-                                     // ),
-                                    //),
-                                        
+                                        //   Align(
+                                        // alignment: Alignment.topRight,
+                                        // child: GestureDetector(
+                                        // onTap: () {
+                                        //   deleteService(service);
+                                        //  },
+                                        //   child: Icon(Icons.delete), // Delete icon in red
+                                        // ),
+                                        //),
+
                                         Text(
                                           service.serviceName,
-                                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, 
-                                      fontFamily: '5yearsoldfont',),
+                                          style: TextStyle(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: '5yearsoldfont',
+                                          ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        
-                                  Row(
+
+                                        Row(
                                           children: [
                                             Text(
                                               'Number of Participant : ',
@@ -500,58 +512,63 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             fontSize: 16,
                                           ),
                                         ),
-                                        
-                                       
-                                      
-                                          
-                                         SizedBox(height: 16),
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    GestureDetector(
-      onTap: () {
-        // Navigation logic for editing service
-       deleteService(service);
-      },
-      child: Icon(Icons.delete), // Edit icon on the left
-    ),
-    ElevatedButton(
-      onPressed: () {
-        // Navigation logic for viewing service details
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CserviceDetails(service: service),
-          ),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        primary: Color.fromARGB(255, 198, 88, 152),
-                      onPrimary: Color.fromARGB(255, 255, 255, 255),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(33.0),
-         
-        ),
-        
-                      minimumSize: Size(10, 30), // Increase the button size
-      ),
-      child: Text(
-        'View Details',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-      ),
-    ),
-  ],
-),
-      ],
-    ),
-  ),
-),
-                      );
-                    }).toList(),
+
+                                        SizedBox(height: 16),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                // Navigation logic for editing service
+                                                deleteService(service);
+                                              },
+                                              child: Icon(Icons
+                                                  .delete), // Edit icon on the left
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Navigation logic for viewing service details
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        CserviceDetails(
+                                                            service: service),
+                                                  ),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Color.fromARGB(
+                                                    255, 198, 88, 152),
+                                                onPrimary: Color.fromARGB(
+                                                    255, 255, 255, 255),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          33.0),
+                                                ),
+
+                                                minimumSize: Size(10,
+                                                    30), // Increase the button size
+                                              ),
+                                              child: Text(
+                                                'View Details',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                   ),
                 ),
@@ -560,7 +577,7 @@ Row(
           ),
         ],
       ),
-         bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: BottomAppBar(
         color:
             Color.fromARGB(255, 255, 255, 255), // Set background color to white
         child: Padding(
@@ -575,7 +592,10 @@ Row(
                 () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => compSerListScreen(centerName: centerName),),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          compSerListScreen(centerName: centerName),
+                    ),
                   );
                 },
               ),
@@ -604,7 +624,8 @@ Row(
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ServiceFormScreen(onServiceAdded: reloadServices),
+                      builder: (context) =>
+                          ServiceFormScreen(onServiceAdded: reloadServices),
                     ),
                   );
                 },
@@ -614,7 +635,6 @@ Row(
                 'Profile',
                 Color.fromARGB(255, 249, 194, 212),
                 () {
-                
                   Navigator.push(
                     context,
                     MaterialPageRoute(
