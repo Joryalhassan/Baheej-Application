@@ -5,14 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart';
-import 'package:baheej/screens/ServiceDetailsPage.dart';
+//import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-//import 'package:timezone/data/latest.dart' as tz;
-//import 'package:timezone/timezone.dart' as tz;
- //import 'package:baheej/screens/NotificationService1.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';comJo
+//import 'package:timezone/data/latest.dart' as tz;comJo
+//import 'package:timezone/timezone.dart' as tz;comJo
+// import 'package:baheej/screens/NotificationService1.dart';
+import 'package:baheej/screens/CserviceDetails.dart';
+// import math , create random colors card
+import 'dart:math';
 
 class HomeScreenCenter extends StatefulWidget {
   final String centerName;
@@ -356,6 +359,19 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
     });
   }
 
+  //function to create random colors of card
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 252, 222, 233),
+    Color.fromARGB(255, 210, 229, 245),
+    Color.fromARGB(255, 251, 242, 212),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -364,82 +380,70 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          SizedBox(width: 10), // Add space to the left of the first icon
           IconButton(
             icon: Icon(Icons.notification_add),
-            onPressed: () {
-              _showAdMessageDialog();
-            },
+            onPressed: _showAdMessageDialog,
           ),
-          SizedBox(width: 60), // Add space between the icons and the text
+          SizedBox(width: 60),
           Expanded(
+              child: Center(
+                  child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 0.0),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.centerLeft, // Align the text to the left
                 child: Text(
                   'Welcome ${widget.centerName}',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                    fontFamily:
+                        '5yearsoldfont', // Replace with your font family name
                   ),
+                  textAlign: TextAlign
+                      .center, // Align the text's content in the center
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 10), // Add space between the text and the last icon
+          ))),
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: () {
-              _handleLogout();
-            },
+            onPressed: _handleLogout,
           ),
         ],
       ),
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/backG.png',
-              fit: BoxFit.cover,
-            ),
+            top: 0,
+            child: Image.asset('assets/images/HomeCenterback.png',
+                fit: BoxFit.cover),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 160, left: 16, right: 16),
+            padding: EdgeInsets.only(top: 200, left: 16, right: 16),
             child: Column(
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ),
                 TextField(
                   controller: _searchController,
-                  onChanged: (value) {
-                    _handleSearch(value);
-                  },
+                  onChanged: _handleSearch,
                   decoration: InputDecoration(
                     hintText: 'Search Programs...',
                     prefixIcon: Icon(Icons.search),
                   ),
-                  toolbarOptions: null,
                 ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: filteredServices.isEmpty
                         ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "You don't have any services yet.",
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.grey),
-                                ),
-                                SizedBox(height: 20), // Add some spacing
-                              ],
+                            child: Text(
+                              "You don't have any services yet.",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
                             ),
                           )
                         : Column(
                             children: filteredServices.map((service) {
+                              final randomColor =
+                                  _getRandomColor(); // Get a random color for each card
                               return GestureDetector(
                                 onTap: () {
                                   // Handle tapping on a service
@@ -447,80 +451,48 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                 child: Card(
                                   elevation: 3,
                                   margin: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 16,
+                                      vertical: 8, horizontal: 16),
+                                  color: randomColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  color: Color.fromARGB(255, 239, 249, 254),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Program name: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.serviceName,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
+                                        //   Align(
+                                        // alignment: Alignment.topRight,
+                                        // child: GestureDetector(
+                                        // onTap: () {
+                                        //   deleteService(service);
+                                        //  },
+                                        //   child: Icon(Icons.delete), // Delete icon in red
+                                        // ),
+                                        //),
+
+                                        Text(
+                                          service.serviceName,
+                                          style: TextStyle(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: '5yearsoldfont',
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
+
                                         Row(
                                           children: [
                                             Text(
-                                              'Start Date: ',
+                                              'Number of Participant : ',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             Text(
-                                              DateFormat('MM/dd/yyyy').format(
-                                                  service.selectedStartDate),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'End Date: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              DateFormat('MM/dd/yyyy').format(
-                                                  service.selectedEndDate),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Program Time: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.selectedTimeSlot,
+                                              service.capacityValue.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                               ),
@@ -540,74 +512,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                             fontSize: 16,
                                           ),
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Minimum Age: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.minAge.toString(),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Maximum Age: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.maxAge.toString(),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Capacity : ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              service.capacityValue.toString(),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Program Price: ',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              '${service.servicePrice.toStringAsFixed(2)}',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+
                                         SizedBox(height: 16),
                                         Row(
                                           mainAxisAlignment:
@@ -615,54 +520,45 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
                                           children: [
                                             GestureDetector(
                                               onTap: () {
+                                                // Navigation logic for editing service
+                                                deleteService(service);
+                                              },
+                                              child: Icon(Icons
+                                                  .delete), // Edit icon on the left
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Navigation logic for viewing service details
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                     builder: (context) =>
-                                                        EditService(
-                                                      service: service,
-                                                      onUpdateService:
-                                                          updateService,
-                                                    ),
+                                                        CserviceDetails(
+                                                            service: service),
                                                   ),
                                                 );
                                               },
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Edit Program',
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 59, 138, 207),
-                                                        decoration:
-                                                            TextDecoration
-                                                                .underline),
-                                                  ),
-                                                ],
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Color.fromARGB(
+                                                    255, 198, 88, 152),
+                                                onPrimary: Color.fromARGB(
+                                                    255, 255, 255, 255),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          33.0),
+                                                ),
+
+                                                minimumSize: Size(10,
+                                                    30), // Increase the button size
                                               ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                deleteService(service);
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Delete Program',
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.red,
-                                                        decoration:
-                                                            TextDecoration
-                                                                .underline),
-                                                  ),
-                                                ],
+                                              child: Text(
+                                                'View Details',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -682,101 +578,104 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Color.fromARGB(255, 245, 198, 239),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 24),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.history),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            compSerListScreen(centerName: centerName),
-                      ),
-                    );
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Booked Programs',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Text(
-                    'Add Program',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
+        color:
+            Color.fromARGB(255, 255, 255, 255), // Set background color to white
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildIconButtonWithLabel(
+                Icons.query_stats,
+                'Program Statistics',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          compSerListScreen(centerName: centerName),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CenterProfileViewScreen(),
-                      ),
-                    );
-                    // Handle profile button tap
-                  },
-                ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 32),
-          ],
+                  );
+                },
+              ),
+              //   color: Color.fromARGB(
+              //       255, 249, 194, 212), // Set icon color to black
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => HistoryScreen()),
+              //     );
+              //   },
+              // ),
+              _buildIconButtonWithLabel(
+                Icons.home,
+                'Home',
+                Color.fromARGB(255, 210, 229, 245),
+                () {
+                  // Handle onPressed action
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.add,
+                'Add Program',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ServiceFormScreen(onServiceAdded: reloadServices),
+                    ),
+                  );
+                },
+              ),
+              _buildIconButtonWithLabel(
+                Icons.person,
+                'Profile',
+                Color.fromARGB(255, 249, 194, 212),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CenterProfileViewScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 174, 207, 250),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  ServiceFormScreen(onServiceAdded: reloadServices),
-            ),
-          );
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
+    );
+  }
+
+  Widget _buildIconButtonWithLabel(
+    IconData iconData,
+    String label,
+    Color iconColor,
+    VoidCallback onPressed,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            iconData,
+            size: 35,
+          ),
+          color: iconColor,
+          onPressed: onPressed,
         ),
-      ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }

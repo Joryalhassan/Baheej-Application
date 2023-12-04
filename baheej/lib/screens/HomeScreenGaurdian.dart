@@ -455,27 +455,36 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                         ),
                                       ),
                                       InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ServiceDetailsPage(
-                                                      service: service),
-                                            ),
-                                          );
-                                        },
                                         child: Row(
                                           children: [
-                                            Text(
-                                              'View Details',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                                decoration:
-                                                    TextDecoration.underline,
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Colors.blue,
+                                                textStyle: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 20,
+                                                  vertical: 12,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                ),
                                               ),
+                                              child: Text('View Details'),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ServiceDetailsPage(
+                                                            service: service),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ],
                                         ),
