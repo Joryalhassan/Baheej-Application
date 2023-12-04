@@ -251,6 +251,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   } else {
                     final bookedServices = snapshot.data!.docs;
 
+                    // Sort the services based on the selectedStartDate in descending order
+                    bookedServices.sort((a, b) {
+                      final aDate =
+                          (a['selectedStartDate'] as Timestamp).toDate();
+                      final bDate =
+                          (b['selectedStartDate'] as Timestamp).toDate();
+                      return bDate.compareTo(aDate);
+                    });
+
                     return ListView.builder(
                       itemCount: bookedServices.length,
                       itemBuilder: (context, index) {
@@ -493,6 +502,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget buildLabelAndValue(String label, String value) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start, // Align labels at the top
       children: [
         Text(
           label,
@@ -502,12 +512,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(width: 5),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            color: Color.fromARGB(255, 0, 0, 0),
+        SizedBox(width: 7),
+        Flexible(
+          child: Container(
+            constraints:
+                BoxConstraints(maxWidth: 200), // Set your desired maximum width
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+              textAlign: TextAlign.left, // Align the text to the left
+            ),
           ),
         ),
       ],

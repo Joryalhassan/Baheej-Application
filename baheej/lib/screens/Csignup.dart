@@ -328,7 +328,10 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
         elevation: 0,
         title: const Text(
           "Sign Up As Center",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: '5yearsoldfont'),
         ),
       ),
       resizeToAvoidBottomInset: false,
@@ -376,7 +379,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.person_outline),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -411,7 +414,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "Email ID",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       TextFormField(
@@ -419,7 +424,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.email),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -467,7 +472,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.phone),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -536,7 +541,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         },
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -589,7 +594,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.format_list_numbered),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -629,7 +634,9 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         child: Text(
                           "Description",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       TextFormField(
@@ -637,7 +644,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.description),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -682,7 +689,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock_outlined),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -762,7 +769,7 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock_outlined),
                           filled: true,
-                          fillColor: Color.fromARGB(255, 210, 229, 245),
+                          fillColor: Colors.grey[300],
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 12,
@@ -787,17 +794,16 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                   ),
 
                   const SizedBox(
-                    height: 20,
+                    height: 30,
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 198, 88, 152),
+                      primary: Color.fromARGB(255, 59, 138, 207),
                       onPrimary: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            40.0), // Increase the border radius
+                        borderRadius: BorderRadius.circular(40.0),
                       ),
-                      minimumSize: Size(200, 40), // Increase the button size
+                      minimumSize: Size(200, 40),
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -806,9 +812,11 @@ class _CsignUpScreenState extends State<CsignUpScreen> {
                     },
                     child: Text(
                       'Sign Up',
-                      style: TextStyle(fontSize: 20), // Increase the font size
+                      style: TextStyle(fontSize: 20),
                     ),
                   ),
+
+                  SizedBox(height: 20),
                 ],
               ),
             ),
