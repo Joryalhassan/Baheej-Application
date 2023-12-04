@@ -172,8 +172,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               TextButton(
                 child: Text('Yes'),
                 onPressed: () {
-                //  makePayment(context);
-                 // Navigator.of(context).pop();
+                  //  makePayment(context);
+                  // Navigator.of(context).pop();
                   // showDialog(
                   // Make the payment
                 },
@@ -183,7 +183,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         },
       );
     } else {
-    //  makePayment(context);
+      //  makePayment(context);
       // ignore: use_build_context_synchronously
     } // No conflict found
   }
@@ -320,6 +320,20 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     final double ffem = 1.0;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          "View Details",
+          style: TextStyle(
+            fontFamily: '5yearsoldfont', // Use the defined font family
+            fontSize: 24, // Adjust the font size as needed
+            fontWeight: FontWeight.bold, // Add other desired styles
+            // Add more styles as required
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Container(
         width: double.maxFinite,
         height: double.maxFinite,
@@ -346,7 +360,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 width: MediaQuery.of(context).size.width,
                 height: 900,
                 decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 239, 245, 254),
+                    color: Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30))),
@@ -362,28 +376,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.cancel,
-                                    color: Colors.red,
-                                    size: 20,
-                                  ),
-                                  SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    'Close',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
                           )
                         ],
                       ),

@@ -14,9 +14,9 @@ class KidCard extends StatelessWidget {
   KidCard({required this.name, required this.age});
   final _random = Random();
   final List<Color> _randomColors = [
-    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 252, 222, 233),
     Color.fromARGB(255, 210, 229, 245),
-    const Color.fromARGB(255, 255, 242, 123),
+    Color.fromARGB(255, 251, 242, 212),
     // Add more colors if needed
   ];
 
