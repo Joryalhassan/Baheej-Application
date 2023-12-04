@@ -530,6 +530,8 @@ Row(
           borderRadius: BorderRadius.circular(33.0),
          
         ),
+        
+                      minimumSize: Size(10, 30), // Increase the button size
       ),
       child: Text(
         'View Details',

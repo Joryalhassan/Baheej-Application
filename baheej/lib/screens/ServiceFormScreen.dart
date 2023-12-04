@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-
+import 'package:baheej/screens/SignInScreen.dart';
 
 class ServiceFormScreen extends StatefulWidget {
-    final Function onServiceAdded;
-    ServiceFormScreen({required this.onServiceAdded});
+  final Function onServiceAdded;
+  ServiceFormScreen({required this.onServiceAdded});
   @override
   _ServiceFormScreenState createState() => _ServiceFormScreenState();
 }
@@ -29,8 +28,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   bool timeSlotSelected = false;
   int minAge = 4;
   int maxAge = 17;
-  int participantNo=0;
-  int starsrate=0;
+  int participantNo = 0;
+  int starsrate = 0;
   @override
   void initState() {
     // add this to store centername(jo)
@@ -38,7 +37,64 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
     // Fetch the user's name from Firestore when the screen initializes
     fetchUserName();
   }
+Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are You Sure?'),
+          content: Text('Do you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  showLogoutSuccessDialog();
+                } catch (e) {
+                  print("Error signing out: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+   void showLogoutSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout Successful'),
+          content: Text('You have successfully logged out.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                navigateToSignInScreen();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void navigateToSignInScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInScreen()),
+    );
+  }
   void fetchUserName() async {
     // add this to store centername(jo)
     final user = FirebaseAuth.instance.currentUser;
@@ -280,8 +336,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
         'centerName': userName, // change this to store centername(jo)
         'minAge': minAge,
         'maxAge': maxAge,
-        'participateNo':participantNo,
-        'starsrate':starsrate,
+        'participateNo': participantNo,
+        'starsrate': starsrate,
       });
 
       // Data has been successfully added to Firestore.
@@ -293,27 +349,29 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   }
 
   Future<void> _showSuccessDialog() async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Success'),
-        content: Text('Program added successfully!'),
-        actions: [
-          TextButton(
-            child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-              widget.onServiceAdded(); // Call the callback to refresh services
-              Navigator.pop(context); // Go back to HomeScreenCenter
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Program added successfully!'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                widget.onServiceAdded();
+                // Call the callback to refresh services
+                Navigator.pop(context);
+                (route) => false; // Go back to HomeScreenCenter
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _showDialog(String title, String content) {
     showDialog(
@@ -679,11 +737,24 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: null,
+    extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: null,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              _handleLogout();
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Image.asset(
-            'assets/images/backasf.png',
+            'assets/images/puzzle.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -700,29 +771,29 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
+                      //  IconButton(
+                         // icon: Icon(
+                          //  Icons.arrow_back_ios,
+                          //  color: Colors.white,
+                         // ),
+                          //onPressed: () {
+                          //  Navigator.of(context).pop();
+                        //  },
+                        //),
                         Padding(
                           padding: EdgeInsets.only(right: 130.0),
                           child: Text(
                             'Add Program',
                             style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              color: Color.fromARGB(255, 255, 255, 255),
+                              fontSize: 30,
+        fontFamily:'5yearsoldfont', // Use the font family name declared in pubspec.yaml
+        color: Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20.0),
+                    SizedBox(height: 150.0),
                     buildTextField('Program Name', validateServiceName,
                         maxLength: 20),
                     // buildTextField('Center Name', validateServiceName,
@@ -874,14 +945,16 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 59, 138, 207),
-                        onPrimary: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
+                      primary: Color.fromARGB(255, 198, 88, 152),
+                      onPrimary: Color.fromARGB(255, 255, 255, 255),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            33.0), 
                         ),
                         minimumSize: Size(100, 40),
                       ),
-                      child: Text('Submit'),
+                      child: Text('Submit',
+                       style: TextStyle(fontSize: 20), ),
                     ),
                   ],
                 ),
@@ -894,28 +967,29 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-  final DateTime picked = (await showDatePicker(
-    context: context,
-    initialDate: isStartDate
-        ? selectedStartDate ?? DateTime.now().add(Duration(days: 1)) // Adjusted here
-        : selectedEndDate ?? DateTime.now(),
-    firstDate: isStartDate
-        ? DateTime.now().add(Duration(days: 1)) // Prevent selecting today's date for start date
-        : DateTime.now(), // Keep as is for end date
-    lastDate: DateTime(2101),
-  ))!;
+    final DateTime picked = (await showDatePicker(
+      context: context,
+      initialDate: isStartDate
+          ? selectedStartDate ??
+              DateTime.now().add(Duration(days: 1)) // Adjusted here
+          : selectedEndDate ?? DateTime.now(),
+      firstDate: isStartDate
+          ? DateTime.now().add(Duration(
+              days: 1)) // Prevent selecting today's date for start date
+          : DateTime.now(), // Keep as is for end date
+      lastDate: DateTime(2101),
+    ))!;
 
-  if (picked != null &&
-      picked != (isStartDate ? selectedStartDate : selectedEndDate)) {
-    setState(() {
-      if (isStartDate) {
-        selectedStartDate = picked;
-      } else {
-        selectedEndDate = picked;
-      }
-      dateSelected = selectedStartDate != null && selectedEndDate != null;
-    });
+    if (picked != null &&
+        picked != (isStartDate ? selectedStartDate : selectedEndDate)) {
+      setState(() {
+        if (isStartDate) {
+          selectedStartDate = picked;
+        } else {
+          selectedEndDate = picked;
+        }
+        dateSelected = selectedStartDate != null && selectedEndDate != null;
+      });
+    }
   }
-}
-
 }

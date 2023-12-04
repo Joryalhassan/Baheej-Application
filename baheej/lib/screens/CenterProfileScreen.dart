@@ -837,29 +837,36 @@ class _CenterProfileViewScreenState extends State<CenterProfileViewScreen> {
                 ElevatedButton(
                   onPressed: _confirmSaveChanges,
                   style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(
-                          255, 59, 138, 207), // Your desired color
+                      primary: Color.fromARGB(255, 198, 88, 152),
+                      onPrimary: Color.fromARGB(255, 255, 255, 255),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(
+                            33.0),
                       ),
                       minimumSize: Size(170, 50)),
                   child: Text(
                     "Save Changes",
-                    style: TextStyle(fontSize: 17, color: Colors.white),
+                     style: TextStyle(fontSize: 20),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: _confirmDeleteAccount,
                   style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 242, 12,
-                          12), // Same color as the "Save Changes" button
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                    primary: const Color.fromARGB(255, 226, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                      side: BorderSide(
+                          color: Color.fromARGB(
+                              255, 226, 0, 0)), // Border color here
                       ),
                       minimumSize: Size(170, 50)),
                   child: Text(
                     "Delete Account",
-                    style: TextStyle(fontSize: 17, color: Colors.white),
+                      style: TextStyle(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],

@@ -271,14 +271,17 @@ class _EditServiceState extends State<EditService> {
                             _saveChangesToFirestore();
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Color.fromARGB(255, 59, 138, 207),
-                            onPrimary: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                      primary: Color.fromARGB(255, 198, 88, 152),
+                      onPrimary: Color.fromARGB(255, 255, 255, 255),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            33.0), // Increase the border radius
                             ),
-                            minimumSize: Size(200, 40),
+                             minimumSize: Size(100, 40),
                           ),
-                          child: Text('Save'), // Button text
+                          child: Text('Save',
+                          style: TextStyle(fontSize: 20), // Increase the font size), 
+                          ),// Button text
                         ),
                       ),
                     ),
