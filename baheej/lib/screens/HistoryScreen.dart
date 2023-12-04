@@ -424,80 +424,69 @@ class _HistoryScreenState extends State<HistoryScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              serviceName,
-              style: TextStyle(
-                fontSize: 25,
-                fontFamily: '5yearsoldfont',
-                color: Color.fromARGB(255, 0, 0, 0),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            buildLabelAndValue('Center Name:', centerName),
-            buildLabelAndValue('Selected Kids:', selectedKidsString),
-            buildLabelAndValue(
-                'Period: ', '$startDateFormatted  To  $endDateFormatted'),
-            buildLabelAndValue('At:', selectedTimeSlot),
-            buildLabelAndValue('Total Price:', '$totalPrice SAR'),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Text(
-                'Rate the Program:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            Center(
-              child: StarRating(
-                serviceDocumentId: serviceDocument.id,
-                initialRating: starsrate ?? 0,
-                onRatingChanged: (newRating) {
-                  print(
-                      "you rated with $newRating stars for ${serviceDocument.id}");
-                  // Handle the new rating as needed
-                },
-              ),
-            ),
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 20),
-                width: 120.0,
-                height: 26.0,
-                child: ElevatedButton(
-                  onPressed: () {
-                    cancelService(serviceDocument);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: const Color.fromARGB(255, 226, 0, 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40.0),
-                      side: BorderSide(
-                          color: Color.fromARGB(
-                              255, 226, 0, 0)), // Border color here
-                    ),
+      child: Stack(
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  serviceName,
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontFamily: '5yearsoldfont',
+                    color: Color.fromARGB(255, 0, 0, 0),
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+                buildLabelAndValue('Center Name:', centerName),
+                buildLabelAndValue('Selected Kids:', selectedKidsString),
+                buildLabelAndValue(
+                    'Period: ', '$startDateFormatted  To  $endDateFormatted'),
+                buildLabelAndValue('At:', selectedTimeSlot),
+                buildLabelAndValue('Total Price:', '$totalPrice SAR'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
                   child: Text(
-                    'Cancel Booking',
+                    'Rate the Program:',
                     style: TextStyle(
-                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      color: Colors.black,
                     ),
                   ),
                 ),
+                Center(
+                  child: StarRating(
+                    serviceDocumentId: serviceDocument.id,
+                    initialRating: starsrate ?? 0,
+                    onRatingChanged: (newRating) {
+                      print(
+                          "you rated with $newRating stars for ${serviceDocument.id}");
+                      // Handle the new rating as needed
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 10,
+            right: 10,
+            child: GestureDetector(
+              onTap: () {
+                // Implement the logic for canceling the booking when the "X" icon is pressed.
+                cancelService(serviceDocument);
+              },
+              child: Icon(
+                Icons.close,
+                size: 30,
+                color: Colors.grey,
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
