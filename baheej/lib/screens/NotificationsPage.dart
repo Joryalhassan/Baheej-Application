@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -32,6 +34,18 @@ class NotificationsPage extends StatelessWidget {
 }
 
 class CardListView extends StatelessWidget {
+  final _random = Random();
+  final List<Color> _randomColors = [
+    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 210, 229, 245),
+    const Color.fromARGB(255, 255, 242, 123),
+    // Add more colors if needed
+  ];
+
+  Color _getRandomColor() {
+    return _randomColors[_random.nextInt(_randomColors.length)];
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -62,10 +76,13 @@ class CardListView extends StatelessWidget {
               centerName = 'Unknown Center'; // Provide a default value
             }
 
+            // Use the same random color logic as in KidCard
+            Color randomColor = _getRandomColor();
+
             return Card(
               elevation: 3,
               margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: Color.fromARGB(255, 239, 249, 254),
+              color: randomColor,
               child: Container(
                 padding: EdgeInsets.all(16),
                 child: Column(
@@ -75,7 +92,8 @@ class CardListView extends StatelessWidget {
                       'Center Name: fun for kids',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: '5yearsoldfont',
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 8),

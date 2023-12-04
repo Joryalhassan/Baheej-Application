@@ -164,19 +164,20 @@ class _AddKidsPageState extends State<AddKidsPage> {
         ),
         child: Column(
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(100.0),
-              child: Text(
-                'My Kids',
-                style: TextStyle(
-                  fontSize: 35,
-                  fontFamily: '5yearsoldfont',
-                  // fontWeight: FontWeight.bold,
-                  color: const Color.fromARGB(
-                      255, 255, 255, 255), // Change the text color to blue
-                ),
+            //Padding(
+            // padding: EdgeInsets.all(100.0),
+            //child:
+            Text(
+              'My Kids',
+              style: TextStyle(
+                fontSize: 35,
+                fontFamily: '5yearsoldfont',
+                // fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(
+                    255, 255, 255, 255), // Change the text color to blue
               ),
             ),
+            //),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
