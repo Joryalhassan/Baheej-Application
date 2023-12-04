@@ -425,6 +425,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         DateFormat('yyyy-MM-dd').format(selectedStartDate);
     final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
     final randomColor = _getRandomColor();
+    final isPastDate = selectedStartDate.isBefore(DateTime.now());
 
     return Card(
       elevation: 3,
@@ -455,28 +456,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     'Period: ', '$startDateFormatted  To  $endDateFormatted'),
                 buildLabelAndValue('At:', selectedTimeSlot),
                 buildLabelAndValue('Total Price:', '$totalPrice SAR'),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Text(
-                    'Rate the Program:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                if (isPastDate)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Text(
+                      'Rate the Program:',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
-                ),
-                Center(
-                  child: StarRating(
-                    serviceDocumentId: serviceDocument.id,
-                    initialRating: starsrate ?? 0,
-                    onRatingChanged: (newRating) {
-                      print(
-                          "you rated with $newRating stars for ${serviceDocument.id}");
-                      // Handle the new rating as needed
-                    },
+                if (isPastDate)
+                  Center(
+                    child: StarRating(
+                      serviceDocumentId: serviceDocument.id,
+                      initialRating: starsrate ?? 0,
+                      onRatingChanged: (newRating) {
+                        print(
+                            "you rated with $newRating stars for ${serviceDocument.id}");
+                        // Handle the new rating as needed
+                      },
+                    ),
                   ),
-                ),
               ],
             ),
           ),
