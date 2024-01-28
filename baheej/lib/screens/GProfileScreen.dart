@@ -318,9 +318,11 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
         title: Text(
           "${_fnameController.text} Profile",
           style: TextStyle(
-              fontFamily: '5yearsoldfont',
-              fontSize: 25 // Apply the custom font family
-              ),
+            fontFamily: '5yearsoldfont',
+            fontSize: 25, // Apply the custom font family
+            //fontSize: 25,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -340,7 +342,7 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
         children: [
           // Background image or content
           Image.asset(
-            'assets/images/blueWaves.png',
+            'assets/images/kidW33.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -349,7 +351,7 @@ class _GProfileViewScreenState extends State<GProfileViewScreen> {
           SingleChildScrollView(
             padding: EdgeInsets.only(
                 top: kToolbarHeight +
-                    20), // Adjust the padding to account for the AppBar
+                    30), // Adjust the padding to account for the AppBar
             child: _isLoading
                 ? Center(
                     child:

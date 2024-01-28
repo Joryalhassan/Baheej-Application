@@ -174,13 +174,17 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         elevation: 0,
         title: const Text(
           "Sign Up As Guardian",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            fontFamily: '5yearsoldfont',
+          ),
         ),
       ),
       body: Stack(children: [
         // Background image
         Image.asset(
-          'assets/images/back3.png',
+          'assets/images/nnnn.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
@@ -194,7 +198,7 @@ class _GSignUpScreenState extends State<GSignUpScreen> {
         // ),
         SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+            padding: EdgeInsets.fromLTRB(20, 150, 20, 0),
             child: Form(
               key: _formKey,
               child: Column(

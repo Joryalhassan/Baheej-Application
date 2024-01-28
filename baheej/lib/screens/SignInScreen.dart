@@ -100,15 +100,20 @@ class _SignInScreenState extends State<SignInScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign In",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          "Sign in to your account",
+          style: TextStyle(
+            fontSize: 30,
+            fontFamily: '5yearsoldfont', // Replace with your font family name
+            fontWeight: FontWeight.w900,
+          ),
         ),
+
         // automaticallyImplyLeading: false, // This line will hide the back arrow
       ),
       body: Stack(
         children: [
           Image.asset(
-            "assets/images/backLo.png",
+            "assets/images/log11.png",
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -123,10 +128,10 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               child: Column(
                 children: <Widget>[
-                  Image.asset(
-                    "assets/images/logo2.png",
-                    width: 100.0,
-                  ),
+                  // Image.asset(
+                  //   "assets/images/logo2.png",
+                  //   width: 100.0,
+                  // ),
                   const SizedBox(
                     height: 20,
                   ),
@@ -163,6 +168,30 @@ class _SignInScreenState extends State<SignInScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 199),
+        Center(
+          child: Text(
+            "BAHEEJ",
+            style: TextStyle(
+              fontSize: 30,
+              fontFamily: '5yearsoldfont', // Replace with your font family name
+              fontWeight: FontWeight.w900,
+            ),
+            textAlign:
+                TextAlign.center, // Optional: Align the text in the center
+          ),
+        ),
+        SizedBox(height: 00),
+        // Text(
+        //   "Please sign in to continue",
+        //   style: TextStyle(
+        //     color: Color.fromARGB(179, 0, 0, 0),
+        //     // fontSize: 20,
+        //     // fontFamily: '5yearsoldfont', // Replace with your font family name
+        //     //fontWeight: FontWeight.bold,
+        //   ),
+        // ),
+        SizedBox(height: 15),
         Text(
           "Enter Email ID",
           style: TextStyle(
@@ -255,6 +284,7 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           ),
         ),
+        SizedBox(height: 20),
         if (passwordErrorText != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -344,6 +374,7 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         primary: Color.fromARGB(255, 59, 138, 207),
+        // primary: Color.fromARGB(255, 198, 88, 152),
         onPrimary: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),

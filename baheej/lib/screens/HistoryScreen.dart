@@ -21,7 +21,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-
     currentUserEmail = FirebaseAuth.instance.currentUser?.email;
   }
 
@@ -184,9 +183,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   final _random = Random();
   final List<Color> _randomColors = [
-    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 252, 222, 233),
     Color.fromARGB(255, 210, 229, 245),
-    const Color.fromARGB(255, 255, 242, 123),
+    Color.fromARGB(255, 251, 242, 212),
     // Add more colors if needed
   ];
 
@@ -201,12 +200,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
-          "Booked Programs",
+          "Bookings",
           style: TextStyle(
-            fontFamily: '5yearsoldfont', // Use the defined font family
-            fontSize: 24, // Adjust the font size as needed
-            fontWeight: FontWeight.bold, // Add other desired styles
-            // Add more styles as required
+            fontFamily: '5yearsoldfont',
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -222,7 +220,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/blueWaves.png',
+              'assets/images/kidW222.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -231,78 +229,83 @@ class _HistoryScreenState extends State<HistoryScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: FutureBuilder<QuerySnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('ServiceBook')
-                  .where('userEmail', isEqualTo: currentUserEmail)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Text('No booked program found'),
-                  );
-                } else {
-                  final bookedServices = snapshot.data!.docs;
+            child: Container(
+              margin: EdgeInsets.only(top: 0),
+              color: Colors.transparent,
+              child: FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('ServiceBook')
+                    .where('userEmail', isEqualTo: currentUserEmail)
+                    .get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text('No booked program found'),
+                    );
+                  } else {
+                    final bookedServices = snapshot.data!.docs;
 
-                  return ListView.builder(
-                    itemCount: bookedServices.length,
-                    itemBuilder: (context, index) {
-                      final serviceDocument = bookedServices[index];
-                      final randomColor =
-                          _getRandomColor(); // Here's the updated line
+                    return ListView.builder(
+                      itemCount: bookedServices.length,
+                      itemBuilder: (context, index) {
+                        final serviceDocument = bookedServices[index];
+                        final randomColor =
+                            _getRandomColor(); // Here's the updated line
 
-                      final data =
-                          serviceDocument.data() as Map<String, dynamic>;
+                        final data =
+                            serviceDocument.data() as Map<String, dynamic>;
 
-                      final centerName = data['centerName'];
+                        final centerName = data['centerName'];
 
-                      final serviceName = data['serviceName'];
+                        final serviceName = data['serviceName'];
 
-                      final selectedKidsMap =
-                          data['selectedKidsNames'] as Map<String, dynamic>?;
+                        final selectedKidsMap =
+                            data['selectedKidsNames'] as Map<String, dynamic>?;
 
-                      final selectedStartDate =
-                          data['selectedStartDate'] as Timestamp;
+                        final selectedStartDate =
+                            data['selectedStartDate'] as Timestamp;
 
-                      final selectedEndDate =
-                          data['selectedEndDate'] as Timestamp;
+                        final selectedEndDate =
+                            data['selectedEndDate'] as Timestamp;
 
-                      final totalPrice = data['totalPrice'] as double;
+                        final totalPrice = data['totalPrice'] as double;
 
-                      final selectedTimeSlot = data['selectedTimeSlot'];
+                        final selectedTimeSlot = data['selectedTimeSlot'];
 
-                      final starsrate = data['starsrate'];
+                        final starsrate = data['starsrate'];
 
-                      String selectedKidsString = '';
+                        String selectedKidsString = '';
 
-                      if (selectedKidsMap != null) {
-                        selectedKidsString = selectedKidsMap.values.join(', ');
-                      }
+                        if (selectedKidsMap != null) {
+                          selectedKidsString =
+                              selectedKidsMap.values.join(', ');
+                        }
 
-                      return buildServiceCard(
-                        context,
-                        centerName,
-                        serviceName,
-                        selectedKidsString,
-                        selectedStartDate.toDate(),
-                        selectedEndDate.toDate(),
-                        selectedTimeSlot,
-                        totalPrice,
-                        serviceDocument,
-                        starsrate,
-                      );
-                    },
-                  );
-                }
-              },
+                        return buildServiceCard(
+                          context,
+                          centerName,
+                          serviceName,
+                          selectedKidsString,
+                          selectedStartDate.toDate(),
+                          selectedEndDate.toDate(),
+                          selectedTimeSlot,
+                          totalPrice,
+                          serviceDocument,
+                          starsrate,
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-          ),
+          )
         ],
       ),
       bottomNavigationBar: BottomAppBar(
@@ -411,9 +414,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   ) {
     final startDateFormatted =
         DateFormat('yyyy-MM-dd').format(selectedStartDate);
-
     final endDateFormatted = DateFormat('yyyy-MM-dd').format(selectedEndDate);
     final randomColor = _getRandomColor();
+
     return Card(
       elevation: 3,
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 26),
@@ -432,75 +435,101 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fontSize: 25,
                 fontFamily: '5yearsoldfont',
                 color: Color.fromARGB(255, 0, 0, 0),
+                fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 10),
-            Text(
-              '$centerName',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 24, 24, 24),
-                fontWeight: FontWeight.bold, // Set the font weight to bold
-              ),
-            ),
-            Text(
-              'Selected Kids: $selectedKidsString',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0),
-                fontWeight: FontWeight.bold, // Set the font weight to bold
-              ),
-            ),
-            Text(
-              'From: $startDateFormatted   To: $endDateFormatted ',
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color.fromARGB(255, 0, 0, 0),
-                fontWeight: FontWeight.bold, // Set the font weight to bold
-              ),
-            ),
-            Text(
-              'At: $selectedTimeSlot',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 2, 2, 2),
-                fontWeight: FontWeight.bold, // Set the font weight to bold
-              ),
-            ),
-            Text(
-              'Total Price: $totalPrice SAR',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 0, 0, 0),
-                fontWeight: FontWeight.bold, // Set the font weight to bold
-              ),
-            ),
-            StarRating(
-              serviceDocumentId: serviceDocument.id,
-              initialRating: starsrate ?? 0,
-              onRatingChanged: (newRating) {
-                print(
-                    "you rated with $newRating stars for ${serviceDocument.id}");
-
-                // Handle the new rating as needed
-              },
-            ),
-            TextButton(
-              onPressed: () {
-                cancelService(serviceDocument);
-              },
+            buildLabelAndValue('Center Name:', centerName),
+            buildLabelAndValue('Selected Kids:', selectedKidsString),
+            buildLabelAndValue(
+                'Period: ', '$startDateFormatted  To  $endDateFormatted'),
+            buildLabelAndValue('At:', selectedTimeSlot),
+            buildLabelAndValue('Total Price:', '$totalPrice SAR'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
               child: Text(
-                'Cancel booking',
+                'Rate the Program:',
                 style: TextStyle(
-                  color: Colors.red,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
+                  color: Colors.black,
                 ),
               ),
             ),
+            Center(
+              child: StarRating(
+                serviceDocumentId: serviceDocument.id,
+                initialRating: starsrate ?? 0,
+                onRatingChanged: (newRating) {
+                  print(
+                      "you rated with $newRating stars for ${serviceDocument.id}");
+                  // Handle the new rating as needed
+                },
+              ),
+            ),
+            Center(
+              child: Container(
+                margin: EdgeInsets.only(top: 20),
+                width: 120.0,
+                height: 26.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    cancelService(serviceDocument);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: const Color.fromARGB(255, 226, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                      side: BorderSide(
+                          color: Color.fromARGB(
+                              255, 226, 0, 0)), // Border color here
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel Booking',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildLabelAndValue(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start, // Align labels at the top
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            color: Color.fromARGB(255, 24, 24, 24),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(width: 7),
+        Flexible(
+          child: Container(
+            constraints:
+                BoxConstraints(maxWidth: 200), // Set your desired maximum width
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+              textAlign: TextAlign.left, // Align the text to the left
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -12,9 +12,11 @@ class RegisterPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Register ',
+          'Register',
           style: TextStyle(
-            fontSize: 25,
+            fontSize: 30,
+            fontFamily:
+                '5yearsoldfont', // Replace with your desired font family name
             fontWeight: FontWeight.w700,
             color: Color.fromARGB(255, 255, 255, 255),
           ),
@@ -27,7 +29,7 @@ class RegisterPage extends StatelessWidget {
         children: [
           // Background image
           Image.asset(
-            "assets/images/backLo.png",
+            "assets/images/reg1.png",
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -40,13 +42,13 @@ class RegisterPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    'Register as:',
+                    'Register As:',
                     style: TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 40),
                   buildCustomButton(
                     text: 'Center',
                     onPressed: () {
@@ -58,7 +60,7 @@ class RegisterPage extends StatelessWidget {
                       );
                     },
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 30),
                   buildCustomButton(
                     text: 'Guardian',
                     onPressed: () {

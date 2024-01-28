@@ -298,12 +298,12 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
     );
   }
 
-//function to create random colors of card
+  //function to create random colors of card
   final _random = Random();
   final List<Color> _randomColors = [
-    Color.fromARGB(255, 249, 194, 212),
+    Color.fromARGB(255, 252, 222, 233),
     Color.fromARGB(255, 210, 229, 245),
-    const Color.fromARGB(255, 255, 242, 123),
+    Color.fromARGB(255, 251, 242, 212),
     // Add more colors if needed
   ];
 
@@ -350,7 +350,8 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
             Text(
               'Welcome $FirstName',
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
                 fontFamily:
                     '5yearsoldfont', // Use the font family name declared in pubspec.yaml
               ),
@@ -372,7 +373,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
           Positioned.fill(
             top: 0,
             child: Image.asset(
-              'assets/images/kidsAndwaves.png',
+              'assets/images/kidW111.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -411,7 +412,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                             elevation: 3,
 
                             margin: EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 16),
+                                vertical: 8, horizontal: 1),
                             //here call randomColor to call the function
                             color: randomColor,
                             shape: RoundedRectangleBorder(
@@ -447,7 +448,7 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Program Time: ${service.selectedTimeSlot}',
+                                        'Program Time: ${service.selectedTimeSlot}\n\n\n',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight
@@ -455,27 +456,39 @@ class _HomeScreenGaurdianState extends State<HomeScreenGaurdian> {
                                         ),
                                       ),
                                       InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ServiceDetailsPage(
-                                                      service: service),
-                                            ),
-                                          );
-                                        },
                                         child: Row(
                                           children: [
-                                            Text(
-                                              'View Details',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                                decoration:
-                                                    TextDecoration.underline,
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Colors.blue,
+                                                textStyle: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                // padding: EdgeInsets.symmetric(
+                                                //   horizontal: 20,
+                                                //   vertical: 12,
+                                                // ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          33.0),
+                                                ),
+                                                backgroundColor: Color.fromARGB(
+                                                    255, 59, 138, 207),
+                                                minimumSize: Size(10, 30),
                                               ),
+                                              child: Text('View Details'),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ServiceDetailsPage(
+                                                            service: service),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ],
                                         ),
