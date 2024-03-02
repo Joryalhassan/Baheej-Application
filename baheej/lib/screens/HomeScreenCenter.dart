@@ -681,23 +681,16 @@
 // }
 //---------
 
-import 'package:baheej/screens/EditService.dart';
+
 import 'package:baheej/screens/compSerList.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:baheej/screens/Service.dart';
-//import 'package:baheej/screens/ServiceDetailsPage.dart';
 import 'package:baheej/screens/ServiceFormScreen.dart';
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:baheej/screens/CenterProfileScreen.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';comJo
-//import 'package:timezone/data/latest.dart' as tz;comJo
-//import 'package:timezone/timezone.dart' as tz;comJo
-// import 'package:baheej/screens/NotificationService1.dart';
 import 'package:baheej/screens/CserviceDetails.dart';
-// import math , create random colors card
 import 'dart:math';
 
 class HomeScreenCenter extends StatefulWidget {
