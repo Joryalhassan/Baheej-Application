@@ -976,8 +976,7 @@ class _HomeScreenCenterState extends State<HomeScreenCenter> {
 
   void _handleSearch(String query) {
     query = query.trim();
-    final now = DateTime.now();
-    setState(() {
+         setState(() {
       filteredServices = services
           .where((service) =>
               service.serviceName.toLowerCase().contains(query.toLowerCase()) ||
