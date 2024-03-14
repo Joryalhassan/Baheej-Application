@@ -1,12 +1,7 @@
 import 'package:baheej/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
-import 'package:baheej/utlis/utilas.dart';
-import 'package:baheej/reusable_widget/reusable_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class CsignUpScreen extends StatefulWidget {
