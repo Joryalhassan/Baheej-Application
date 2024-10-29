@@ -1,5 +1,5 @@
-# Baheej
-![Baheej Logo](baheej/assets/logo.png)
+# BAHEEJ
+![Baheej Logo](baheej/assets/images/logo.png)
 
 ## Overview
 **Baheej** is an iOS application designed to make it easy for guardians to discover, enroll, and pay for kids' extracurricular activities, all in one place. This platform enables activity centers and schools to showcase programs and manage enrollments seamlessly, reaching a broader audience. Baheej is user-friendly and facilitates an efficient enrollment process for both guardians and activity centers.
