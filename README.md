@@ -18,7 +18,7 @@ Developed using Flutter and Dart with a backend in Firebase, Baheej integrates t
 
 ---
 
-## Tech Stack
+## Stack
 - **Frontend:** Flutter, Dart
 - **Backend:** Firebase
 - **Payment Integration:** Stripe API
